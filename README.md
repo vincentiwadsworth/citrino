@@ -340,7 +340,7 @@ const data = await response.json();
 console.log(`Encontradas ${data.total_results} propiedades`);
 ```
 
-## 🧪 Testing
+## 🧪 Testing y Calidad de Datos
 
 ### Suite de Pruebas Completa
 
@@ -351,6 +351,8 @@ pytest
 # Pruebas específicas
 pytest tests/test_api.py -v           # API endpoints
 pytest tests/test_api_simple.py -v    # Smoke tests manuales
+pytest tests/test_data_validation.py -v   # Validación de datos
+pytest tests/test_etl_pipeline.py -v      # Pipeline ETL
 ```
 
 ### Validación del Sistema
@@ -365,6 +367,55 @@ python scripts/build_urban_services_dataset.py
 # Generar inventario de ejemplo para demos/pruebas
 python scripts/build_sample_inventory.py
 ```
+
+### Herramientas de Análisis de Calidad
+
+```bash
+# Análisis completo de calidad de datos
+python scripts/analizar_calidad_datos.py
+
+# Análisis de columnas por proveedor
+python scripts/analizar_proveedores.py
+
+# Detección avanzada de duplicados
+python scripts/detectar_duplicados.py
+
+# Extracción de características desde descripciones
+python scripts/extraer_caracteristicas.py
+
+# Normalización de precios y monedas
+python scripts/normalizar_precios.py
+
+# Geocodificación inversa (requiere conexión a internet)
+python scripts/geocodificar_coordenadas.py
+```
+
+### Estado Actual de Calidad de Datos
+
+**Baseline establecido** (ver `PLAN_PRUEBAS_ETL_RESUMEN.md`):
+
+| Métrica | Estado Actual | Objetivo |
+|---------|---------------|----------|
+| **Score General** | 14.4% | >40% |
+| **Con Zona** | 38.1% | >90% |
+| **Con Precio** | 14.4% | >50% |
+| **Con Coordenadas** | 96.0% | 96%+ ✅ |
+| **Con Características** | ~16% | >60% |
+
+**Mejoras Implementadas:**
+- ✅ Sistema de extracción de zonas desde títulos/descripciones (30+ zonas conocidas)
+- ✅ Geocodificación inversa desde coordenadas (+420 zonas identificadas)
+- ✅ Extracción regex de habitaciones, baños, garajes (+171 propiedades enriquecidas)
+- ✅ Detección multi-criterio de duplicados (URL → Coords → Título)
+- ✅ Análisis de proveedores y mapeo de esquemas inconsistentes
+
+**Archivos de Soporte:**
+- `pytest.ini` - Configuración de pytest con markers personalizados
+- `tests/conftest.py` - Fixtures compartidos para testing
+- `data/reporte_calidad_datos.json` - Reporte detallado de métricas
+- `data/estadisticas_duplicados.json` - Análisis de duplicados
+- `data/analisis_proveedores.json` - Mapeo de columnas por proveedor
+
 
 ## 🚀 Despliegue en Producción
 
@@ -537,7 +588,65 @@ MIT License - ver archivo LICENSE para detalles.
 
 ## 🗺️ Roadmap Futuro
 
-### Próximos Lanazamientos (Q4 2024)
+### Commits Prioritarios Planificados
+
+#### 1. Sistema de Gestión de Planillas Excel
+**Problema:** Actualmente el personal de Citrino debe cargar/quitar archivos `.xlsx` manualmente en `data/raw/`.
+
+**Solución Propuesta:**
+- [ ] Panel web de administración para carga de archivos
+- [ ] Validación automática de formato y esquema
+- [ ] Versionado y respaldo automático de planillas
+- [ ] Vista previa de datos antes de procesar
+- [ ] Sistema de permisos por rol (admin/editor/viewer)
+- [ ] Historial de cambios con rollback
+
+**Beneficio:** Reducir errores humanos y democratizar acceso a actualización de datos.
+
+#### 2. Corrección de Errores en Archivos Excel
+**Problema:** Los archivos `.xlsx` de proveedores contienen errores que corrompen la base de datos:
+- Esquemas inconsistentes entre fechas del mismo proveedor
+- Campos críticos vacíos o mal formateados (precios, zonas, tipos)
+- Duplicados no detectados por falta de identificadores únicos
+
+**Solución Propuesta:**
+- [ ] Validador pre-procesamiento con reglas por proveedor
+- [ ] Normalización automática de tipos de datos
+- [ ] Auto-corrección de formatos de precio/moneda
+- [ ] Sugerencias inteligentes para campos vacíos
+- [ ] Reportes de calidad por archivo subido
+- [ ] Quarantine para archivos con >20% de errores
+
+**Beneficio:** Mejorar score de calidad de 14.4% → >40%.
+
+#### 3. Geocodificación con OpenStreetMap/Google Maps
+**Problema:** 61.9% de propiedades sin zona. Geocodificación inversa actual con OSM Nominatim solo identifica 31% de ubicaciones.
+
+**Solución Propuesta:**
+- [ ] Integración con Google Maps Geocoding API (mejor para Bolivia)
+- [ ] Sistema híbrido: OSM gratuito + Google Maps fallback
+- [ ] Cache de resultados de geocodificación
+- [ ] Catálogo expandido de 30 → 100+ zonas de Santa Cruz
+- [ ] Validación manual asistida para coordenadas ambiguas
+- [ ] Enriquecimiento con barrios, UV, manzanas desde coords
+
+**Beneficio:** Reducir propiedades sin zona de 61.9% → <15%.
+
+#### 4. Corrección de Responsividad y UI/UX
+**Problema:** Interfaz actual funcional pero mejorable en dispositivos móviles y experiencia de usuario.
+
+**Solución Propuesta:**
+- [ ] Rediseño responsive mobile-first
+- [ ] Optimización de performance (lazy loading, compresión)
+- [ ] Mejora de flujos de navegación
+- [ ] Componentes de carga y feedback visual
+- [ ] Dark mode
+- [ ] Accesibilidad WCAG 2.1 nivel AA
+- [ ] PWA con trabajo offline
+
+**Beneficio:** Aumentar adopción y satisfacción del equipo interno.
+
+### Próximos Lanzamientos (Q1 2025)
 
 - [ ] **Mobile App** - Aplicación nativa para iOS y Android
 - [ ] **Integración WhatsApp** - Chatbot para WhatsApp Business
@@ -555,7 +664,6 @@ MIT License - ver archivo LICENSE para detalles.
 ### Mejoras Continuas
 
 - [ ] **Performance Optimization** - Reducción de tiempos de respuesta
-- [ ] **UI/UX Enhancements** - Mejora continua de la interfaz
 - [ ] **Security Updates** - Mantenimiento de seguridad
 - [ ] **Documentation** - Mejora de documentación y tutoriales
 

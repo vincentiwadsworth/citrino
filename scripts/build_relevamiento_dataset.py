@@ -1,16 +1,33 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Script para procesar datos de relevamiento de mercado inmobiliario.
 Procesa archivos Excel de data/raw/ y genera una base de datos unificada.
+
+Formato de archivos: YYYY.MM.DD NN.xlsx
+  - YYYY.MM.DD: Fecha de scraping
+  - NN: Código de proveedor (01, 02, 03, etc.)
 """
 
 import pandas as pd
 import json
 import os
 import glob
+import re
+import sys
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
+from pathlib import Path
 import logging
+
+# Agregar path para importar extractor de zonas
+sys.path.insert(0, str(Path(__file__).parent))
+try:
+    from zonas_extractor import ZonasExtractor
+    ZONAS_EXTRACTOR_DISPONIBLE = True
+except ImportError:
+    ZONAS_EXTRACTOR_DISPONIBLE = False
+    logging.warning("ZonasExtractor no disponible, zonas no serán extraídas")
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,6 +41,13 @@ class ProcesadorDatosRelevamiento:
         self.output_dir = output_dir
         self.properties_data = []
         self.processed_files = []
+        
+        # Inicializar extractor de zonas si está disponible
+        self.zonas_extractor = ZonasExtractor() if ZONAS_EXTRACTOR_DISPONIBLE else None
+        
+        # Patrón para extraer fecha y proveedor del nombre de archivo
+        # Formato: YYYY.MM.DD NN.xlsx
+        self.filename_pattern = re.compile(r'(\d{4}\.\d{2}\.\d{2})\s+(\d{2})\.xlsx')
 
     def encontrar_archivos_excel(self) -> List[str]:
         """Encuentra todos los archivos Excel en el directorio raw."""
@@ -46,8 +70,13 @@ class ProcesadorDatosRelevamiento:
             filename = os.path.basename(filepath)
             logger.info(f"Procesando archivo: {filename}")
 
-            # Extraer fecha del nombre de archivo si está disponible
-            fecha_relevamiento = self.extraer_fecha_desde_filename(filename)
+            # Extraer fecha y código de proveedor del nombre de archivo
+            fecha_relevamiento, codigo_proveedor = self.extraer_fecha_y_proveedor_desde_filename(filename)
+            
+            if not fecha_relevamiento:
+                logger.warning(f"No se pudo extraer fecha/proveedor de {filename}")
+            else:
+                logger.info(f"  Fecha: {fecha_relevamiento}, Proveedor: {codigo_proveedor}")
 
             # Leer Excel (intentar diferentes hojas)
             df = self.leer_excel(filepath)
@@ -61,7 +90,12 @@ class ProcesadorDatosRelevamiento:
             # Procesar cada propiedad
             propiedades = []
             for index, row in df.iterrows():
-                propiedad = self.procesar_propiedad(row, fecha_relevamiento, filename)
+                propiedad = self.procesar_propiedad(
+                    row, 
+                    fecha_relevamiento, 
+                    codigo_proveedor,
+                    filename
+                )
                 if propiedad:
                     propiedades.append(propiedad)
 
@@ -72,19 +106,35 @@ class ProcesadorDatosRelevamiento:
             logger.error(f"Error procesando {filepath}: {str(e)}")
             return []
 
-    def extraer_fecha_desde_filename(self, filename: str) -> str:
-        """Extrae fecha del nombre del archivo si está en formato YYYY.MM.DD"""
+    def extraer_fecha_y_proveedor_desde_filename(self, filename: str) -> Tuple[Optional[str], Optional[str]]:
+        """Extrae fecha y código de proveedor del nombre del archivo.
+        
+        Formato esperado: YYYY.MM.DD NN.xlsx
+        - YYYY.MM.DD: Fecha de scraping
+        - NN: Código de proveedor (01, 02, 03, etc.)
+        
+        Returns:
+            Tuple (fecha_str, codigo_proveedor) o (None, None) si no se puede extraer
+        """
         try:
-            # Formato esperado: YYYY.MM.DD XX.xlsx
-            partes = filename.split()
-            if len(partes) >= 1 and '.' in partes[0]:
-                fecha_str = partes[0]
-                # Validar formato
+            match = self.filename_pattern.match(filename)
+            if match:
+                fecha_str = match.group(1)
+                codigo_proveedor = match.group(2)
+                
+                # Validar formato de fecha
                 datetime.strptime(fecha_str, '%Y.%m.%d')
-                return fecha_str
-        except:
-            pass
-        return None
+                
+                return fecha_str, codigo_proveedor
+        except Exception as e:
+            logger.debug(f"No se pudo extraer fecha/proveedor de {filename}: {e}")
+            
+        return None, None
+    
+    def extraer_fecha_desde_filename(self, filename: str) -> str:
+        """Extrae solo la fecha (mantener compatibilidad)."""
+        fecha, _ = self.extraer_fecha_y_proveedor_desde_filename(filename)
+        return fecha
 
     def leer_excel(self, filepath: str) -> pd.DataFrame:
         """Intenta leer el archivo Excel con diferentes configuraciones."""
@@ -200,7 +250,7 @@ class ProcesadorDatosRelevamiento:
 
         return df
 
-    def procesar_propiedad(self, row: pd.Series, fecha_relevamiento: str, source_file: str) -> Dict[str, Any]:
+    def procesar_propiedad(self, row: pd.Series, fecha_relevamiento: str, codigo_proveedor: str, source_file: str) -> Dict[str, Any]:
         """Procesa una fila de propiedad y la convierte al formato estándar."""
         try:
             # Extraer tipo de propiedad desde el título si no está disponible
@@ -210,13 +260,38 @@ class ProcesadorDatosRelevamiento:
             if not tipo_propiedad and titulo:
                 tipo_propiedad = self.extraer_tipo_propiedad_desde_titulo(titulo)
 
+            # Extraer zona inicial (puede contener fuente de datos)
+            zona_original = self.limpiar_texto(str(row.get('zona', '')))
+            descripcion = self.limpiar_texto(str(row.get('descripcion', '')))
+            
+            # Separar fuente de datos vs zona geográfica
+            fuente_datos = None
+            zona_geografica = ''
+            
+            # Si zona está en mayúsculas o parece ser nombre de proveedor, es fuente
+            if zona_original and (zona_original.isupper() or zona_original in ['ULTRACASAS', 'INFOCASAS']):
+                fuente_datos = zona_original
+            else:
+                zona_geografica = zona_original
+            
+            # Extraer zona geográfica real usando extractor
+            if self.zonas_extractor and not zona_geografica:
+                # Intentar desde título primero
+                zona_extraida = self.zonas_extractor.extraer_zona_principal(titulo)
+                if not zona_extraida:
+                    # Si no, desde descripción
+                    zona_extraida = self.zonas_extractor.extraer_zona_principal(descripcion)
+                
+                if zona_extraida:
+                    zona_geografica = zona_extraida
+            
             # Extraer datos básicos
             propiedad = {
                 'id': f"{source_file}_{row.name}",
                 'titulo': titulo,
                 'tipo_propiedad': tipo_propiedad,
                 'precio': self.limpiar_precio(row.get('precio')),
-                'zona': self.limpiar_texto(str(row.get('zona', ''))),
+                'zona': zona_geografica,  # Zona geográfica real
                 'direccion': self.limpiar_texto(str(row.get('direccion', ''))),
                 'latitud': self.limpiar_coordenada(row.get('latitud')),
                 'longitud': self.limpiar_coordenada(row.get('longitud')),
@@ -226,9 +301,11 @@ class ProcesadorDatosRelevamiento:
                 'habitaciones': self.limpiar_numero(row.get('habitaciones')),
                 'banos': self.limpiar_numero(row.get('banos')),
                 'garajes': self.limpiar_numero(row.get('garajes')),
-                'descripcion': self.limpiar_texto(str(row.get('descripcion', ''))),
-                'fecha_relevamiento': fecha_relevamiento,
-                'fuente': source_file,
+                'descripcion': descripcion,
+                'fecha_scraping': fecha_relevamiento,  # Renombrado para claridad
+                'codigo_proveedor': codigo_proveedor,  # Nuevo: código del proveedor
+                'fuente_datos': fuente_datos,  # Nuevo: nombre del proveedor si aplica
+                'archivo_origen': source_file,  # Renombrado para claridad
                 'url': self.limpiar_texto(str(row.get('url', ''))),
                 'agente': self.limpiar_texto(str(row.get('agente', ''))),
                 'telefono': self.limpiar_texto(str(row.get('telefono', ''))),
@@ -237,6 +314,13 @@ class ProcesadorDatosRelevamiento:
                 'unidad_vecinal': self.extraer_uv(row),
                 'manzana': self.extraer_manzana(row)
             }
+            
+            # Agregar referencias de ubicación si el extractor está disponible
+            if self.zonas_extractor and zona_geografica:
+                texto_completo = f"{titulo} {descripcion}"
+                referencias = self.zonas_extractor.extraer_referencias_ubicacion(texto_completo)
+                if referencias['anillos'] or referencias['radiales']:
+                    propiedad['referencias_ubicacion'] = referencias
 
             # Validar datos mínimos requeridos
             if not self.validar_propiedad(propiedad):
@@ -288,12 +372,19 @@ class ProcesadorDatosRelevamiento:
             return None
 
     def limpiar_numero(self, numero) -> int:
-        """Limpia y convierte a entero."""
+        """Limpia y convierte a entero.
+        
+        CORRECCIÓN DE BUG: Ahora maneja correctamente decimales.
+        Ejemplo: '3.5' → 3 (trunca), no 35 como antes.
+        """
         if pd.isna(numero):
             return None
 
         try:
-            num_str = str(numero).replace(',', '').replace('.', '')
+            # Remover separadores de miles
+            num_str = str(numero).replace(',', '')
+            
+            # Convertir a float primero (para manejar decimales), luego a int
             return int(float(num_str))
         except:
             return None
