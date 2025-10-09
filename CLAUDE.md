@@ -17,7 +17,9 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - **Frontend**: HTML5 + Bootstrap 5 + JavaScript moderno
 - **Procesamiento**: Pandas + NumPy para análisis de datos de mercado
 - **Geolocalización**: Algoritmo Haversine para cálculos precisos
-- **Datos**: JSON con propiedades procesadas de scraping
+- **LLM Primario**: Z.AI GLM-4.6 para análisis y extracción de datos
+- **LLM Fallback**: OpenRouter con Qwen2.5 72B (gratuito, 2025)
+- **Datos**: JSON con propiedades procesadas de scraping + extracción inteligente
 
 ## Technology Stack
 
@@ -73,8 +75,14 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 
 #### Directorios Clave
 - **`api/`** - Servidor REST y endpoints para inversores
-- **`src/`** - Motores de recomendación, lógica de inversión y integración LLM (`llm_integration.py`)
+- **`src/`** - Motores de recomendación, lógica de inversión y integración LLM
+  - `llm_integration.py` - Sistema LLM con fallback automático a OpenRouter
+  - `description_parser.py` - Extracción de datos estructurados desde texto libre
+  - `recommendation_engine_mejorado.py` - Motor principal con geolocalización Haversine
 - **`scripts/`** - Procesamiento de datos y análisis de mercado
+  - `build_relevamiento_dataset.py` - ETL con extracción inteligente LLM
+  - `analizar_por_proveedor.py` - Diagnóstico de calidad de datos por proveedor
+  - `test_proveedor02_sample.py` - Testing de extracción LLM con muestras
 - **`tests/`** - Suite de pruebas para el sistema de inversión
 - **`data/`** - Todos los archivos de datos de inversión (1,583 propiedades)
 - **`assets/`** - CSS y JavaScript del frontend moderno
@@ -128,6 +136,41 @@ python src/cli.py query --zona "Equipetrol" --tipo-inversion "desarrollo" --pres
 python src/cli.py natural-query "busco propiedad con potencial de plusvalía en zona norte"
 ```
 
+### Sistema LLM con Fallback Automático (2025)
+```bash
+# Test del sistema de fallback
+python test_fallback_simple.py
+
+# Test de extracción con muestras del Proveedor 02
+python scripts/test_proveedor02_sample.py
+
+# Análisis de calidad de datos por proveedor
+python scripts/analizar_por_proveedor.py
+```
+
+**Configuración requerida en `.env`:**
+```bash
+# Proveedor primario (Z.AI)
+ZAI_API_KEY=tu_clave_zai_aqui
+LLM_PROVIDER=zai
+LLM_MODEL=glm-4.6
+
+# Fallback automático (OpenRouter)
+OPENROUTER_FALLBACK_ENABLED=true
+OPENROUTER_API_KEY=tu_clave_openrouter_aqui
+OPENROUTER_MODEL=qwen/qwen-2.5-72b-instruct:free
+
+# Configuración general
+LLM_MAX_TOKENS=8000
+LLM_TEMPERATURE=0.1
+```
+
+**Modelos gratuitos recomendados 2025:**
+- `qwen/qwen-2.5-72b-instruct:free` - Optimizado para JSON (recomendado)
+- `deepseek/deepseek-r1:free` - Razonamiento superior
+- `meta-llama/llama-4-maverick:free` - Multimodal, 400B parámetros
+- `meta-llama/llama-4-scout:free` - Contexto masivo (512K tokens)
+
 ## Architecture Overview
 
 ### Core Components
@@ -142,6 +185,18 @@ python src/cli.py natural-query "busco propiedad con potencial de plusvalía en 
    - **Original Engine** (`src/recommendation_engine.py`): Basic matching algorithm
    - **Enhanced Engine** (`src/recommendation_engine_mejorado.py`): Advanced geospatial recommendations with Haversine distance calculation
    - **Weight System**: Budget (25%), Family (20%), Services (30%), Demographics (15%), Preferences (10%)
+
+3. **LLM Integration System** (`src/llm_integration.py`, `src/description_parser.py`)
+   - **Primary Provider**: Z.AI GLM-4.6 for data extraction and analysis
+   - **Automatic Fallback**: OpenRouter with Qwen2.5 72B (free) on rate limits/errors
+   - **Error Detection**: Automatic detection of 429 (rate limit), 500/502/503 (server errors)
+   - **Smart Extraction**: Parses free-text descriptions into structured JSON fields
+   - **Cache System**: LRU caching to reduce API costs and improve performance
+   - **Statistics Tracking**: Monitors provider usage, fallback rate, cache hits
+   - **Use Cases**: 
+     - Provider 02 data extraction (1,579 properties in free-text)
+     - ETL processing with high-volume LLM queries
+     - Resilience against API limitations
 
 3. **Geospatial System**
    - **Haversine Algorithm**: Real-distance calculation between coordinates

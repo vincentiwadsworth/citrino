@@ -23,7 +23,9 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 - **🏘️ Propiedades**: 1,583 propiedades con coordenadas exactas
 - **🏢 Servicios Urbanos**: 4,777 servicios mapeados
 - **📍 Cobertura**: Santa Cruz de la Sierra y áreas metropolitanas
-- **🤖 LLM**: Z.AI (GLM-4.5-Air) integrado en Citrino Chat
+- **🤖 LLM Primario**: Z.AI GLM-4.6 para análisis y extracción
+- **🔄 LLM Fallback**: OpenRouter con Qwen2.5 72B (gratuito)
+- **🎯 Extracción Inteligente**: Procesamiento automático de 1,579 descripciones en texto libre
 - **☁️ Deploy**: Backend en Render.com + Frontend en GitHub Pages
 - **🛠️ Uso**: Herramienta interna del equipo Citrino
 
@@ -112,16 +114,52 @@ Citrino ofrece dos niveles de análisis según las necesidades del usuario:
 Para activar el motor con IA, configura la API key en `.env`:
 
 ```bash
-# Obtener en https://z.ai/model-api
+# Proveedor primario
 ZAI_API_KEY=tu_clave_zai_aqui
 LLM_PROVIDER=zai
-LLM_MODEL=glm-4.5-air
+LLM_MODEL=glm-4.6
 ```
 
 **En producción (Render.com):**
 - Configura `ZAI_API_KEY` en las variables de entorno del dashboard
 - El briefing ejecutivo se generará automáticamente en cada recomendación
 - El enriquecimiento personalizado se activará cuando el usuario provea contexto
+
+### 🔄 Sistema de Fallback Automático (2025)
+
+**Alta disponibilidad con OpenRouter**: El sistema detecta automáticamente cuando Z.AI no está disponible (rate limits 429, errores de servidor 500/502/503) y cambia a OpenRouter con modelos gratuitos de última generación.
+
+**Configuración del Fallback:**
+
+```bash
+# Habilitar fallback automático
+OPENROUTER_FALLBACK_ENABLED=true
+OPENROUTER_API_KEY=tu_clave_openrouter_aqui
+
+# Modelo gratuito recomendado (2025)
+OPENROUTER_MODEL=qwen/qwen-2.5-72b-instruct:free
+```
+
+**Modelos Gratuitos Disponibles:**
+
+| Modelo | Parámetros | Especialidad | Contexto |
+|--------|-----------|--------------|----------|
+| **Qwen2.5 72B Instruct** ⭐ | 72B | JSON estructurado | 128K tokens |
+| DeepSeek R1 | 671B (37B activos) | Razonamiento complejo | 128K tokens |
+| Llama 4 Maverick | 400B (17B activos) | Multimodal | 256K tokens |
+| Llama 4 Scout | 109B (17B activos) | Contexto masivo | 512K tokens |
+
+**Ventajas del Sistema de Fallback:**
+- ✅ **99%+ disponibilidad** del sistema de extracción LLM
+- ✅ **Detección automática** de rate limits y errores
+- ✅ **Transparente**: Usuario no necesita intervenir
+- ✅ **Sin costo adicional**: Modelos gratuitos de alta calidad
+- ✅ **Tracking completo**: Estadísticas de uso por provider
+
+**Casos de Uso:**
+- Extracción de datos del Proveedor 02 (1,579 propiedades en texto libre)
+- Procesamiento ETL con alto volumen de consultas
+- Resiliencia ante limitaciones de API primaria
 
 ## 🏗️ Arquitectura del Sistema
 
