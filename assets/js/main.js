@@ -643,15 +643,12 @@ const App = {
         if (currentPath.includes('index.html') || currentPath === '/') {
             // Componentes de página principal
             App.initializeHomePage();
-        } else if (currentPath.includes('perfil.html')) {
-            // Componentes de página de perfil
-            App.initializeProfilePage();
+        } else if (currentPath.includes('citrino-reco.html')) {
+            // Componentes de Citrino Reco
+            App.initializeRecoPage();
         } else if (currentPath.includes('chat.html')) {
             // Componentes de página de chat
             App.initializeChatPage();
-        } else if (currentPath.includes('resultados.html')) {
-            // Componentes de página de resultados
-            App.initializeResultsPage();
         }
 
         // Inicializar tooltips
@@ -691,9 +688,9 @@ const App = {
     },
 
     /**
-     * Inicializa componentes de página de perfil
+     * Inicializa componentes de Citrino Reco
      */
-    initializeProfilePage: () => {
+    initializeRecoPage: () => {
         // Auto-save del formulario
         const formInputs = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
         formInputs.forEach(input => {
@@ -718,27 +715,6 @@ const App = {
             });
         }
     },
-
-    /**
-     * Inicializa componentes de página de resultados
-     */
-    initializeResultsPage: () => {
-        // Scroll infinito (opcional)
-        let isLoading = false;
-        const resultsContainer = document.getElementById('resultsContainer');
-
-        if (resultsContainer) {
-            resultsContainer.addEventListener('scroll', Utils.throttle(() => {
-                if (resultsContainer.scrollTop + resultsContainer.clientHeight >= resultsContainer.scrollHeight - 100) {
-                    if (!isLoading) {
-                        // Aquí iría la lógica de cargar más resultados
-                        console.log('Load more results...');
-                    }
-                }
-            }, 1000));
-        }
-    },
-
     /**
      * Limpieza antes de salir de la página
      */

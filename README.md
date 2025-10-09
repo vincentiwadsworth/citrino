@@ -40,11 +40,11 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 - **Filtros UV/Manzana** para análisis por ubicación precisa
 - **Cálculo de proximidad** a servicios que impactan plusvalía
 
-### 💬 Asistente Virtual para Inversores
-- **Procesamiento de lenguaje natural** para consultas de inversión
-- **Extracción automática de criterios** desde conversaciones
-- **Registro de objetivos de ROI y plazos** a partir de la conversación
-- **Análisis contextual** de oportunidades de inversión
+### 💬 Experiencias Asistidas con IA
+- **Citrino Reco** centraliza notas de exploración y devuelve recomendaciones al instante
+- **Citrino Chat** permite "chatear con la información" sin restricciones temáticas
+- **Extracción automática de criterios** desde conversaciones y formularios
+- **Arquitectura preparada** para integrar z.ai y enriquecer los prompts del LLM
 
 ### 💻 Panel de Inversor
 - **Diseño responsive** para visualización de propiedades
@@ -58,9 +58,8 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 ```
 Frontend Web/
 ├── index.html              # Página principal y marketing
-├── perfil.html             # Formulario completo de perfil
-├── chat.html               # Asistente virtual con IA
-├── resultados.html         # Visualización de recomendaciones
+├── citrino-reco.html       # Notas de exploración + recomendaciones inline
+├── chat.html               # Citrino Chat para consultas multi-fuente
 └── assets/
     ├── css/custom.css      # Estilos personalizados
     ├── js/main.js          # Lógica principal de UI
@@ -175,23 +174,17 @@ Deberías ver:
    - Explora las características del sistema
    - Elige entre "Crear Perfil" o "Asistente Virtual"
 
-2. **Perfil Detallado** → `perfil.html`
-   - Completa información demográfica
-   - Define presupuesto y preferencias
-   - Selecciona servicios necesarios
-   - Recibe recomendaciones personalizadas
+2. **Citrino Reco** → `citrino-reco.html`
+   - Registra notas de exploración sin exponer datos sensibles
+   - Define presupuestos, zonas y contexto de negocio
+   - Añade instrucciones específicas para el futuro LLM
+   - Obtén recomendaciones inline y exporta JSON
 
-3. **Asistente Virtual** → `chat.html`
-   - Describe tus necesidades en lenguaje natural
-   - Chat interactivo con procesamiento IA
-   - Extracción automática de perfil
-   - Recomendaciones contextuales
-
-4. **Resultados** → `resultados.html`
-   - Visualiza propiedades recomendadas
-   - Aplica filtros avanzados
-   - Compara opciones lado a lado
-   - Exporta resultados
+3. **Citrino Chat** → `chat.html`
+   - Consulta el inventario, la guía urbana y el censo inmobiliario
+   - Cruza datasets, genera prompts e insights conversacionales
+   - Visualiza recomendaciones dentro del chat
+   - Comparte respuestas con el equipo o vuelve a Citrino Reco
 
 ### Ejemplos de Consultas de Inversión
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente Virtual - Citrino</title>
+    <title>Citrino Chat - Conversa con tus datos</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -333,6 +333,91 @@
             background: #dc3545;
             animation: pulse 1s infinite;
         }
+
+        .chat-recommendations {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .chat-recommendations {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 992px) {
+            .chat-recommendations {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .chat-recommendations .recommendation-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 1.1rem;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .chat-recommendations .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .chat-recommendations .recommendation-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #1e293b;
+        }
+
+        .chat-recommendations .compatibility-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 999px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .chat-recommendations .compatibility-pill.high {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .chat-recommendations .compatibility-pill.medium {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .chat-recommendations .compatibility-pill.low {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .chat-recommendations .meta-chip {
+            background: #f1f5f9;
+            border-radius: 999px;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            margin-right: 0.25rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .chat-recommendations .recommendation-justification {
+            background: #eef2ff;
+            border-left: 3px solid #6366f1;
+            border-radius: 0 10px 10px 0;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -342,19 +427,19 @@
             <div class="section-icon mx-auto mb-3">
                 <i class="bi bi-robot"></i>
             </div>
-            <h3 class="mb-3">¡Hola! Soy tu asistente inmobiliario</h3>
+            <h3 class="mb-3">Bienvenido a Citrino Chat</h3>
             <p class="text-muted mb-4">
-                Puedes describirme en lenguaje natural lo que buscas, y te ayudaré a encontrar las propiedades perfectas para ti.
+                Conversa libremente con el inventario relevado, la guía urbana y el censo inmobiliario. Pronto integraremos z.ai para potenciar aún más las respuestas.
             </p>
             <div class="quick-suggestions justify-content-center mb-4">
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy un inversor buscando propiedades con buen potencial de retorno en Santa Cruz')">
-                    Inversor capitalista
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Resume las oportunidades de inversión en Equipetrol y qué servicios urbanos justifican su valorización')">
+                    Relaciona datos urbanos
                 </div>
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Busco una casa para inversión con plusvalía en zona norte')">
-                    Inversor
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Cruza el censo inmobiliario con el inventario para detectar activos con potencial de renta corta')">
+                    Cruce con censo
                 </div>
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Busco desarrollo inmobiliario en zonas con alta demanda comercial')">
-                    Desarrollador inmobiliario
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Dime qué barrios tienen correlación entre precio y proximidad a universidades privadas')">
+                    Correlaciones precio vs servicios
                 </div>
             </div>
             <button class="btn btn-primary btn-lg" onclick="startChat()">
@@ -380,18 +465,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="perfil.html">
-                            <i class="bi bi-person-plus me-1"></i>Perfil de Cliente
+                        <a class="nav-link" href="citrino-reco.html">
+                            <i class="bi bi-journal-text me-1"></i>Citrino Reco
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="chat.html">
-                            <i class="bi bi-chat-dots me-1"></i>Asistente Virtual
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="resultados.html">
-                            <i class="bi bi-search me-1"></i>Resultados
+                            <i class="bi bi-chat-dots me-1"></i>Citrino Chat
                         </a>
                     </li>
                 </ul>
@@ -412,10 +492,10 @@
                                     <i class="bi bi-robot"></i>
                                 </div>
                                 <div>
-                                    <h5 class="mb-1">Asistente Virtual Citrino</h5>
+                                    <h5 class="mb-1">Citrino Chat · Inteligencia conversacional</h5>
                                     <p class="mb-0">
                                         <span class="status-indicator status-online" id="statusIndicator"></span>
-                                        <span id="statusText">En línea - Listo para ayudarte</span>
+                                        <span id="statusText">En línea · listo para cruzar información</span>
                                     </p>
                                 </div>
                             </div>
@@ -449,17 +529,17 @@
                 <!-- Chat Input -->
                 <div class="chat-input-container">
                     <div class="quick-suggestions" id="quickSuggestions">
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué zonas tienen mejor potencial de inversión?')">
-                            Zonas con potencial
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Compara el inventario de Equipetrol con la guía urbana y dime qué servicios impulsan la demanda corporativa')">
+                            Perfil Equipetrol
                         </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Busco algo con buen potencial de reventa')">
-                            Opción de inversión
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué barrios muestran mejor relación entre rentas proyectadas y proximidad a hospitales?')">
+                            Rentas vs salud
                         </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Busco zonas con alta demanda comercial y corporativa')">
-                            Alta demanda
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Dame propiedades con garaje doble y parque cercano, ordenadas por compatibilidad')">
+                            Filtro avanzado
                         </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué opciones hay con garaje incluido?')">
-                            Con garaje
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Genera preguntas sugeridas para un prospecto interesado en plusvalía en la zona norte')">
+                            Prompt sugerido
                         </div>
                     </div>
                     <div class="chat-input-group">
@@ -496,6 +576,45 @@
         let isProcessing = false;
         let voiceRecognition = null;
         let isRecording = false;
+        let chatRecommendations = [];
+        const demoChatRecommendations = [
+            {
+                id: 'demo_chat_1',
+                nombre: 'Departamento corporativo en Equipetrol',
+                precio: 210000,
+                superficie_m2: 135,
+                habitaciones: 3,
+                banos: 2,
+                zona: 'Equipetrol',
+                compatibilidad: 93,
+                justificacion: 'Demanda sostenida de alquiler ejecutivo, proximidad a centros empresariales y ratio precio/m² competitivo.',
+                caracteristicas: ['garaje', 'gimnasio', 'seguridad']
+            },
+            {
+                id: 'demo_chat_2',
+                nombre: 'Loft mixto en zona Centro',
+                precio: 128000,
+                superficie_m2: 82,
+                habitaciones: 2,
+                banos: 1,
+                zona: 'Centro',
+                compatibilidad: 84,
+                justificacion: 'Alta rotación para alquiler temporal y acceso directo a corredores de transporte y servicios culturales.',
+                caracteristicas: ['amoblado', 'acceso_rapido', 'terraza']
+            },
+            {
+                id: 'demo_chat_3',
+                nombre: 'Casa con lote amplio en Los Olivos',
+                precio: 255000,
+                superficie_m2: 190,
+                habitaciones: 3,
+                banos: 3,
+                zona: 'Los Olivos',
+                compatibilidad: 87,
+                justificacion: 'Espacio exterior para desarrollo futuro y cercanía a servicios educativos en expansión.',
+                caracteristicas: ['jardin', 'garaje', 'area_verde']
+            }
+        ];
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
@@ -571,7 +690,7 @@
             // Enviar mensaje de bienvenida
             const welcomeMessage = {
                 type: 'assistant',
-                content: '¡Hola! Soy tu asistente de inversión inmobiliaria de Citrino. Puedes describirme en lenguaje natural lo que buscas, como:\n\n• "Soy un inversor buscando propiedades con potencial de retorno en Equipetrol"\n• "Busco desarrollo inmobiliario con presupuesto de $500,000"\n• "Necesito zonas con alta demanda comercial"\n\n¿Qué tipo de inversión estás buscando?',
+                content: 'Soy Citrino Chat. Puedo revisar inmuebles relevados, la guía urbana, el censo inmobiliario y cruzar todo para generar conclusiones. Próximamente me acompañará z.ai para enriquecer aún más las respuestas.\n\nPruébame con ejemplos como: \n• "Cruza el inventario de Equipetrol con servicios cercanos y dame tres motivos para invertir"\n• "Genera preguntas para una reunión con un prospecto interesado en renta en la zona norte"\n• "Explica la relación entre plusvalía y proximidad a hospitales en Santa Cruz"\n\n¿Qué insight te gustaría explorar primero?',
                 timestamp: new Date().toISOString()
             };
 
@@ -605,7 +724,7 @@
 
             // Mostrar indicador de escritura
             showTypingIndicator();
-            updateStatus('processing', 'Procesando tu solicitud...');
+            updateStatus('processing', 'Analizando tu consulta con datos inmobiliarios...');
 
             isProcessing = true;
             document.getElementById('sendButton').disabled = true;
@@ -670,7 +789,7 @@
                 addMessage(errorMessage);
             } finally {
                 hideTypingIndicator();
-                updateStatus('online', 'En línea - Listo para ayudarte');
+                updateStatus('online', 'En línea · listo para cruzar información');
                 isProcessing = false;
                 document.getElementById('sendButton').disabled = false;
             }
@@ -925,24 +1044,105 @@
             return `
                 <div class="mt-3">
                     <button class="btn btn-primary btn-sm" onclick="showRecommendations()">
-                        <i class="bi bi-search me-2"></i>Ver recomendaciones
+                        <i class="bi bi-stars me-2"></i>Generar recomendaciones aquí mismo
                     </button>
                 </div>
             `;
         }
 
         // Mostrar recomendaciones
-        function showRecommendations() {
-            if (currentProfile) {
-                const params = new URLSearchParams();
-                Object.keys(currentProfile).forEach(key => {
-                    if (currentProfile[key] !== null && currentProfile[key] !== undefined && currentProfile[key] !== '') {
-                        params.set(key, typeof currentProfile[key] === 'object' ? JSON.stringify(currentProfile[key]) : currentProfile[key]);
-                    }
-                });
-                window.location.href = `resultados.html?${params.toString()}`;
+        async function showRecommendations() {
+            if (!currentProfile) {
+                showToast('Necesitamos extraer información del mensaje antes de recomendar.', 'warning');
+                return;
             }
+
+            await requestChatRecommendations(currentProfile);
         }
+
+async function requestChatRecommendations(profile) {
+    showTypingIndicator();
+    updateStatus('processing', 'Analizando inventario y servicios urbanos...');
+    document.getElementById('sendButton').disabled = true;
+
+    try {
+        const response = await window.citrinoAPI.getEnhancedRecommendations(profile, { limite: 6, umbral_minimo: 0.3 });
+        if (response.success && response.recommendations.length > 0) {
+            chatRecommendations = response.recommendations;
+            addRecommendationsMessage(chatRecommendations, false);
+            showToast('Recomendaciones generadas dentro del chat.', 'success');
+        } else {
+            chatRecommendations = demoChatRecommendations;
+            addRecommendationsMessage(chatRecommendations, true);
+            showToast('Mostrando recomendaciones de demostración. Conecta la API para resultados reales.', 'warning');
+        }
+    } catch (error) {
+        console.error('Error obteniendo recomendaciones desde el chat:', error);
+        chatRecommendations = demoChatRecommendations;
+        addRecommendationsMessage(chatRecommendations, true);
+        showToast('No fue posible contactar la API. Se muestran ejemplos de demostración.', 'warning');
+    } finally {
+        hideTypingIndicator();
+        updateStatus('online', 'En línea · listo para cruzar información');
+        document.getElementById('sendButton').disabled = false;
+    }
+}
+
+function addRecommendationsMessage(recommendations, isDemo = false) {
+    if (!recommendations || !recommendations.length) {
+        return;
+    }
+
+    const cards = recommendations.map(buildChatRecommendationCard).join('');
+    const preamble = isDemo
+        ? '<p><strong>Nota:</strong> Sin conexión a la API, se muestran resultados de ejemplo para ilustrar el formato.</p>'
+        : '<p>Estas son las propiedades que mejor coinciden según los criterios detectados. Pide más detalles o modifica las condiciones cuando quieras.</p>';
+
+    const message = {
+        type: 'assistant',
+        content: `${preamble}<div class="chat-recommendations">${cards}</div>`,
+        timestamp: new Date().toISOString()
+    };
+
+    addMessage(message);
+}
+
+function buildChatRecommendationCard(property) {
+    const compatibilityClass = property.compatibilidad >= 90 ? 'high'
+        : property.compatibilidad >= 70 ? 'medium' : 'low';
+
+    const formattedPrice = property.precio ? Utils.formatCurrency(property.precio) : 'Precio reservado';
+
+    return `
+        <div class="recommendation-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <div class="recommendation-title">${property.nombre || 'Propiedad sin título'}</div>
+                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${property.zona || 'Zona por confirmar'}</small>
+                </div>
+                <span class="compatibility-pill ${compatibilityClass}">
+                    <i class="bi bi-stars"></i>${Math.round(property.compatibilidad || 0)}%
+                </span>
+            </div>
+            <div class="fw-bold text-success mb-2">${formattedPrice}</div>
+            <div class="mb-2">
+                ${property.habitaciones ? `<span class="meta-chip"><i class="bi bi-door-open"></i>${property.habitaciones} dorm.</span>` : ''}
+                ${property.banos ? `<span class="meta-chip"><i class="bi bi-droplet"></i>${property.banos} baños</span>` : ''}
+                ${property.superficie_m2 ? `<span class="meta-chip"><i class="bi bi-rulers"></i>${property.superficie_m2} m²</span>` : ''}
+            </div>
+            ${property.caracteristicas?.length ? `
+                <div class="mb-2">
+                    ${property.caracteristicas.slice(0, 3).map(feature => `<span class="meta-chip"><i class="bi bi-check-lg"></i>${feature.replace(/_/g, ' ')}</span>`).join('')}
+                </div>
+            ` : ''}
+            <div class="recommendation-justification">
+                <strong>Motivo</strong>
+                <p class="mb-0 mt-1">${property.justificacion || 'Sin justificación disponible.'}</p>
+            </div>
+        </div>
+    `;
+}
+
 
         // Mostrar/ocultar indicador de escritura
         function showTypingIndicator() {
@@ -1075,7 +1275,7 @@
             const voiceButton = document.getElementById('voiceButton');
             voiceButton.classList.remove('recording');
             voiceButton.innerHTML = '<i class="bi bi-mic"></i>';
-            updateStatus('online', 'En línea - Listo para ayudarte');
+                updateStatus('online', 'En línea · listo para cruzar información');
         }
 
         // Utilidades

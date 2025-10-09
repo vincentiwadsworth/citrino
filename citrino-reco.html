@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Cliente - Citrino</title>
+    <title>Citrino Reco - Notas de exploración</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -139,6 +139,108 @@
             border-color: #667eea;
         }
 
+        .recommendations-section {
+            display: none;
+        }
+
+        .recommendations-section.active {
+            display: block;
+        }
+
+        .recommendations-header {
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid #eef2ff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .recommendation-header {
+            padding: 1.25rem 1.25rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .recommendation-body {
+            padding: 1.25rem;
+        }
+
+        .compatibility-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.2rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .compatibility-pill.high {
+            background: #ecfdf3;
+            color: #047857;
+        }
+
+        .compatibility-pill.medium {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .compatibility-pill.low {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .recommendation-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .meta-chip {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .recommendation-justification {
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+
+        .recommendations-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            border: 1px dashed #cbd5f5;
+            border-radius: 16px;
+            background: #f8faff;
+        }
+
+        .recommendations-empty i {
+            font-size: 3rem;
+            color: #94a3b8;
+        }
+
         @media (max-width: 768px) {
             .form-section {
                 padding: 1.5rem;
@@ -181,18 +283,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="perfil.html">
-                            <i class="bi bi-person-plus me-1"></i>Perfil de Cliente
+                        <a class="nav-link active" href="citrino-reco.html">
+                            <i class="bi bi-journal-text me-1"></i>Citrino Reco
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="chat.html">
-                            <i class="bi bi-chat-dots me-1"></i>Asistente Virtual
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="resultados.html">
-                            <i class="bi bi-search me-1"></i>Resultados
+                            <i class="bi bi-chat-dots me-1"></i>Citrino Chat
                         </a>
                     </li>
                 </ul>
@@ -207,11 +304,11 @@
             <div class="row mb-5">
                 <div class="col-lg-12 text-center">
                     <h1 class="display-5 fw-bold mb-3">
-                        <i class="bi bi-graph-up-arrow text-primary me-3"></i>
-                        Crear Perfil de Inversor
+                        <i class="bi bi-journal-text text-primary me-3"></i>
+                        Citrino Reco · Notas de exploración
                     </h1>
                     <p class="lead text-muted">
-                        Define tus criterios de inversión para recibir oportunidades inmobiliarias con alto potencial de retorno
+                        Documenta hallazgos de reuniones, resguarda la privacidad del prospecto y deja que el motor asigne puntajes y coincidencias en tiempo real.
                     </p>
                 </div>
             </div>
@@ -222,7 +319,7 @@
                     <div class="form-section">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0">
-                                <i class="bi bi-clock-history me-2"></i>Perfiles Guardados
+                                <i class="bi bi-clock-history me-2"></i>Notas guardadas
                             </h5>
                             <button class="btn btn-sm btn-outline-secondary" onclick="loadSavedProfiles()">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
@@ -231,7 +328,7 @@
                         <div id="savedProfilesContainer" class="saved-profiles">
                             <div class="text-center text-muted py-3">
                                 <i class="bi bi-inbox display-4"></i>
-                                <p class="mt-2">No hay perfiles guardados</p>
+                                <p class="mt-2">Aún no guardaste notas</p>
                             </div>
                         </div>
                     </div>
@@ -245,7 +342,7 @@
                     <div class="section-icon">
                         <i class="bi bi-person-badge"></i>
                     </div>
-                    <h4 class="mb-4">Información Básica</h4>
+                    <h4 class="mb-4">Datos principales del prospecto</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
@@ -285,7 +382,7 @@
                     <div class="section-icon">
                         <i class="bi bi-currency-dollar"></i>
                     </div>
-                    <h4 class="mb-4">Presupuesto</h4>
+                    <h4 class="mb-4">Rangos de inversión</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
@@ -334,7 +431,7 @@
                     <div class="section-icon">
                         <i class="bi bi-people-fill"></i>
                     </div>
-                    <h4 class="mb-4">Perfil del Inversor</h4>
+                    <h4 class="mb-4">Contexto del equipo</h4>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-floating">
@@ -399,7 +496,7 @@
                     <div class="section-icon">
                         <i class="bi bi-geo-alt-fill"></i>
                     </div>
-                    <h4 class="mb-4">Preferencias de Ubicación</h4>
+                    <h4 class="mb-4">Preferencias territoriales</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
@@ -445,7 +542,7 @@
                     <div class="section-icon">
                         <i class="bi bi-building"></i>
                     </div>
-                    <h4 class="mb-4">Tipo de Propiedad</h4>
+                    <h4 class="mb-4">Tipo de activo objetivo</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
@@ -486,7 +583,7 @@
                     <div class="section-icon">
                         <i class="bi bi-list-check"></i>
                     </div>
-                    <h4 class="mb-4">Características Deseadas</h4>
+                    <h4 class="mb-4">Características deseadas</h4>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-floating">
@@ -587,7 +684,7 @@
                     <div class="section-icon">
                         <i class="bi bi-shop"></i>
                     </div>
-                    <h4 class="mb-4">Servicios Cercanos Necesarios</h4>
+                    <h4 class="mb-4">Servicios cercanos prioritarios</h4>
                     <p class="text-muted mb-3">Selecciona los servicios que necesitas cerca de tu nueva propiedad:</p>
                     <div class="needs-container" id="needsContainer">
                         <!-- Los needs tags se generarán dinámicamente -->
@@ -599,11 +696,16 @@
                     <div class="section-icon">
                         <i class="bi bi-chat-left-text"></i>
                     </div>
-                    <h4 class="mb-4">Observaciones Adicionales</h4>
-                    <div class="form-floating">
-                        <textarea class="form-control" id="observaciones" placeholder="Observaciones adicionales" style="height: 120px"></textarea>
-                        <label for="observaciones">Información adicional que sea relevante para tu búsqueda</label>
+                    <h4 class="mb-4">Notas y contexto</h4>
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="observaciones" placeholder="Notas relevantes de la reunión" style="height: 120px"></textarea>
+                        <label for="observaciones">Resumen breve de la conversación y próximos pasos</label>
                     </div>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="informacionLLM" placeholder="Instrucciones adicionales para el LLM" style="height: 120px"></textarea>
+                        <label for="informacionLLM">Información adicional para guiar a Citrino Chat / z.ai</label>
+                    </div>
+                    <small class="text-muted">Describe señales sensibles a resguardar, hipótesis que quieras validar o restricciones que el LLM debe considerar.</small>
                 </div>
 
                 <!-- Action Buttons -->
@@ -611,10 +713,10 @@
                     <div class="col-lg-12 text-center">
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
                             <button type="button" class="btn btn-secondary btn-lg" onclick="saveProfile()">
-                                <i class="bi bi-save me-2"></i>Guardar Perfil
+                                <i class="bi bi-save me-2"></i>Guardar nota
                             </button>
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-search me-2"></i>Buscar Propiedades
+                                <i class="bi bi-stars me-2"></i>Generar recomendaciones
                             </button>
                             <button type="button" class="btn btn-outline-danger btn-lg" onclick="clearForm()">
                                 <i class="bi bi-x-circle me-2"></i>Limpiar Formulario
@@ -623,6 +725,27 @@
                     </div>
                 </div>
             </form>
+            <div id="recoResultsSection" class="recommendations-section mt-5">
+                <div class="recommendations-header d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <h2 class="h3 fw-bold mb-2 mb-md-0">
+                            <i class="bi bi-stars text-primary me-2"></i>Resultados recomendados
+                        </h2>
+                        <p class="text-muted mb-0">Comparte estas recomendaciones con Citrino Chat para cruzar insights, validar hipótesis o generar nuevas preguntas.</p>
+                    </div>
+                    <div class="mt-3 mt-md-0">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportRecommendations()">
+                            <i class="bi bi-upload me-1"></i>Exportar JSON
+                        </button>
+                    </div>
+                </div>
+                <div class="row g-4" id="recommendationsGrid"></div>
+                <div id="recommendationsEmpty" class="recommendations-empty d-none">
+                    <i class="bi bi-search"></i>
+                    <h5 class="mt-3">Sin coincidencias por ahora</h5>
+                    <p class="text-muted">Ajusta el presupuesto, la zona o los servicios prioritarios para ampliar la búsqueda.</p>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -632,10 +755,10 @@
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <p class="mb-0">
-                        <i class="bi bi-house-heart-fill me-2"></i>Citrino - Sistema de Recomendación Inmobiliaria
+                        <i class="bi bi-house-heart-fill me-2"></i>Citrino · Recomendaciones + conversaciones con datos
                     </p>
                     <small class="text-white-50">
-                        Inteligencia artificial para encontrar tu hogar ideal en Santa Cruz de la Sierra
+                        Preparando integración con z.ai para potenciar el análisis inmobiliario en Santa Cruz de la Sierra
                     </small>
                 </div>
             </div>
@@ -658,6 +781,47 @@
             'restaurante', 'centro_comercial', 'area_verde',
             'guarderia', 'veterinaria', 'iglesia', 'seguridad_privada'
         ];
+
+        const demoRecommendations = [
+            {
+                id: 'demo_1',
+                nombre: 'Departamento moderno en Equipetrol',
+                precio: 185000,
+                superficie_m2: 120,
+                habitaciones: 3,
+                banos: 2,
+                zona: 'Equipetrol',
+                compatibilidad: 95,
+                justificacion: 'Ubicación premium con potencial de plusvalía y servicios corporativos a menos de 500m.',
+                caracteristicas: ['garaje', 'piscina', 'gimnasio']
+            },
+            {
+                id: 'demo_2',
+                nombre: 'Penthouse ejecutivo en Santa Mónica',
+                precio: 320000,
+                superficie_m2: 200,
+                habitaciones: 4,
+                banos: 3,
+                zona: 'Santa Mónica',
+                compatibilidad: 92,
+                justificacion: 'Alta demanda de alquiler corporativo, entorno seguro y acceso inmediato a colegios premium.',
+                caracteristicas: ['terraza', 'garaje doble', 'seguridad']
+            },
+            {
+                id: 'demo_3',
+                nombre: 'Casa con jardín en Los Olivos',
+                precio: 245000,
+                superficie_m2: 180,
+                habitaciones: 3,
+                banos: 2,
+                zona: 'Los Olivos',
+                compatibilidad: 88,
+                justificacion: 'Terreno amplio con potencial de ampliación y proximidad a servicios urbanos emergentes.',
+                caracteristicas: ['jardin', 'garaje', 'area_verde']
+            }
+        ];
+
+        let latestRecommendations = [];
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
@@ -709,18 +873,6 @@
 
         // Configurar event listeners
         function setupEventListeners() {
-            // Número de niños change
-            document.getElementById('ninosCount').addEventListener('change', function() {
-                const container = document.getElementById('edadesNinosContainer');
-                if (this.value > 0) {
-                    container.style.display = 'block';
-                } else {
-                    container.style.display = 'none';
-                    document.getElementById('edadesNinos').value = '';
-                }
-                updateProgressBar();
-            });
-
             // Validación en tiempo real
             const requiredFields = ['nombreCliente', 'presupuestoMin', 'presupuestoMax', 'adultos', 'zonaPreferida', 'tipoPropiedad'];
             requiredFields.forEach(fieldId => {
@@ -846,21 +998,31 @@
         }
 
         // Guardar perfil
-        async function saveProfile() {
+        async function saveProfile(options = {}) {
+            const { silent = false } = options;
+
             if (!validateForm()) {
-                showToast('Por favor, completa los campos requeridos', 'error');
-                return;
+                if (!silent) {
+                    showToast('Por favor, completa los campos requeridos', 'error');
+                }
+                return null;
             }
 
             const profileData = getFormData();
             const result = await window.citrinoAPI.saveProfile(profileData);
 
             if (result.success) {
-                showToast('¡Perfil guardado exitosamente!', 'success');
+                if (!silent) {
+                    showToast('¡Nota guardada exitosamente!', 'success');
+                }
                 loadSavedProfiles();
-            } else {
-                showToast('Error al guardar el perfil: ' + result.error, 'error');
+                return result.data;
             }
+
+            if (!silent) {
+                showToast('Error al guardar la nota: ' + result.error, 'error');
+            }
+            return null;
         }
 
         // Cargar perfiles guardados
@@ -872,7 +1034,7 @@
                 container.innerHTML = `
                     <div class="text-center text-muted py-3">
                         <i class="bi bi-inbox display-4"></i>
-                        <p class="mt-2">No hay perfiles guardados</p>
+                        <p class="mt-2">No hay notas guardadas</p>
                     </div>
                 `;
                 return;
@@ -882,7 +1044,7 @@
                 <div class="profile-card" onclick="loadProfile('${profile.id}')" data-profile-id="${profile.id}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h6 class="mb-1">${profile.nombreCliente || 'Perfil sin nombre'}</h6>
+                            <h6 class="mb-1">${profile.nombreCliente || 'Nota sin nombre'}</h6>
                             <p class="mb-1 text-muted">
                                 <i class="bi bi-currency-dollar me-1"></i>
                                 $${profile.presupuesto_min?.toLocaleString() || 0} - $${profile.presupuesto_max?.toLocaleString() || 0}
@@ -937,33 +1099,36 @@
                 });
             }
 
+            const informacionLLMField = document.getElementById('informacionLLM');
+            if (informacionLLMField) {
+                informacionLLMField.value = profile.informacion_llm || profile.informacionLLM || '';
+            }
+
             updateProgressBar();
-            showToast('Perfil cargado correctamente', 'success');
+            showToast('Nota cargada correctamente', 'success');
         }
 
         // Eliminar perfil
         async function deleteProfile(profileId, event) {
             event.stopPropagation();
 
-            if (!confirm('¿Estás seguro de que quieres eliminar este perfil?')) {
+            if (!confirm('¿Estás seguro de que quieres eliminar esta nota?')) {
                 return;
             }
 
             const result = await window.citrinoAPI.deleteProfile(profileId);
             if (result.success) {
-                showToast('Perfil eliminado correctamente', 'success');
+                showToast('Nota eliminada correctamente', 'success');
                 loadSavedProfiles();
             } else {
-                showToast('Error al eliminar el perfil: ' + result.error, 'error');
+                showToast('Error al eliminar la nota: ' + result.error, 'error');
             }
         }
 
         // Obtener datos del formulario
         function getFormData() {
-            const edadesNinos = document.getElementById('edadesNinos').value
-                .split(',')
-                .map(age => parseInt(age.trim()))
-                .filter(age => !isNaN(age));
+            const ninosCount = parseInt(document.getElementById('ninosCount').value) || 0;
+            const edadesNinos = Array.from({ length: ninosCount }, () => 8);
 
             return {
                 nombreCliente: document.getElementById('nombreCliente').value,
@@ -991,7 +1156,8 @@
                 orientacion: document.getElementById('orientacion').value,
                 caracteristicas_deseadas: getAdditionalFeatures(),
                 necesidades: getSelectedNeeds(),
-                observaciones: document.getElementById('observaciones').value
+                observaciones: document.getElementById('observaciones').value,
+                informacion_llm: document.getElementById('informacionLLM').value
             };
         }
 
@@ -1025,19 +1191,123 @@
             }
 
             const profileData = getFormData();
+            await saveProfile({ silent: true });
+            await generateRecommendations(profileData);
+        }
 
-            // Guardar perfil
-            await saveProfile();
+        async function generateRecommendations(profileData) {
+            const section = document.getElementById('recoResultsSection');
+            const grid = document.getElementById('recommendationsGrid');
+            const emptyState = document.getElementById('recommendationsEmpty');
 
-            // Redirigir a resultados
-            const params = new URLSearchParams();
-            Object.keys(profileData).forEach(key => {
-                if (profileData[key] !== null && profileData[key] !== undefined && profileData[key] !== '') {
-                    params.set(key, typeof profileData[key] === 'object' ? JSON.stringify(profileData[key]) : profileData[key]);
+            section.classList.add('active');
+            grid.innerHTML = `
+                <div class="col-12">
+                    <div class="recommendations-empty">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <h5 class="mt-3">Analizando oportunidades...</h5>
+                        <p class="text-muted">Evaluando coincidencias con datos georreferenciados.</p>
+                    </div>
+                </div>
+            `;
+            emptyState.classList.add('d-none');
+
+            try {
+                const result = await window.citrinoAPI.getEnhancedRecommendations(profileData, { limite: 6, umbral_minimo: 0.3 });
+
+                if (result.success && result.recommendations.length > 0) {
+                    renderRecommendations(result.recommendations);
+                    showToast('Recomendaciones generadas con datos en vivo', 'success');
+                } else {
+                    renderRecommendations(demoRecommendations);
+                    showToast('Mostrando recomendaciones de demostración. Conecta la API para resultados reales.', 'warning');
                 }
-            });
+            } catch (error) {
+                console.error('Error obteniendo recomendaciones:', error);
+                renderRecommendations(demoRecommendations);
+                showToast('No pudimos contactar la API. Se muestran datos de demostración.', 'warning');
+            }
+        }
 
-            window.location.href = `resultados.html?${params.toString()}`;
+        function renderRecommendations(recommendations) {
+            const grid = document.getElementById('recommendationsGrid');
+            const emptyState = document.getElementById('recommendationsEmpty');
+
+            latestRecommendations = recommendations;
+
+            if (!recommendations || recommendations.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+            grid.innerHTML = recommendations.map(item => `
+                <div class="col-md-6 col-xl-4">
+                    ${buildRecommendationCard(item)}
+                </div>
+            `).join('');
+        }
+
+        function buildRecommendationCard(property) {
+            const compatibilityClass = property.compatibilidad >= 90 ? 'high'
+                : property.compatibilidad >= 70 ? 'medium' : 'low';
+
+            const formattedPrice = property.precio ? Utils.formatCurrency(property.precio) : 'Precio reservado';
+
+            return `
+                <div class="recommendation-card">
+                    <div class="recommendation-header d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1">${property.nombre || 'Propiedad sin título'}</h5>
+                            <span class="text-muted"><i class="bi bi-geo-alt me-1"></i>${property.zona || 'Zona no declarada'}</span>
+                        </div>
+                        <span class="compatibility-pill ${compatibilityClass}">
+                            <i class="bi bi-stars"></i>${Math.round(property.compatibilidad || 0)}%
+                        </span>
+                    </div>
+                    <div class="recommendation-body">
+                        <div class="h4 fw-bold text-success mb-2">${formattedPrice}</div>
+                        <div class="recommendation-meta">
+                            ${property.habitaciones ? `<span class="meta-chip"><i class="bi bi-door-open"></i>${property.habitaciones} dorm.</span>` : ''}
+                            ${property.banos ? `<span class="meta-chip"><i class="bi bi-droplet"></i>${property.banos} baños</span>` : ''}
+                            ${property.superficie_m2 ? `<span class="meta-chip"><i class="bi bi-rulers"></i>${property.superficie_m2} m²</span>` : ''}
+                        </div>
+                        ${property.caracteristicas?.length ? `
+                            <div class="mb-3">
+                                ${property.caracteristicas.slice(0, 4).map(feature => `<span class="meta-chip"><i class="bi bi-check-lg"></i>${feature.replace(/_/g, ' ')}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="recommendation-justification">
+                            <strong>Motivo</strong>
+                            <p class="mb-0 mt-1">${property.justificacion || 'Sin justificación disponible para esta coincidencia.'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function exportRecommendations() {
+            if (!latestRecommendations.length) {
+                showToast('No hay recomendaciones para exportar todavía', 'warning');
+                return;
+            }
+
+            const dataStr = JSON.stringify({
+                generatedAt: new Date().toISOString(),
+                recommendations: latestRecommendations
+            }, null, 2);
+
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `citrino-reco-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('Recomendaciones exportadas en JSON', 'success');
         }
 
         // Limpiar formulario
@@ -1050,7 +1320,13 @@
                 document.querySelectorAll('.is-valid').forEach(field => {
                     field.classList.remove('is-valid');
                 });
-                document.getElementById('edadesNinosContainer').style.display = 'none';
+                const resultsSection = document.getElementById('recoResultsSection');
+                if (resultsSection) {
+                    resultsSection.classList.remove('active');
+                    document.getElementById('recommendationsGrid').innerHTML = '';
+                    document.getElementById('recommendationsEmpty').classList.add('d-none');
+                    latestRecommendations = [];
+                }
                 updateProgressBar();
                 showToast('Formulario limpiado correctamente', 'success');
             }

@@ -58,10 +58,10 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
    - **Análisis de Zonas**: Evaluación de servicios y cobertura por área
    - **Optimización de Rendimiento**: Índices espaciales para consultas eficientes
 
-4. **Frontend HTML Moderno** (`index.html`, `chat.html`, `perfil.html`, `results.html`)
-   - Interfaz interna para presentar resultados al equipo de Citrino y sus clientes inversores
-   - Sistema de captura y revisión de perfiles de inversión
-   - Análisis visual de oportunidades a partir de los datos procesados
+4. **Frontend HTML Moderno** (`index.html`, `citrino-reco.html`, `chat.html`)
+   - Interfaz interna con enfoque en Citrino Reco (notas + recomendaciones) y Citrino Chat (conversaciones sobre datos)
+   - Flujo integrado para registrar hallazgos, obtener coincidencias y profundizar con consultas libres
+   - Preparado para conectar una capa LLM (suscripción planificada a z.ai)
 
 #### Arquitectura de Datos
 ```
@@ -271,7 +271,6 @@ streamlit run demo_stable.py    # Start demo interface
 - 6 perfiles de referencia preparados por el equipo de Citrino
 - Consultas directas a la API de recomendaciones
 - Pantalla de bienvenida y UI alineadas con los flujos internos
-- Emergency meeting instructions in `instrucciones_reunion.txt`
 
 ## Future Development
 
