@@ -301,6 +301,31 @@ class CitrinoAPI {
     }
 
     /**
+     * Procesa mensaje de chat con z.ai y genera recomendaciones
+     */
+    async processChatWithLLM(message) {
+        try {
+            const response = await this.request('/chat/process', {
+                method: 'POST',
+                body: JSON.stringify({ mensaje: message })
+            });
+
+            return {
+                success: true,
+                profile: response.perfil,
+                recommendations: response.recomendaciones || [],
+                response: response.respuesta,
+                llmUsed: response.llm_usado
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Guarda un perfil de cliente
      */
     async saveProfile(profile) {

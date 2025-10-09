@@ -15,11 +15,11 @@ from dataclasses import dataclass
 @dataclass
 class LLMConfig:
     """Configuración para el servicio LLM."""
-    provider: str = "openrouter"  # openrouter, openai, zai
+    provider: str = "zai"  # zai, openrouter, openai
     api_key: Optional[str] = None
-    model: str = "openai/gpt-3.5-turbo"
+    model: str = "glm-4.5-air"
     base_url: Optional[str] = None
-    max_tokens: int = 1000
+    max_tokens: int = 2000
     temperature: float = 0.1
 
 
@@ -51,9 +51,9 @@ class LLMIntegration:
 
     def _config_from_env(self) -> LLMConfig:
         """Crea configuración desde variables de entorno."""
-        provider = os.getenv("LLM_PROVIDER", "openrouter")
-        api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-        model = os.getenv("LLM_MODEL", "openai/gpt-3.5-turbo")
+        provider = os.getenv("LLM_PROVIDER", "zai")
+        api_key = os.getenv("ZAI_API_KEY") or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
+        model = os.getenv("LLM_MODEL", "glm-4.5-air")
 
         return LLMConfig(
             provider=provider,
@@ -151,6 +151,39 @@ JSON:"""
         except Exception as e:
             raise ValueError(f"Error procesando respuesta: {e}")
 
+    def _call_zai(self, prompt: str) -> str:
+        """Realiza llamada a la API de Z.AI."""
+        url = "https://api.z.ai/api/paas/v4/chat/completions"
+
+        payload = {
+            "model": self.config.model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "max_tokens": self.config.max_tokens,
+            "temperature": self.config.temperature
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.config.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=60)
+            response.raise_for_status()
+
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(f"Error de conexión con Z.AI: {e}")
+        except KeyError as e:
+            raise ValueError(f"Respuesta inesperada de Z.AI: {e}")
+
     def _call_openrouter(self, prompt: str) -> str:
         """Realiza llamada a la API de OpenRouter."""
         url = "https://openrouter.ai/api/v1/chat/completions"
@@ -229,7 +262,9 @@ JSON:"""
 
         try:
             # Llamar al LLM según el proveedor
-            if self.config.provider == "openrouter":
+            if self.config.provider == "zai":
+                response_text = self._call_zai(prompt)
+            elif self.config.provider == "openrouter":
                 response_text = self._call_openrouter(prompt)
             elif self.config.provider == "openai":
                 response_text = self._call_openai(prompt)
@@ -342,7 +377,7 @@ JSON:"""
             print("Error: No se encontró API key para el LLM")
             return False
 
-        if self.config.provider not in ["openrouter", "openai"]:
+        if self.config.provider not in ["zai", "openrouter", "openai"]:
             print(f"Error: Proveedor no soportado: {self.config.provider}")
             return False
 

@@ -525,6 +525,181 @@ Basado en análisis de 76,853 propiedades en Santa Cruz de la Sierra
 
     return briefing
 
+@app.route('/api/chat/process', methods=['POST'])
+def process_chat_message():
+    """Procesa mensaje de chat con z.ai y genera recomendaciones si es posible"""
+    try:
+        data = request.get_json()
+        mensaje = data.get('mensaje', '')
+
+        if not mensaje:
+            return jsonify({
+                'success': False,
+                'error': 'Mensaje vacío'
+            }), 400
+
+        # Intentar usar LLM si está configurado
+        perfil_extraido = None
+        respuesta_llm = None
+        recomendaciones = []
+
+        try:
+            from llm_integration import LLMIntegration, LLMConfig
+
+            # Inicializar LLM con z.ai
+            llm_config = LLMConfig(
+                provider=os.getenv('LLM_PROVIDER', 'zai'),
+                api_key=os.getenv('ZAI_API_KEY'),
+                model=os.getenv('LLM_MODEL', 'glm-4.5-air')
+            )
+
+            llm = LLMIntegration(llm_config)
+
+            # Validar configuración
+            if llm.validar_configuracion():
+                # Parsear perfil desde el mensaje
+                perfil_extraido = llm.parsear_perfil_desde_texto(mensaje)
+
+                # Generar recomendaciones si se extrajo un perfil válido
+                if perfil_extraido and perfil_extraido.get('presupuesto', {}).get('max'):
+                    # Adaptar perfil para el motor de recomendaciones
+                    perfil_motor = {
+                        'id': 'chat_profile',
+                        'presupuesto': perfil_extraido.get('presupuesto', {}),
+                        'composicion_familiar': perfil_extraido.get('composicion_familiar', {}),
+                        'preferencias': perfil_extraido.get('preferencias', {}),
+                        'necesidades': perfil_extraido.get('necesidades', [])
+                    }
+
+                    # Generar recomendaciones con motor mejorado
+                    resultados = motor_mejorado.generar_recomendaciones(
+                        perfil_motor,
+                        limite=6,
+                        umbral_minimo=0.3
+                    )
+
+                    # Formatear recomendaciones
+                    for rec in resultados:
+                        prop = rec['propiedad']
+                        caract = prop.get('caracteristicas_principales', {})
+                        if not caract:
+                            caract = {
+                                'precio': prop.get('precio', 0),
+                                'superficie_m2': prop.get('superficie', 0),
+                                'habitaciones': prop.get('habitaciones', 0),
+                                'banos_completos': prop.get('banos', 0)
+                            }
+
+                        ubicacion = prop.get('ubicacion', {})
+                        if not ubicacion:
+                            ubicacion = {
+                                'zona': prop.get('zona', ''),
+                                'direccion': prop.get('direccion', '')
+                            }
+
+                        recomendaciones.append({
+                            'id': prop.get('id', ''),
+                            'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
+                            'precio': caract.get('precio', 0),
+                            'superficie_m2': caract.get('superficie_m2', 0),
+                            'habitaciones': caract.get('habitaciones', 0),
+                            'banos': caract.get('banos_completos', 0),
+                            'zona': ubicacion.get('zona', ''),
+                            'compatibilidad': round(rec['compatibilidad'], 1),
+                            'justificacion': rec.get('justificacion', ''),
+                            'servicios_cercanos': rec.get('servicios_cercanos', '')
+                        })
+
+                    respuesta_llm = f"He analizado tu solicitud y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
+                else:
+                    respuesta_llm = "He entendido tu mensaje. ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+
+            else:
+                # LLM no configurado, usar análisis básico
+                perfil_extraido = extraer_perfil_basico(mensaje)
+                respuesta_llm = "Procesé tu mensaje con análisis básico. Para mejores resultados, configura la integración con Z.AI."
+
+        except ImportError:
+            # Módulo LLM no disponible
+            perfil_extraido = extraer_perfil_basico(mensaje)
+            respuesta_llm = "Sistema básico activo. Configura Z.AI para análisis avanzado."
+
+        except Exception as e:
+            # Error en procesamiento LLM, usar fallback
+            print(f"Error procesando con LLM: {e}")
+            perfil_extraido = extraer_perfil_basico(mensaje)
+            respuesta_llm = "Hubo un problema con el análisis avanzado. Procesé tu mensaje con el sistema básico."
+
+        return jsonify({
+            'success': True,
+            'perfil': perfil_extraido,
+            'recomendaciones': recomendaciones,
+            'respuesta': respuesta_llm,
+            'llm_usado': bool(os.getenv('ZAI_API_KEY'))
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+def extraer_perfil_basico(mensaje):
+    """Extrae información básica del mensaje usando reglas simples"""
+    import re
+
+    mensaje_lower = mensaje.lower()
+
+    # Extraer presupuesto
+    presupuesto_min = None
+    presupuesto_max = None
+
+    # Buscar números en el mensaje
+    numeros = re.findall(r'\b(\d+(?:,\d+)?)\s*(?:k|mil|usd|dolares)?', mensaje_lower)
+    if numeros:
+        valores = [float(n.replace(',', '')) for n in numeros]
+        # Convertir a valores completos si son pequeños
+        valores = [v * 1000 if v < 1000 else v for v in valores]
+
+        if len(valores) >= 1:
+            presupuesto_min = min(valores) * 0.8
+            presupuesto_max = max(valores) * 1.2
+
+    # Extraer zona
+    zonas = ['equipetrol', 'santa mónica', 'urbari', 'los olivos', 'zona norte', 'zona sur', 'centro']
+    zona_preferida = None
+    for zona in zonas:
+        if zona in mensaje_lower:
+            zona_preferida = zona.title()
+            break
+
+    # Extraer tipo de propiedad
+    tipo_propiedad = None
+    if 'departamento' in mensaje_lower or 'apartamento' in mensaje_lower:
+        tipo_propiedad = 'departamento'
+    elif 'casa' in mensaje_lower:
+        tipo_propiedad = 'casa'
+    elif 'penthouse' in mensaje_lower:
+        tipo_propiedad = 'penthouse'
+
+    return {
+        'composicion_familiar': {
+            'adultos': 2,
+            'ninos': [],
+            'adultos_mayores': 0
+        },
+        'presupuesto': {
+            'min': presupuesto_min,
+            'max': presupuesto_max,
+            'tipo': 'compra'
+        },
+        'preferencias': {
+            'ubicacion': zona_preferida,
+            'tipo_propiedad': tipo_propiedad
+        },
+        'necesidades': []
+    }
+
 if __name__ == '__main__':
     # Configuración para desarrollo vs producción
     port = int(os.getenv('PORT', 5001))

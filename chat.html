@@ -734,43 +734,41 @@
                 const result = await processMessageWithLLM(message);
 
                 if (result.success) {
-                    // Extraer perfil del mensaje
+                    // Extraer perfil y recomendaciones del mensaje
                     const extractedProfile = result.data.profile;
+                    const recommendations = result.data.recommendations || [];
+                    const llmUsed = result.data.llmUsed;
 
+                    // Mostrar respuesta del asistente
+                    const responseMessage = {
+                        type: 'assistant',
+                        content: result.data.response || 'He procesado tu mensaje.',
+                        timestamp: new Date().toISOString()
+                    };
+                    addMessage(responseMessage);
+
+                    // Guardar perfil actual si se extrajo
                     if (extractedProfile) {
-                        // Mostrar perfil extraído
-                        const profileMessage = {
-                            type: 'assistant',
-                            content: `He entendido que buscas:\n\n${formatProfileSummary(extractedProfile)}`,
-                            timestamp: new Date().toISOString(),
-                            profile: extractedProfile
-                        };
-
-                        addMessage(profileMessage);
-
-                        // Guardar perfil actual
                         currentProfile = extractedProfile;
+                    }
 
-                        // Preguntar si desea ver recomendaciones
+                    // Si hay recomendaciones, mostrarlas directamente
+                    if (recommendations.length > 0) {
+                        chatRecommendations = recommendations;
+                        setTimeout(() => {
+                            addRecommendationsMessage(recommendations, !llmUsed);
+                        }, 500);
+                    } else if (extractedProfile && extractedProfile.presupuesto && extractedProfile.presupuesto.max) {
+                        // Si hay perfil pero no hay recomendaciones, preguntar si desea ver recomendaciones
                         setTimeout(() => {
                             const confirmMessage = {
                                 type: 'assistant',
-                                content: '¿Te gustaría que te muestre las propiedades que coinciden con tu perfil?',
+                                content: '¿Te gustaría que busque propiedades que coincidan con tu perfil?',
                                 timestamp: new Date().toISOString(),
                                 showRecommendationButton: true
                             };
                             addMessage(confirmMessage);
-                        }, 1000);
-
-                    } else {
-                        // Mensaje de respuesta normal
-                        const responseMessage = {
-                            type: 'assistant',
-                            content: result.data.response || 'Entendido. ¿Podrías darme más detalles sobre lo que buscas?',
-                            timestamp: new Date().toISOString()
-                        };
-
-                        addMessage(responseMessage);
+                        }, 500);
                     }
                 } else {
                     throw new Error(result.error);
@@ -795,29 +793,49 @@
             }
         }
 
-        // Procesar mensaje con LLM (simulado)
+        // Procesar mensaje con LLM
         async function processMessageWithLLM(message) {
-            // Simulación de procesamiento LLM
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            try {
+                // Intentar procesar con la API real
+                const result = await window.citrinoAPI.processChatWithLLM(message);
 
-            // Análisis simple del mensaje para extraer información
-            const profile = extractProfileFromMessage(message);
+                if (result.success) {
+                    return {
+                        success: true,
+                        data: {
+                            profile: result.profile,
+                            response: result.response,
+                            recommendations: result.recommendations,
+                            llmUsed: result.llmUsed
+                        }
+                    };
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.warn('Error con API, usando análisis local:', error);
 
-            if (profile) {
-                return {
-                    success: true,
-                    data: {
-                        profile: profile,
-                        response: 'He analizado tu solicitud y encontrado un perfil. A continuación te muestro las propiedades recomendadas.'
-                    }
-                };
-            } else {
-                return {
-                    success: true,
-                    data: {
-                        response: generateContextualResponse(message)
-                    }
-                };
+                // Fallback: Análisis simple del mensaje para extraer información
+                const profile = extractProfileFromMessage(message);
+
+                if (profile) {
+                    return {
+                        success: true,
+                        data: {
+                            profile: profile,
+                            response: 'He analizado tu solicitud con el sistema básico. Para mejores resultados, configura Z.AI en el backend.',
+                            llmUsed: false
+                        }
+                    };
+                } else {
+                    return {
+                        success: true,
+                        data: {
+                            response: generateContextualResponse(message),
+                            llmUsed: false
+                        }
+                    };
+                }
             }
         }
 
