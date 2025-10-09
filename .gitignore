@@ -16,6 +16,7 @@ data/**/*.csv
 __pycache__/
 *.py[cod]
 *$py.class
+.cache_llm_extractions.json
 
 # Ignorar archivos de entorno virtual
 venv/

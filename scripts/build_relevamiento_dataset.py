@@ -20,14 +20,22 @@ from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 import logging
 
-# Agregar path para importar extractor de zonas
+# Agregar path para importar extractor de zonas y parser LLM
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 try:
     from zonas_extractor import ZonasExtractor
     ZONAS_EXTRACTOR_DISPONIBLE = True
 except ImportError:
     ZONAS_EXTRACTOR_DISPONIBLE = False
     logging.warning("ZonasExtractor no disponible, zonas no serán extraídas")
+
+try:
+    from description_parser import DescriptionParser
+    DESCRIPTION_PARSER_DISPONIBLE = True
+except ImportError:
+    DESCRIPTION_PARSER_DISPONIBLE = False
+    logging.warning("DescriptionParser no disponible, extracción LLM desactivada")
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,14 +44,24 @@ logger = logging.getLogger(__name__)
 class ProcesadorDatosRelevamiento:
     """Clase para procesar datos de relevamiento de mercado."""
 
-    def __init__(self, raw_data_dir: str = "data/raw", output_dir: str = "data"):
+    def __init__(self, raw_data_dir: str = "data/raw", output_dir: str = "data", enable_llm: bool = True):
         self.raw_data_dir = raw_data_dir
         self.output_dir = output_dir
         self.properties_data = []
         self.processed_files = []
+        self.enable_llm = enable_llm
         
         # Inicializar extractor de zonas si está disponible
         self.zonas_extractor = ZonasExtractor() if ZONAS_EXTRACTOR_DISPONIBLE else None
+        
+        # Inicializar parser LLM si está disponible y habilitado
+        self.description_parser = None
+        if DESCRIPTION_PARSER_DISPONIBLE and enable_llm:
+            try:
+                self.description_parser = DescriptionParser()
+                logger.info("Parser LLM inicializado correctamente")
+            except Exception as e:
+                logger.warning(f"No se pudo inicializar parser LLM: {e}")
         
         # Patrón para extraer fecha y proveedor del nombre de archivo
         # Formato: YYYY.MM.DD NN.xlsx
@@ -322,6 +340,10 @@ class ProcesadorDatosRelevamiento:
                 if referencias['anillos'] or referencias['radiales']:
                     propiedad['referencias_ubicacion'] = referencias
 
+            # Enriquecer con LLM si es proveedor 02 y hay descripción
+            if codigo_proveedor == '02' and descripcion and self.description_parser:
+                propiedad = self.enriquecer_con_llm(propiedad, descripcion, titulo)
+
             # Validar datos mínimos requeridos
             if not self.validar_propiedad(propiedad):
                 return None
@@ -331,6 +353,72 @@ class ProcesadorDatosRelevamiento:
         except Exception as e:
             logger.warning(f"Error procesando propiedad {row.name}: {e}")
             return None
+
+    def enriquecer_con_llm(self, propiedad: Dict[str, Any], descripcion: str, titulo: str = "") -> Dict[str, Any]:
+        """
+        Enriquece los datos de una propiedad usando LLM para extraer de la descripción.
+
+        Args:
+            propiedad: Diccionario con los datos básicos de la propiedad
+            descripcion: Texto de la descripción
+            titulo: Título de la propiedad
+
+        Returns:
+            Diccionario de propiedad enriquecido
+        """
+        # Solo enriquecer si faltan datos críticos
+        necesita_enriquecimiento = (
+            not propiedad.get('precio') or
+            not propiedad.get('habitaciones') or
+            not propiedad.get('banos') or
+            not propiedad.get('zona') or
+            not propiedad.get('tipo_propiedad')
+        )
+
+        if not necesita_enriquecimiento:
+            return propiedad
+
+        try:
+            logger.info(f"Enriqueciendo propiedad {propiedad['id']} con LLM...")
+            extracted_data = self.description_parser.extract_from_description(descripcion, titulo)
+
+            # Actualizar solo los campos que están vacíos
+            if not propiedad.get('precio') and extracted_data.get('precio'):
+                propiedad['precio'] = extracted_data['precio']
+                propiedad['moneda'] = extracted_data.get('moneda', 'USD')
+                propiedad['precio_origen'] = 'llm_extraction'
+
+            if not propiedad.get('habitaciones') and extracted_data.get('habitaciones'):
+                propiedad['habitaciones'] = extracted_data['habitaciones']
+
+            if not propiedad.get('banos') and extracted_data.get('banos'):
+                propiedad['banos'] = extracted_data['banos']
+
+            if not propiedad.get('superficie') and extracted_data.get('superficie'):
+                propiedad['superficie'] = extracted_data['superficie']
+
+            if not propiedad.get('superficie_terreno') and extracted_data.get('superficie_terreno'):
+                propiedad['superficie_terreno'] = extracted_data['superficie_terreno']
+
+            if not propiedad.get('superficie_construida') and extracted_data.get('superficie_construida'):
+                propiedad['superficie_construida'] = extracted_data['superficie_construida']
+
+            if not propiedad.get('zona') and extracted_data.get('zona'):
+                propiedad['zona'] = extracted_data['zona']
+                propiedad['zona_origen'] = 'llm_extraction'
+
+            if not propiedad.get('tipo_propiedad') and extracted_data.get('tipo_propiedad'):
+                propiedad['tipo_propiedad'] = extracted_data['tipo_propiedad']
+
+            if extracted_data.get('caracteristicas'):
+                propiedad['caracteristicas_llm'] = extracted_data['caracteristicas']
+
+            logger.info(f"Propiedad {propiedad['id']} enriquecida exitosamente")
+
+        except Exception as e:
+            logger.warning(f"Error enriqueciendo con LLM: {e}")
+
+        return propiedad
 
     def limpiar_texto(self, texto: str) -> str:
         """Limpia y normaliza texto."""
@@ -491,6 +579,12 @@ class ProcesadorDatosRelevamiento:
     def guardar_datos(self, propiedades: List[Dict[str, Any]]) -> str:
         """Guarda los datos procesados en formato JSON."""
         output_file = os.path.join(self.output_dir, 'base_datos_relevamiento.json')
+
+        # Guardar caché de LLM si existe
+        if self.description_parser:
+            self.description_parser.save_cache()
+            stats = self.description_parser.get_stats()
+            logger.info(f"Estadísticas LLM: {stats}")
 
         # Crear metadata
         metadata = {
