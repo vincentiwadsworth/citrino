@@ -19,7 +19,8 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - **Geolocalización**: Algoritmo Haversine para cálculos precisos
 - **LLM Primario**: Z.AI GLM-4.6 para análisis y extracción de datos
 - **LLM Fallback**: OpenRouter con Qwen2.5 72B (gratuito, 2025)
-- **Datos**: JSON con propiedades procesadas de scraping + extracción inteligente
+- **Extracción Híbrida**: Sistema Regex + LLM (80% sin LLM, 90% reducción tokens)
+- **Datos**: JSON con 1,583 propiedades + 4,777 servicios urbanos
 
 ## Technology Stack
 
@@ -74,19 +75,27 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 ```
 
 #### Directorios Clave
-- **`api/`** - Servidor REST y endpoints para inversores
-- **`src/`** - Motores de recomendación, lógica de inversión y integración LLM
+- **`api/`** - Servidor REST y endpoints
+- **`src/`** - Motores de recomendación, lógica de negocio e integración LLM
   - `llm_integration.py` - Sistema LLM con fallback automático a OpenRouter
-  - `description_parser.py` - Extracción de datos estructurados desde texto libre
+  - `description_parser.py` - Sistema híbrido Regex + LLM para extracción
+  - `regex_extractor.py` - Extractor basado en patrones (nuevo, 2025)
   - `recommendation_engine_mejorado.py` - Motor principal con geolocalización Haversine
-- **`scripts/`** - Procesamiento de datos y análisis de mercado
-  - `build_relevamiento_dataset.py` - ETL con extracción inteligente LLM
-  - `analizar_por_proveedor.py` - Diagnóstico de calidad de datos por proveedor
-  - `test_proveedor02_sample.py` - Testing de extracción LLM con muestras
-- **`tests/`** - Suite de pruebas para el sistema de inversión
-- **`data/`** - Todos los archivos de datos de inversión (1,583 propiedades)
-- **`assets/`** - CSS y JavaScript del frontend moderno
-- **`docs/historico/`** - Documentación archivada de fases anteriores del proyecto
+- **`scripts/`** - ETL, procesamiento y análisis de datos
+  - `build_relevamiento_dataset.py` - ETL con sistema híbrido de extracción
+  - `test_regex_vs_llm.py` - Medición de ahorro de tokens (nuevo)
+  - `analizar_descripciones_p02.py` - Análisis de patrones Proveedor 02
+- **`tests/`** - Suite de pruebas completa (movidos desde root)
+- **`data/`** - Base de datos de propiedades (1,583) y servicios (4,777)
+- **`assets/`** - CSS y JavaScript del frontend
+- **`docs/`** - Documentación técnica organizada
+  - `SISTEMA_HIBRIDO_EXTRACCION.md` - Detalles del sistema Regex+LLM
+  - `ARQUITECTURA_TECNICA.md` - Arquitectura y stack completo
+  - `GUIA_DESARROLLO.md` - Setup, comandos, testing
+  - `API_REFERENCE.md` - Referencia completa de endpoints
+  - `ROADMAP.md` - Plan de evolución 2025
+  - `CALIDAD_DATOS.md` - Métricas y análisis de calidad
+  - `historico/` - Documentación archivada de fases anteriores
 
 ## Comandos de Desarrollo
 
