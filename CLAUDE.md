@@ -4,7 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Citrino is an advanced real estate recommendation system for Santa Cruz de la Sierra, Bolivia, that uses AI, precise geolocation, and municipal data to provide intelligent property recommendations. The system processes 76,853 properties with exact coordinates and 4,777 urban services to achieve 85-96% recommendation accuracy.
+Citrino es una plataforma especializada en análisis y recomendación de propiedades de inversión para inversores capitalistas en Santa Cruz de la Sierra, Bolivia. El sistema utiliza IA, geolocalización precisa y datos de mercado para identificar oportunidades inmobiliarias con alto potencial de retorno.
+
+### Enfoque Principal
+- **Objetivo**: Exclusivamente para inversores capitalistas (no para familias o compra para vivienda personal)
+- **Datos procesados**: 1,583 propiedades de inversion con datos de scraping actualizados
+- **Mercado objetivo**: Inversores, fondos de inversión, desarrolladores inmobiliarios
+- **Métricas**: Potencial de retorno, plusvalía, análisis de mercado, rentabilidad
+
+### Tecnología Principal
+- **Backend**: Python 3.x con Flask 2.3.3 para REST API
+- **Frontend**: HTML5 + Bootstrap 5 + JavaScript moderno
+- **Procesamiento**: Pandas + NumPy para análisis de datos de mercado
+- **Geolocalización**: Algoritmo Haversine para cálculos precisos
+- **Datos**: JSON con propiedades procesadas de scraping
 
 ## Technology Stack
 
@@ -21,66 +34,97 @@ Citrino is an advanced real estate recommendation system for Santa Cruz de la Si
 - Responsive design with professional UI
 
 ### Data Storage
-- **JSON format** (current implementation)
-- **PostgreSQL** planned for future migration
-- **128MB main database** (4.6M lines)
+- **JSON format** (implementación actual con datos de scraping)
+- **PostgreSQL** planeado para futura migración
+- **1.58MB** datos procesados de propiedades de inversión
 
-## Development Commands
+### Arquitectura del Sistema
 
-### Quick Start (Recommended for Demos)
+#### Componentes Principales
+
+1. **API Server** (`api/server.py`)
+   - Flask REST API con CORS para inversores
+   - Endpoints especializados en análisis de inversión
+   - Integración con datos de scraping actualizados
+   - Sistema de caché para análisis de mercado
+
+2. **Motores de Recomendación**
+   - **Motor de Inversión** (`src/recommendation_engine.py`): Análisis de ROI y plusvalía
+   - **Motor Mejorado** (`src/recommendation_engine_mejorado`): Georreferenciación para análisis de zona
+   - **Sistema de Ponderación**: Potencial retorno (40%), Ubicación estratégica (25%), Datos de mercado (20%), Tendencias (15%)
+
+3. **Sistema Geoespacial**
+   - **Algoritmo Haversine**: Cálculo de distancias precisas
+   - **Análisis de Zonas**: Identificación de zonas con alto potencial
+   - **Optimización de Rendimiento**: Indexado espacial para propiedades de inversión
+
+4. **Frontend HTML Moderno** (`index.html`, `chat.html`, `perfil.html`, `results.html`)
+   - Interfaz profesional para inversores capitalistas
+   - Sistema de perfiles de inversión especializados
+   - Análisis visual de oportunidades
+
+#### Arquitectura de Datos
+```
+/data/
+├── base_datos_relevamiento.json    # Base de datos de scraping (1,583 propiedades)
+├── data/processed/                 # Datos procesados y validados
+└── perfiles_inversion/               # Plantillas de perfiles de inversores
+```
+
+#### Directorios Clave
+- **`api/`** - Servidor REST y endpoints para inversores
+- **`src/`** - Motores de recomendación y lógica de inversión
+- **`scripts/`** - Procesamiento de datos y análisis de mercado
+- **`tests/` - Suite de pruebas para el sistema de inversión
+- **`data/`** - Todos los archivos de datos de inversión
+- **`assets/`** - CSS y JavaScript del frontend moderno
+
+## Comandos de Desarrollo
+
+### Inicio Rápido (Recomendado)
 ```bash
-# Verify system status
+# Verificar estado del sistema
 python verificar_servicios.py
 
-# Start everything automatically
-./iniciar_demo.bat
+# Iniciar sistema completo (API + Frontend)
+# Nota: Los scripts individuales están abajo si necesitas control manual
 
-# Access demo at: http://localhost:8501
+# Acceso: http://localhost:8080/ (UI HTML para inversores)
 ```
 
-### Manual Development Setup
+### Desarrollo Manual
 ```bash
-# Install dependencies
-pip install -r requirements_api.txt
+# Iniciar API para inversores (port 5001)
+python -c "import sys; sys.path.append('api'); from server import app; app.run(debug=False, host='0.0.0.0', port=5001)"
 
-# Start API server (port 5000)
-python api/server.py
+# Iniciar frontend HTML (port 8080)
+python -m http.server 8080
 
-# Start Streamlit demo (port 8501)
-streamlit run demo_stable.py
-
-# Run tests
-python -m pytest tests/
-
-# Test API endpoints
-python tests/test_api.py
+# Acceso: http://localhost:8080/ (HTML moderno para inversores)
 ```
 
-### Data Processing Commands
+### Procesamiento de Datos
 ```bash
-# Process property data
-python scripts/procesar_datos_citrino.py
+# Procesar datos de scraping actualizados
+python scripts/procesar_datos_relevamiento.py
 
-# Validate datasets
+# Validar calidad de datos procesados
 python scripts/validar_dataset_mejorado.py
 
-# Evaluate system performance
+# Evaluar rendimiento del sistema de inversión
 python scripts/evaluacion_completa_sistema.py
-
-# Benchmark recommendation engine
-python scripts/benchmar_rendimiento.py
 ```
 
-### CLI Operations
+### CLI para Inversores
 ```bash
-# Access CLI help
+# Acceder a ayuda CLI
 python src/cli.py --help
 
-# Query properties using CLI
-python src/cli.py query --zona "Equipetrol" --precio-max 300000
+# Consultar propiedades de inversión
+python src/cli.py query --zona "Equipetrol" --tipo-inversion "desarrollo" --presupuesto-max 500000
 
-# Process natural language queries
-python src/cli.py natural-query "busco casa familiar en santa cruz"
+# Análisis de lenguaje natural para inversores
+python src/cli.py natural-query "busco propiedad con potencial de plusvalía en zona norte"
 ```
 
 ## Architecture Overview
