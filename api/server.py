@@ -37,62 +37,79 @@ sistema_consulta = SistemaConsultaCitrino()
 motor_recomendacion = RecommendationEngine()
 motor_mejorado = RecommendationEngineMejorado()
 
-# Cargar base de datos de relevamiento al iniciar
-@app.before_request
-def cargar_datos():
-    if not hasattr(app, 'datos_cargados'):
-        print("Cargando base de datos de relevamiento...")
+# Variable global para estado de carga
+DATOS_CARGADOS = False
 
-        # Intentar cargar base de datos de relevamiento
-        try:
-            with open("data/base_datos_relevamiento.json", 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                propiedades_relevamiento = data.get('propiedades', [])
-                print(f"Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
+def inicializar_datos():
+    """Carga datos una sola vez al iniciar el servidor"""
+    global DATOS_CARGADOS
+    
+    print("=" * 60)
+    print("INICIANDO CITRINO API")
+    print("=" * 60)
+    
+    # Intentar cargar base de datos de relevamiento
+    try:
+        # Usar ruta relativa al directorio del script
+        ruta = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento.json')
+        print(f"Cargando datos desde: {ruta}")
+        
+        with open(ruta, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            propiedades_relevamiento = data.get('propiedades', [])
+            print(f"✅ Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
 
-                # Cargar en ambos motores
-                motor_recomendacion.cargar_propiedades(propiedades_relevamiento)
-                motor_mejorado.cargar_propiedades(propiedades_relevamiento)
+            # Cargar en ambos motores
+            motor_recomendacion.cargar_propiedades(propiedades_relevamiento)
+            motor_mejorado.cargar_propiedades(propiedades_relevamiento)
 
-                # También cargar en el sistema de consulta para compatibilidad
-                sistema_consulta.propiedades = propiedades_relevamiento
-                sistema_consulta.estadisticas_globales['total_propiedades'] = len(propiedades_relevamiento)
+            # También cargar en el sistema de consulta para compatibilidad
+            sistema_consulta.propiedades = propiedades_relevamiento
+            sistema_consulta.estadisticas_globales['total_propiedades'] = len(propiedades_relevamiento)
+            
+            DATOS_CARGADOS = True
+            print("=" * 60)
+            print("✅ CITRINO API LISTA")
+            print("=" * 60)
+            return True
+            
+    except FileNotFoundError as e:
+        print(f"❌ Error: No se encontró data/base_datos_relevamiento.json")
+        print(f"   Ruta buscada: {e}")
+        print("   Ejecute: python scripts/build_relevamiento_dataset.py")
+        return False
+        
+    except Exception as e:
+        print(f"❌ Error cargando base de datos de relevamiento: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
-        except FileNotFoundError:
-            print("Error: No se encontró data/base_datos_relevamiento.json")
-            print("Ejecute: python scripts/build_relevamiento_dataset.py")
-            # Cargar base de datos antigua como fallback
-            try:
-                sistema_consulta.cargar_base_datos("data/bd_final/propiedades_limpias.json")
-                motor_recomendacion.cargar_propiedades(sistema_consulta.propiedades)
-                motor_mejorado.cargar_propiedades(sistema_consulta.propiedades)
-                print("Cargada base de datos antigua como fallback")
-            except Exception as e:
-                print(f"Error cargando fallback: {e}")
-                return
-
-        except Exception as e:
-            print(f"Error cargando base de datos de relevamiento: {e}")
-            return
-
-        # Cargar guía urbana municipal para enriquecimiento
-        print("Cargando guía urbana municipal...")
-        try:
-            motor_mejorado.cargar_guias_urbanas("data/guia_urbana_municipal_completa.json")
-            print("Guía urbana cargada exitosamente")
-        except Exception as e:
-            print(f"Advertencia: No se pudo cargar guía urbana: {e}")
-
-        app.datos_cargados = True
-        print("Base de datos cargada exitosamente")
+# Cargar datos al iniciar (una sola vez)
+print("Iniciando carga de datos...")
+inicializar_datos()
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Verifica que el API está funcionando"""
+    status = 'ok' if DATOS_CARGADOS else 'degraded'
+    total_props = len(sistema_consulta.propiedades) if DATOS_CARGADOS else 0
+    
     return jsonify({
-        'status': 'ok',
-        'message': 'API Citrino funcionando',
-        'total_propiedades': len(sistema_consulta.propiedades)
+        'status': status,
+        'message': 'API Citrino funcionando' if DATOS_CARGADOS else 'API activa pero sin datos cargados',
+        'total_propiedades': total_props,
+        'datos_cargados': DATOS_CARGADOS,
+        'version': '1.0.0',
+        'endpoints': [
+            '/api/health',
+            '/api/buscar',
+            '/api/recomendar',
+            '/api/recomendar-mejorado',
+            '/api/estadisticas',
+            '/api/zonas',
+            '/api/chat/process'
+        ]
     })
 
 @app.route('/api/buscar', methods=['POST'])
