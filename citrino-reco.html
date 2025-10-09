@@ -878,7 +878,7 @@
                     </div>
                     <div class="form-floating">
                         <textarea class="form-control" id="informacionLLM" placeholder="Instrucciones adicionales para el LLM" style="height: 120px"></textarea>
-                        <label for="informacionLLM">Información adicional para guiar a Citrino Chat / z.ai</label>
+                        <label for="informacionLLM">Información adicional para sistema LLM (análisis conversacional)</label>
                     </div>
                     <small class="text-muted">Describe señales sensibles a resguardar, hipótesis que quieras validar o restricciones que el LLM debe considerar.</small>
                 </div>
@@ -946,7 +946,7 @@
                         <i class="bi bi-house-heart-fill me-2"></i>Citrino · Recomendaciones + conversaciones con datos
                     </p>
                     <small class="text-white-50">
-                        Briefing ejecutivo generado con Z.AI · Análisis personalizado disponible
+                        Sistema Multi-LLM con fallback automático · Análisis conversacional disponible
                     </small>
                 </div>
             </div>
@@ -1401,7 +1401,7 @@
                             <span class="visually-hidden">Cargando...</span>
                         </div>
                         <h5 class="mt-3">Analizando oportunidades...</h5>
-                        <p class="text-muted">Generando briefing ejecutivo y evaluando propiedades con Z.AI...</p>
+                        <p class="text-muted">Generando briefing ejecutivo con sistema Multi-LLM (Z.AI/OpenRouter)...</p>
                     </div>
                 </div>
             `;
@@ -1409,7 +1409,7 @@
             if (briefingSection) briefingSection.style.display = 'none';
 
             try {
-                // SIEMPRE intentar usar el endpoint con Z.AI
+                // Intentar usar endpoint con sistema Multi-LLM (fallback automático)
                 // El briefing es SIEMPRE requerido (valor principal de Citrino Reco)
                 const result = await window.citrinoAPI.getRecommendationsWithLLM(
                     profileData, 
@@ -1424,13 +1424,13 @@
                         renderBriefing(result.briefing);
                         currentBriefing = result.briefing;
                     } else {
-                        console.warn('Briefing no generado - verificar configuración Z.AI');
+                        console.warn('Briefing no generado - verificar configuración LLM (Z.AI/OpenRouter)');
                     }
                     
                     // Mensaje según si hubo enriquecimiento personalizado
                     const hasPersonalizedAnalysis = result.recommendations.some(r => r.analisis_personalizado);
                     const message = hasPersonalizedAnalysis
-                        ? 'Recomendaciones con análisis personalizado Z.AI'
+                        ? 'Recomendaciones con análisis Multi-LLM'
                         : 'Recomendaciones con briefing ejecutivo generadas';
                     showToast(message, 'success');
                 } else {
@@ -1438,9 +1438,9 @@
                     showToast('Mostrando recomendaciones de demostración.', 'warning');
                 }
             } catch (error) {
-                console.error('Error con endpoint Z.AI:', error);
+                console.error('Error con endpoint Multi-LLM:', error);
                 
-                // Fallback SOLO si Z.AI no está disponible
+                // Fallback a recomendaciones básicas si Multi-LLM no está disponible
                 try {
                     const fallbackResult = await window.citrinoAPI.getEnhancedRecommendations(
                         profileData, 
@@ -1449,7 +1449,7 @@
                     
                     if (fallbackResult.success && fallbackResult.recommendations.length > 0) {
                         renderRecommendations(fallbackResult.recommendations);
-                        showToast('Recomendaciones generadas sin IA (Z.AI no disponible)', 'info');
+                        showToast('Recomendaciones básicas (sistema LLM no disponible)', 'info');
                         
                         // Advertencia: el briefing no estará disponible
                         if (briefingSection) {
@@ -1457,7 +1457,7 @@
                                 <div class="alert alert-warning">
                                     <i class="bi bi-exclamation-triangle"></i>
                                     <strong>Briefing ejecutivo no disponible</strong><br>
-                                    Configura la API key de Z.AI para generar el briefing automático.
+                                    Configura las API keys de Z.AI o OpenRouter para briefing automático con LLM.
                                 </div>
                             `;
                             briefingSection.style.display = 'block';
@@ -1506,7 +1506,7 @@
             <div class="llm-analysis">
                 <div class="llm-badge">
                     <i class="bi bi-stars"></i>
-                    <span>Análisis con Z.AI</span>
+                    <span>Análisis Multi-LLM</span>
                 </div>
                 <p>${property.analisis_personalizado}</p>
             </div>
@@ -1520,7 +1520,7 @@
             <div class="llm-analysis">
                 <div class="llm-badge">
                     <i class="bi bi-stars"></i>
-                    <span>Análisis con Z.AI</span>
+                    <span>Análisis Multi-LLM</span>
                 </div>
                 <p>${property.analisis_personalizado}</p>
             </div>
@@ -1675,7 +1675,7 @@ ${currentBriefing}
 
 ---
 
-*Generado automáticamente por Citrino con análisis de Z.AI GLM-4.5-Air*
+*Generado automáticamente por Citrino con sistema Multi-LLM (Z.AI GLM-4.6 / OpenRouter Qwen2.5 72B)*
 *Basado en ${latestRecommendations.length} propiedades recomendadas en Santa Cruz de la Sierra*
 `;
             

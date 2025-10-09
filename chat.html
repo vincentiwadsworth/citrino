@@ -469,7 +469,7 @@
             </div>
             <h3 class="mb-3">Bienvenido a Citrino Chat</h3>
             <p class="text-muted mb-4">
-                Conversa libremente con el inventario relevado, la guía urbana y el censo inmobiliario. Pronto integraremos z.ai para potenciar aún más las respuestas.
+                Conversa libremente con el inventario relevado, la guía urbana y el censo inmobiliario con sistema Multi-LLM (Z.AI/OpenRouter) que garantiza análisis continuo.
             </p>
             <div class="quick-suggestions justify-content-center mb-4">
                 <div class="suggestion-chip" onclick="useQuickSuggestion('Resume las oportunidades de inversión en Equipetrol y qué servicios urbanos justifican su valorización')">
@@ -733,7 +733,7 @@
             // Enviar mensaje de bienvenida
             const welcomeMessage = {
                 type: 'assistant',
-                content: 'Soy Citrino Chat. Puedo revisar inmuebles relevados, la guía urbana, el censo inmobiliario y cruzar todo para generar conclusiones. Próximamente me acompañará z.ai para enriquecer aún más las respuestas.\n\nPruébame con ejemplos como: \n• "Cruza el inventario de Equipetrol con servicios cercanos y dame tres motivos para invertir"\n• "Genera preguntas para una reunión con un prospecto interesado en renta en la zona norte"\n• "Explica la relación entre plusvalía y proximidad a hospitales en Santa Cruz"\n\n¿Qué insight te gustaría explorar primero?',
+                content: 'Soy Citrino Chat con sistema Multi-LLM operativo. Puedo revisar inmuebles relevados, la guía urbana, el censo inmobiliario y cruzar todo para generar conclusiones con análisis conversacional híbrido (Z.AI GLM-4.6 / OpenRouter Qwen2.5 72B).\n\nPruébame con ejemplos como: \n• "Cruza el inventario de Equipetrol con servicios cercanos y dame tres motivos para invertir"\n• "Genera preguntas para una reunión con un prospecto interesado en renta en la zona norte"\n• "Explica la relación entre plusvalía y proximidad a hospitales en Santa Cruz"\n\n¿Qué insight te gustaría explorar primero?',
                 timestamp: new Date().toISOString()
             };
 
@@ -866,7 +866,7 @@
                         success: true,
                         data: {
                             profile: profile,
-                            response: 'He analizado tu solicitud con el sistema básico. Para mejores resultados, configura Z.AI en el backend.',
+                            response: 'He analizado tu solicitud con sistema local. El sistema Multi-LLM (Z.AI/OpenRouter) no está disponible temporalmente.',
                             llmUsed: false
                         }
                     };
