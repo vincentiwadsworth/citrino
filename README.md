@@ -1,6 +1,8 @@
 # 💰 Citrino - Plataforma de Inteligencia de Inversión Inmobiliaria
 
-**Plataforma especializada para inversores capitalistas en Santa Cruz de la Sierra, Bolivia** que utiliza inteligencia artificial, geolocalización precisa y datos de mercado para identificar oportunidades de inversión con alto potencial de ROI y plusvalía.
+**Plataforma interna de Citrino para apoyar a inversores en Santa Cruz de la Sierra, Bolivia** que utiliza análisis de datos, geolocalización precisa y los algoritmos implementados en este repositorio (Haversine, scoring ponderado, caché LRU) para identificar oportunidades con base en la información disponible.
+
+Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar el portafolio de propiedades y generar recomendaciones para sus clientes, no es una plataforma de cara al público general.
 
 ## 📊 Estado Actual del Proyecto
 
@@ -10,19 +12,18 @@
 
 | Componente | Estado | Descripción |
 |------------|--------|-------------|
-| **Frontend Web** | ✅ **COMPLETO** | Interfaz para inversores con métricas de ROI |
+| **Frontend Web** | ✅ **COMPLETO** | Interfaz interna para presentar análisis al equipo de Citrino |
 | **API Backend** | ✅ **COMPLETO** | REST API con análisis de inversión |
-| **Motor de Recomendación** | ✅ **COMPLETO** | Algoritmos especializados en plusvalía y rentabilidad |
-| **Asistente Virtual** | ✅ **COMPLETO** | Chat con procesamiento para consultas de inversión |
+| **Motor de Recomendación** | ✅ **COMPLETO** | Ponderación multifactor y distancias Haversine implementadas en `src/` |
+| **Asistente Virtual** | ✅ **COMPLETO** | Chat para recopilar criterios y consultar resultados desde la API |
 | **Datos de Mercado** | ✅ **COMPLETO** | Propiedades de relevamiento y 4,777 servicios urbanos |
 
 ### 📈 Métricas del Sistema
 
 - **🏘️ Propiedades de Relevamiento**: Actualizadas continuamente con coordenadas exactas
 - **🏢 Servicios Urbanos**: 4,777 (impactan valor y plusvalía)
-- **🎯 Precisión de Inversión**: 85-96% en identificación de oportunidades
-- **⚡ Tiempo de Respuesta**: <2 segundos para análisis de ROI
 - **📍 Cobertura Geográfica**: 100% Santa Cruz de la Sierra y áreas metropolitanas
+- **🛠️ Uso interno**: Operado por el equipo de Citrino para ofrecer recomendaciones personalizadas a sus clientes
 
 ## 🎯 Características Principales
 
@@ -34,7 +35,7 @@
 
 ### 🗺️ Geolocalización para Inversión
 - **Fórmula de Haversine** para cálculo de distancias reales
-- **Índice espacial** para búsquedas optimizadas (99.3% más rápido)
+- **Índice espacial** para búsquedas optimizadas por zona
 - **Coordenadas exactas** para propiedades de relevamiento
 - **Filtros UV/Manzana** para análisis por ubicación precisa
 - **Cálculo de proximidad** a servicios que impactan plusvalía
@@ -42,7 +43,7 @@
 ### 💬 Asistente Virtual para Inversores
 - **Procesamiento de lenguaje natural** para consultas de inversión
 - **Extracción automática de criterios** desde conversaciones
-- **Interpretación inteligente** de objetivos de ROI y plazos
+- **Registro de objetivos de ROI y plazos** a partir de la conversación
 - **Análisis contextual** de oportunidades de inversión
 
 ### 💻 Panel de Inversor
@@ -336,10 +337,10 @@ docker run -p 5000:5000 citrino-api
 
 ### Métricas del Sistema
 
-- **📈 Rendimiento**: <2 segundos para recomendaciones
-- **🎯 Precisión**: 85-96% según validación
-- **💾 Caching**: 95% hit ratio en caché LRU
-- **🌐 Disponibilidad**: 99.9% uptime objetivo
+- **📈 Rendimiento**: tiempos de respuesta de la API observados por el equipo de Citrino
+- **🎯 Calidad**: revisión manual de resultados generados por los motores de recomendación
+- **💾 Caching**: estado del caché LRU incluido en el motor mejorado
+- **🌐 Disponibilidad**: monitoreo del estado de los servicios desplegados internamente
 
 ### Logging
 
@@ -525,10 +526,10 @@ MIT License - ver archivo LICENSE para detalles.
 - **📥 Descargas**: [Código fuente](https://github.com/vincentiwadsworth/citrino/archive/refs/heads/main.zip)
 
 ### Impacto
-- **🏘️ Propiedades Analizadas**: 76,853
-- **🏢 Servicios Mapeados**: 4,777
-- **👥 Usuarios Potenciales**: 50,000+ en Santa Cruz
-- **🎯 Precisión del Sistema**: 85-96%
+- **🏘️ Propiedades Analizadas**: 76,853 (según `data/base_datos_relevamiento.json`)
+- **🏢 Servicios Mapeados**: 4,777 (según `data/guia_urbana_municipal_completa.json`)
+- **👥 Equipo Objetivo**: analistas y consultores de Citrino
+- **🎯 Aplicación**: soporte interno para recomendaciones a clientes de inversión
 
 ---
 

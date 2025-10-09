@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Citrino es una plataforma especializada en análisis y recomendación de propiedades de inversión para inversores capitalistas en Santa Cruz de la Sierra, Bolivia. El sistema utiliza IA, geolocalización precisa y datos de mercado para identificar oportunidades inmobiliarias con alto potencial de retorno.
+Citrino es una herramienta interna que el equipo de la empresa utiliza para analizar y recomendar propiedades de inversión en Santa Cruz de la Sierra, Bolivia. El sistema combina análisis de datos, geolocalización precisa y los algoritmos implementados en este repositorio para apoyar el trabajo de consultoría con los clientes de Citrino.
 
 ### Enfoque Principal
-- **Objetivo**: Exclusivamente para inversores capitalistas (no para familias o compra para vivienda personal)
-- **Datos procesados**: 1,583 propiedades de inversion con datos de scraping actualizados
-- **Mercado objetivo**: Inversores, fondos de inversión, desarrolladores inmobiliarios
-- **Métricas**: Potencial de retorno, plusvalía, análisis de mercado, rentabilidad
+- **Objetivo**: Herramienta de trabajo para el equipo de Citrino al atender a sus clientes inversores (no orientada al público general)
+- **Datos procesados**: Conjuntos JSON mantenidos por Citrino con propiedades y servicios urbanos actualizados
+- **Usuarios internos**: Analistas de datos, consultores de inversión y equipo comercial de Citrino
+- **Criterios de análisis**: Ponderaciones configurables, cobertura de servicios cercanos y cálculos basados en distancias Haversine
 
 ### Tecnología Principal
 - **Backend**: Python 3.x con Flask 2.3.3 para REST API
@@ -49,19 +49,19 @@ Citrino es una plataforma especializada en análisis y recomendación de propied
    - Sistema de caché para análisis de mercado
 
 2. **Motores de Recomendación**
-   - **Motor de Inversión** (`src/recommendation_engine.py`): Análisis de ROI y plusvalía
-   - **Motor Mejorado** (`src/recommendation_engine_mejorado`): Georreferenciación para análisis de zona
-   - **Sistema de Ponderación**: Potencial retorno (40%), Ubicación estratégica (25%), Datos de mercado (20%), Tendencias (15%)
+   - **Motor de Inversión** (`src/recommendation_engine.py`): Filtrado y puntuación de propiedades según criterios del perfil
+   - **Motor Mejorado** (`src/recommendation_engine_mejorado.py`): Georreferenciación con distancias Haversine y verificación de servicios cercanos
+   - **Sistema de Ponderación**: Pesos configurables (ubicación 35%, precio 25%, servicios 20%, características 15%, disponibilidad 5%) definidos en el código
 
 3. **Sistema Geoespacial**
    - **Algoritmo Haversine**: Cálculo de distancias precisas
-   - **Análisis de Zonas**: Identificación de zonas con alto potencial
-   - **Optimización de Rendimiento**: Indexado espacial para propiedades de inversión
+   - **Análisis de Zonas**: Evaluación de servicios y cobertura por área
+   - **Optimización de Rendimiento**: Índices espaciales para consultas eficientes
 
 4. **Frontend HTML Moderno** (`index.html`, `chat.html`, `perfil.html`, `results.html`)
-   - Interfaz profesional para inversores capitalistas
-   - Sistema de perfiles de inversión especializados
-   - Análisis visual de oportunidades
+   - Interfaz interna para presentar resultados al equipo de Citrino y sus clientes inversores
+   - Sistema de captura y revisión de perfiles de inversión
+   - Análisis visual de oportunidades a partir de los datos procesados
 
 #### Arquitectura de Datos
 ```
@@ -145,7 +145,7 @@ python src/cli.py natural-query "busco propiedad con potencial de plusvalía en 
 3. **Geospatial System**
    - **Haversine Algorithm**: Real-distance calculation between coordinates
    - **Spatial Indexing**: Efficient service proximity lookup
-   - **Performance Optimization**: 99.3% improvement with zone pre-filtering
+   - **Performance Considerations**: Pre-filtrado por zona para reducir cálculos innecesarios
 
 4. **Demo Application** (`demo_stable.py`)
    - Professional welcome screen with 6 prospect profiles
@@ -210,7 +210,7 @@ pytest tests/test_api_simple.py -v
 - LRU caching for distance calculations
 - Thread-safe cache with locks
 - Spatial indexing for service lookups
-- Zone pre-filtering for 99.3% performance improvement
+- Zone pre-filtering to avoid unnecessary operations
 
 ### Monitoring
 - Real-time performance metrics in `stats` dictionary
@@ -268,9 +268,9 @@ streamlit run demo_stable.py    # Start demo interface
 ```
 
 ### Demo Features
-- 6 predefined prospect profiles (families, investors, professionals)
-- Real-time recommendation processing
-- Professional welcome screen and UI
+- 6 perfiles de referencia preparados por el equipo de Citrino
+- Consultas directas a la API de recomendaciones
+- Pantalla de bienvenida y UI alineadas con los flujos internos
 - Emergency meeting instructions in `instrucciones_reunion.txt`
 
 ## Future Development
