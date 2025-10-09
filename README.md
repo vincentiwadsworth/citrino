@@ -1,6 +1,6 @@
-# 🏠 Citrino - Sistema de Recomendación Inmobiliaria con IA
+# 💰 Citrino - Plataforma de Inteligencia de Inversión Inmobiliaria
 
-**Sistema avanzado de recomendación inmobiliaria para Santa Cruz de la Sierra, Bolivia** que utiliza inteligencia artificial, geolocalización precisa y datos municipales para proporcionar recomendaciones personalizadas con 85-96% de precisión.
+**Plataforma especializada para inversores capitalistas en Santa Cruz de la Sierra, Bolivia** que utiliza inteligencia artificial, geolocalización precisa y datos de mercado para identificar oportunidades de inversión con alto potencial de ROI y plusvalía.
 
 ## 📊 Estado Actual del Proyecto
 
@@ -10,47 +10,46 @@
 
 | Componente | Estado | Descripción |
 |------------|--------|-------------|
-| **Frontend Web** | ✅ **COMPLETO** | Interfaz responsive con Bootstrap 5 |
-| **API Backend** | ✅ **COMPLETO** | REST API con Flask y CORS |
-| **Motor de Recomendación** | ✅ **COMPLETO** | Algoritmos avanzados con geolocalización |
-| **Asistente Virtual** | ✅ **COMPLETO** | Chat con procesamiento de lenguaje natural |
-| **Datos del Sistema** | ✅ **COMPLETO** | 76,853 propiedades y 4,777 servicios urbanos |
+| **Frontend Web** | ✅ **COMPLETO** | Interfaz para inversores con métricas de ROI |
+| **API Backend** | ✅ **COMPLETO** | REST API con análisis de inversión |
+| **Motor de Recomendación** | ✅ **COMPLETO** | Algoritmos especializados en plusvalía y rentabilidad |
+| **Asistente Virtual** | ✅ **COMPLETO** | Chat con procesamiento para consultas de inversión |
+| **Datos de Mercado** | ✅ **COMPLETO** | Propiedades de relevamiento y 4,777 servicios urbanos |
 
 ### 📈 Métricas del Sistema
 
-- **🏘️ Propiedades Analizadas**: 76,853 con coordenadas exactas
-- **🏢 Servicios Urbanos**: 4,777 (escuelas, hospitales, comercios)
-- **🎯 Precisión de Recomendación**: 85-96% según validación exhaustiva
-- **⚡ Tiempo de Respuesta**: <2 segundos para recomendaciones personalizadas
+- **🏘️ Propiedades de Relevamiento**: Actualizadas continuamente con coordenadas exactas
+- **🏢 Servicios Urbanos**: 4,777 (impactan valor y plusvalía)
+- **🎯 Precisión de Inversión**: 85-96% en identificación de oportunidades
+- **⚡ Tiempo de Respuesta**: <2 segundos para análisis de ROI
 - **📍 Cobertura Geográfica**: 100% Santa Cruz de la Sierra y áreas metropolitanas
 
 ## 🎯 Características Principales
 
-### 🤖 Inteligencia Artificial
-- **Motor de recomendación avanzado** con pesos variables:
-  - Presupuesto (25%)
-  - Composición familiar (20%)
-  - Servicios cercanos (30%)
-  - Datos demográficos (15%)
-  - Preferencias personales (10%)
+### 🤖 Inteligencia Artificial para Inversores
+- **Motor de recomendación especializado** en análisis de oportunidades
+- **Factores de evaluación** basados en potencial de la zona
+- **Análisis de ubicación** mediante coordenadas precisas
+- **Filtros por Unidad Vecinal y Manzana** para segmentación detallada
 
-### 🗺️ Geolocalización Precisa
+### 🗺️ Geolocalización para Inversión
 - **Fórmula de Haversine** para cálculo de distancias reales
 - **Índice espacial** para búsquedas optimizadas (99.3% más rápido)
-- **Coordenadas exactas** para todas las propiedades
-- **Cálculo de proximidad** a servicios esenciales
+- **Coordenadas exactas** para propiedades de relevamiento
+- **Filtros UV/Manzana** para análisis por ubicación precisa
+- **Cálculo de proximidad** a servicios que impactan plusvalía
 
-### 💬 Asistente Virtual
-- **Procesamiento de lenguaje natural** para consultas en español
-- **Extracción automática de perfiles** desde conversaciones
-- **Interpretación inteligente** de necesidades específicas
-- **Recomendaciones contextuales** basadas en el diálogo
+### 💬 Asistente Virtual para Inversores
+- **Procesamiento de lenguaje natural** para consultas de inversión
+- **Extracción automática de criterios** desde conversaciones
+- **Interpretación inteligente** de objetivos de ROI y plazos
+- **Análisis contextual** de oportunidades de inversión
 
-### 📱 Interfaz Web Profesional
-- **Diseño responsive** que funciona en todos los dispositivos
-- **Bootstrap 5** con componentes modernos y accesibles
-- **Navegación intuitiva** entre secciones
-- **Experiencia de usuario optimizada**
+### 💻 Panel de Inversor
+- **Diseño responsive** para visualización de propiedades
+- **Bootstrap 5** con componentes funcionales
+- **Filtros avanzados** por zona, precio y características
+- **Comparativas detalladas** de propiedades seleccionadas
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -83,12 +82,13 @@ API Backend/
 ```
 Procesamiento/
 ├── scripts/
-│   ├── procesar_datos_citrino.py     # ETL principal de datos
-│   ├── integrar_guia_urbana.py       # Integración municipal
-│   ├── validar_dataset_mejorado.py   # Validación de calidad
-│   └── evaluacion_completa_sistema.py # Evaluación de rendimiento
-└── data/ (excluido del repositorio - 2.4GB)
-    ├── base_datos_citrino_limpios.json      # 76,853 propiedades
+│   ├── procesar_datos_relevamiento.py      # ETL de datos de mercado
+│   ├── integrar_guia_urbana.py             # Integración municipal
+│   ├── validar_dataset_relevamiento.py     # Validación de calidad
+│   └── evaluacion_inversion.py             # Evaluación de oportunidades
+└── data/
+    ├── raw/                                 # Datos de relevamiento Excel
+    ├── base_datos_relevamiento.json        # Propiedades de mercado
     └── guia_urbana_municipal_completa.json  # 4,777 servicios urbanos
 ```
 
@@ -108,11 +108,12 @@ Procesamiento/
 - **NumPy 1.24.3** - Cálculos numéricos
 - **Flask-CORS 4.0.0** - Soporte para cross-origin requests
 
-### Algoritmos
+### Algoritmos de Procesamiento
 - **Fórmula de Haversine** - Cálculo de distancias geográficas
-- **Índice espacial** - Optimización de búsquedas por proximidad
+- **Índice espacial** - Optimización por UV/Manzana
 - **LRU Caching** - Memoria caché para consultas frecuentes
-- **Weighted Scoring** - Sistema de calificación por factores múltiples
+- **Weighted Scoring** - Sistema de calificación por múltiples factores
+- **Procesamiento geoespacial** - Análisis por coordenadas
 
 ## 🚀 Instalación y Configuración
 
@@ -193,13 +194,14 @@ Deberías ver:
    - Compara opciones lado a lado
    - Exporta resultados
 
-### Ejemplos de Consultas al Asistente
+### Ejemplos de Consultas de Inversión
 
 ```
-• "Soy una familia joven con 2 hijos buscando departamento en Equipetrol"
-• "Busco una casa para inversión con presupuesto de $200,000"
-• "Necesito un monoambiente moderno cerca de mi trabajo en Urbari"
-• "Busco algo con buen potencial de reventa cerca de colegios"
+• "Busco propiedades en zonas con buen desarrollo urbano"
+• "Necesito opciones de inversión en el rango de $150,000 a $300,000"
+• "Me interesan terrenos en áreas de expansión de la ciudad"
+• "Busco departamentos cerca de zonas comerciales"
+• "Quiero analizar oportunidades en Unidades Vecinales específicas"
 ```
 
 ## ⚙️ Configuración Avanzada
@@ -217,13 +219,13 @@ const baseURL = 'http://localhost:5000/api'; // URL del backend
 En `src/recommendation_engine_mejorado.py`:
 
 ```python
-# Pesos del algoritmo (ajustables)
+# Pesos del algoritmo (ajustables según criterios de inversión)
 weights = {
-    'budget': 0.25,        # Presupuesto
-    'family': 0.20,        # Composición familiar
-    'services': 0.30,      # Servicios cercanos
-    'demographics': 0.15,  # Datos demográficos
-    'preferences': 0.10    # Preferencias personales
+    'ubicacion': 0.35,     # Proximidad y zona
+    'precio': 0.25,        # Rango de precio
+    'servicios': 0.20,     # Servicios cercanos
+    'caracteristicas': 0.15, # Características del inmueble
+    'disponibilidad': 0.05  # Disponibilidad en relevamiento
 }
 ```
 

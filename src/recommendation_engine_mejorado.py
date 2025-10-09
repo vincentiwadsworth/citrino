@@ -1,6 +1,6 @@
 """
-Motor de recomendación mejorado con georreferenciación real y guía urbana
-Implementa cálculo de distancias reales entre propiedades y servicios
+Motor de recomendación especializado para inversores inmobiliarios
+Implementa análisis de oportunidades de inversión con georreferenciación real
 """
 
 from typing import Dict, List, Any, Optional, Tuple
@@ -15,18 +15,18 @@ from pathlib import Path
 
 
 class RecommendationEngineMejorado:
-    """Motor de recomendación con georreferenciación real y guía urbana."""
+    """Motor de recomendación especializado para inversores con georreferenciación real."""
 
     def __init__(self):
         self.propiedades = []
         self.guias_urbanas = []
         self.indice_servicios_espaciales = {}
         self.pesos = {
-            'presupuesto': 0.25,
-            'composicion_familiar': 0.20,
-            'servicios_cercanos': 0.30,  # Aumentado peso por ser ahora más preciso
-            'demografia': 0.15,
-            'preferencias': 0.10
+            'ubicacion': 0.35,      # Proximidad y zona
+            'precio': 0.25,         # Rango de precio
+            'servicios': 0.20,      # Servicios que impactan valor
+            'caracteristicas': 0.15, # Características del inmueble
+            'disponibilidad': 0.05   # Disponibilidad en relevamiento
         }
         # Cache para cálculos repetitivos
         self._cache_puntuaciones = {}
@@ -200,7 +200,7 @@ class RecommendationEngineMejorado:
 
     def calcular_compatibilidad(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
         """
-        Calcula el porcentaje de compatibilidad usando georreferenciación real.
+        Calcula el porcentaje de compatibilidad para inversores usando georreferenciación real.
         """
         inicio_tiempo = time.time()
         self.stats['calculos_realizados'] += 1
@@ -215,29 +215,20 @@ class RecommendationEngineMejorado:
 
         puntuaciones = {}
 
-        # 1. Evaluación de presupuesto (25%)
-        presupuesto = perfil.get('presupuesto', {})
-        if presupuesto:
-            presupuesto_min = presupuesto.get('min', 0)
-            presupuesto_max = presupuesto.get('max', float('inf'))
-            precio_propiedad = propiedad.get('caracteristicas_principales', {}).get('precio', 0)
-            puntuaciones['presupuesto'] = self._evaluar_presupuesto_cercania(
-                presupuesto_min, presupuesto_max, precio_propiedad
-            )
-        else:
-            puntuaciones['presupuesto'] = 0.0
+        # 1. Evaluación de ubicación (35%)
+        puntuaciones['ubicacion'] = self._evaluar_ubicacion_inversion(perfil, propiedad)
 
-        # 2. Evaluación de composición familiar (20%)
-        puntuaciones['composicion_familiar'] = self._evaluar_composicion_familiar(perfil, propiedad)
+        # 2. Evaluación de precio/rentabilidad (25%)
+        puntuaciones['precio'] = self._evaluar_precio_inversion(perfil, propiedad)
 
-        # 3. Evaluación de servicios cercanos con georreferenciación real (30%)
-        puntuaciones['servicios_cercanos'] = self._evaluar_servicios_georreferenciados(perfil, propiedad)
+        # 3. Evaluación de servicios que impactan valor (20%)
+        puntuaciones['servicios'] = self._evaluar_servicios_inversion(perfil, propiedad)
 
-        # 4. Evaluación demográfica (15%)
-        puntuaciones['demografia'] = self._evaluar_demografia(perfil, propiedad)
+        # 4. Evaluación de características del inmueble (15%)
+        puntuaciones['caracteristicas'] = self._evaluar_caracteristicas_inversion(perfil, propiedad)
 
-        # 5. Evaluación de preferencias (10%)
-        puntuaciones['preferencias'] = self._evaluar_preferencias(perfil, propiedad)
+        # 5. Evaluación de disponibilidad (5%)
+        puntuaciones['disponibilidad'] = self._evaluar_disponibilidad(perfil, propiedad)
 
         # Cálculo final con ponderación
         compatibilidad = sum(puntuaciones[area] * peso for area, peso in self.pesos.items())
@@ -507,32 +498,16 @@ class RecommendationEngineMejorado:
 
     def generar_recomendaciones(self, perfil: Dict[str, Any], limite: int = 5,
                             umbral_minimo: float = 0.1) -> List[Dict[str, Any]]:
-        """Genera recomendaciones usando el motor mejorado."""
+        """Genera recomendaciones usando el motor mejorado con filtros UV/MZ."""
         if not self.propiedades:
             return []
 
-        # Optimización: Pre-filtrar propiedades por zona preferida
-        zona_preferida = perfil.get('preferencias', {}).get('ubicacion', '').lower()
-        propiedades_a_evaluar = self.propiedades
-
-        if zona_preferida and zona_preferida != '':
-            # Buscar propiedades que coincidan con la zona preferida
-            propiedades_filtradas = []
-            for prop in self.propiedades:
-                zona_prop = prop.get('ubicacion', {}).get('zona', '').lower()
-                if zona_preferida in zona_prop or zona_prop in zona_preferida:
-                    propiedades_filtradas.append(prop)
-
-            # Si encontramos propiedades en la zona preferida, usarlas
-            if propiedades_filtradas:
-                propiedades_a_evaluar = propiedades_filtradas
-                print(f"Evaluando {len(propiedades_a_evaluar)} propiedades en zona '{zona_preferida}'")
-            else:
-                print(f"No se encontraron propiedades en '{zona_preferida}', evaluando todas {len(self.propiedades)}")
+        # Pre-filtrar propiedades con filtros avanzados
+        propiedades_filtradas = self._filtrar_propiedades_avanzado(perfil)
 
         # Calcular compatibilidad para cada propiedad
         recomendaciones = []
-        for propiedad in propiedades_a_evaluar:
+        for propiedad in propiedades_filtradas:
             compatibilidad = self.calcular_compatibilidad(perfil, propiedad)
 
             if compatibilidad >= (umbral_minimo * 100):  # Convertir umbral a porcentaje
@@ -550,8 +525,154 @@ class RecommendationEngineMejorado:
         recomendaciones.sort(key=lambda x: x['compatibilidad'], reverse=True)
         return recomendaciones[:limite]
 
+    def _filtrar_propiedades_avanzado(self, perfil: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Filtra propiedades usando criterios avanzados incluyendo UV/MZ."""
+        preferencias = perfil.get('preferencias', {})
+        presupuesto = perfil.get('presupuesto', {})
+
+        propiedades_filtradas = self.propiedades
+
+        # 1. Filtro por zona preferida
+        zona_preferida = preferencias.get('ubicacion', '').lower()
+        if zona_preferida and zona_preferida.strip():
+            propiedades_zona = []
+            for prop in propiedades_filtradas:
+                zona_prop = prop.get('ubicacion', {}).get('zona', '').lower()
+                if zona_preferida in zona_prop or zona_prop in zona_preferida:
+                    propiedades_zona.append(prop)
+
+            if propiedades_zona:
+                propiedades_filtradas = propiedades_zona
+                print(f"Filtrado por zona '{zona_preferida}': {len(propiedades_filtradas)} propiedades")
+
+        # 2. Filtro por Unidad Vecinal (UV)
+        uv_preferida = preferencias.get('unidad_vecinal', '').strip()
+        if uv_preferida:
+            propiedades_uv = []
+            for prop in propiedades_filtradas:
+                uv_prop = str(prop.get('unidad_vecinal', '')).strip().lower()
+                if uv_preferida.lower() in uv_prop:
+                    propiedades_uv.append(prop)
+
+            if propiedades_uv:
+                propiedades_filtradas = propiedades_uv
+                print(f"Filtrado por UV '{uv_preferida}': {len(propiedades_filtradas)} propiedades")
+
+        # 3. Filtro por Manzana (MZ)
+        mz_preferida = preferencias.get('manzana', '').strip()
+        if mz_preferida:
+            propiedades_mz = []
+            for prop in propiedades_filtradas:
+                mz_prop = str(prop.get('manzana', '')).strip().lower()
+                if mz_preferida.lower() in mz_prop:
+                    propiedades_mz.append(prop)
+
+            if propiedades_mz:
+                propiedades_filtradas = propiedades_mz
+                print(f"Filtrado por Manzana '{mz_preferida}': {len(propiedades_filtradas)} propiedades")
+
+        # 4. Filtro por tipo de propiedad
+        tipo_preferido = preferencias.get('tipo_propiedad', '').strip().lower()
+        if tipo_preferido:
+            propiedades_tipo = []
+            for prop in propiedades_filtradas:
+                tipo_prop = str(prop.get('tipo', '')).strip().lower()
+                if tipo_preferido in tipo_prop:
+                    propiedades_tipo.append(prop)
+
+            if propiedades_tipo:
+                propiedades_filtradas = propiedades_tipo
+                print(f"Filtrado por tipo '{tipo_preferido}': {len(propiedades_filtradas)} propiedades")
+
+        # 5. Filtro por rango de precio
+        presupuesto_min = presupuesto.get('min', 0)
+        presupuesto_max = presupuesto.get('max', float('inf'))
+        if presupuesto_min > 0 or presupuesto_max < float('inf'):
+            propiedades_precio = []
+            for prop in propiedades_filtradas:
+                precio = prop.get('caracteristicas_principales', {}).get('precio', 0)
+                if presupuesto_min <= precio <= presupuesto_max:
+                    propiedades_precio.append(prop)
+
+            if propiedades_precio:
+                propiedades_filtradas = propiedades_precio
+                print(f"Filtrado por precio ${presupuesto_min:,}-${presupuesto_max:,}: {len(propiedades_filtradas)} propiedades")
+
+        # 6. Filtro por disponibilidad reciente
+        dias_maximos = preferencias.get('disponibilidad_dias', 90)  # Por defecto 90 días
+        if dias_maximos > 0:
+            propiedades_recientes = []
+            for prop in propiedades_filtradas:
+                fecha_rel = prop.get('fecha_relevamiento', '')
+                if fecha_rel:
+                    try:
+                        from datetime import datetime
+                        fecha_dt = datetime.strptime(fecha_rel, '%Y.%m.%d')
+                        dias_desde = (datetime.now() - fecha_dt).days
+                        if dias_desde <= dias_maximos:
+                            propiedades_recientes.append(prop)
+                    except:
+                        pass  # Si no puede parsear la fecha, incluir la propiedad
+
+            if propiedades_recientes:
+                propiedades_filtradas = propiedades_recientes
+                print(f"Filtrado por disponibilidad reciente ({dias_maximos} días): {len(propiedades_filtradas)} propiedades")
+
+        print(f"Total propiedades después de filtros: {len(propiedades_filtradas)}")
+        return propiedades_filtradas
+
+    def buscar_por_filtros(self, filtros: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Busca propiedades usando filtros específicos sin perfil de inversor.
+        Útil para búsquedas directas por UV, Manzana, zona, etc.
+        """
+        propiedades_filtradas = self.propiedades
+
+        # Filtro por UV
+        if 'unidad_vecinal' in filtros and filtros['unidad_vecinal']:
+            uv = filtros['unidad_vecinal'].strip().lower()
+            propiedades_filtradas = [
+                prop for prop in propiedades_filtradas
+                if uv in str(prop.get('unidad_vecinal', '')).lower()
+            ]
+
+        # Filtro por Manzana
+        if 'manzana' in filtros and filtros['manzana']:
+            mz = filtros['manzana'].strip().lower()
+            propiedades_filtradas = [
+                prop for prop in propiedades_filtradas
+                if mz in str(prop.get('manzana', '')).lower()
+            ]
+
+        # Filtro por zona
+        if 'zona' in filtros and filtros['zona']:
+            zona = filtros['zona'].strip().lower()
+            propiedades_filtradas = [
+                prop for prop in propiedades_filtradas
+                if zona in prop.get('ubicacion', {}).get('zona', '').lower()
+            ]
+
+        # Filtro por tipo
+        if 'tipo_propiedad' in filtros and filtros['tipo_propiedad']:
+            tipo = filtros['tipo_propiedad'].strip().lower()
+            propiedades_filtradas = [
+                prop for prop in propiedades_filtradas
+                if tipo in str(prop.get('tipo', '')).lower()
+            ]
+
+        # Filtro por precio
+        if 'precio_min' in filtros or 'precio_max' in filtros:
+            precio_min = filtros.get('precio_min', 0)
+            precio_max = filtros.get('precio_max', float('inf'))
+            propiedades_filtradas = [
+                prop for prop in propiedades_filtradas
+                if precio_min <= prop.get('caracteristicas_principales', {}).get('precio', 0) <= precio_max
+            ]
+
+        return propiedades_filtradas
+
     def _generar_justificacion_mejorada(self, perfil: Dict[str, Any], propiedad: Dict[str, Any], compatibilidad: float) -> str:
-        """Genera justificación detallada basada en análisis real."""
+        """Genera justificación detallada para inversores basada en análisis real."""
         caracteristicas = propiedad.get('caracteristicas_principales', {})
         ubicacion = propiedad.get('ubicacion', {})
         valorizacion = propiedad.get('valorizacion_sector', {})
@@ -563,33 +684,53 @@ class RecommendationEngineMejorado:
 
         justificacion = []
 
-        # Presupuesto
+        # Precio y oportunidad de inversión
         if presupuesto_min <= precio <= presupuesto_max:
-            justificacion.append(f"Precio de ${precio:,} está dentro del presupuesto (${presupuesto_max:,}).")
+            justificacion.append(f"Inversión de ${precio:,} se ajusta al rango presupuestado.")
         elif precio < presupuesto_min:
-            justificacion.append(f"Precio de ${precio:,} está por debajo del presupuesto mínimo (${presupuesto_min:,}).")
+            justificacion.append(f"Oportunidad por debajo del presupuesto: ${precio:,} vs mínimo ${presupuesto_min:,}.")
         else:
-            justificacion.append(f"Precio de ${precio:,} excede el presupuesto máximo (${presupuesto_max:,}).")
+            justificacion.append(f"Inversión de ${precio:,} excede rango máximo de ${presupuesto_max:,}.")
 
-        # Ubicación y valorización
+        # Potencial de la zona
         zona = ubicacion.get('zona', 'No especificada')
-        seguridad = valorizacion.get('seguridad_zona', 'No especificada')
         demanda = valorizacion.get('demanda_sector', 'No especificada')
 
-        justificacion.append(f"Ubicada en zona {zona.lower()} con seguridad {seguridad.lower()} y demanda {demanda.lower()}.")
+        if demanda in ['muy_alta', 'alta']:
+            justificacion.append(f"Zona {zona.lower()} con alta demanda y buen potencial.")
+        elif demanda == 'media':
+            justificacion.append(f"Zona {zona.lower()} con demanda moderada, oportunidades de negociación.")
+        else:
+            justificacion.append(f"Zona {zona.lower()} en desarrollo.")
 
-        # Servicios cercanos (solo si tenemos guía urbana)
+        # UV y Manzana si están disponibles
+        uv = propiedad.get('unidad_vecinal', '')
+        mz = propiedad.get('manzana', '')
+        if uv:
+            justificacion.append(f"Ubicada en UV {uv}")
+            if mz:
+                justificacion.append(f", manzana {mz}.")
+
+        # Servicios que impactan el valor
         if self.guias_urbanas:
             servicios_resumen = self._obtener_resumen_servicios_cercanos(perfil, propiedad)
             if servicios_resumen:
-                justificacion.append(f"Cuenta con {servicios_resumen} en áreas cercanas.")
+                justificacion.append(f"Buen acceso a {servicios_resumen}.")
 
-        # Características principales
-        habitaciones = caracteristicas.get('habitaciones', 0)
-        banos = caracteristicas.get('banos_completos', 0)
+        # Características atractivas para inversión
         superficie = caracteristicas.get('superficie_m2', 0)
+        habitaciones = caracteristicas.get('habitaciones', 0)
+        tipo = propiedad.get('tipo', '')
 
-        justificacion.append(f"Ofrece {habitaciones} habitaciones, {banos} baños y {superficie}m² de superficie.")
+        if superficie >= 100:
+            justificacion.append(f"Amplia superficie de {superficie}m².")
+        if habitaciones >= 3:
+            justificacion.append(f"{habitaciones} habitaciones.")
+
+        # Disponibilidad
+        fecha_rel = propiedad.get('fecha_relevamiento', '')
+        if fecha_rel:
+            justificacion.append(f"Datos actualizados al {fecha_rel}.")
 
         return " ".join(justificacion)
 
@@ -629,6 +770,227 @@ class RecommendationEngineMejorado:
             resumen.append(f"{count} servicios de {categoria} a {distancia_promedio:.1f}km en promedio")
 
         return ", ".join(resumen)
+
+    def _evaluar_ubicacion_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
+        """Evalúa la ubicación desde perspectiva de inversión."""
+        ubicacion = propiedad.get('ubicacion', {})
+        valorizacion = propiedad.get('valorizacion_sector', {})
+        preferencias = perfil.get('preferencias', {})
+
+        puntuacion = 0.0
+        zona = ubicacion.get('zona', '').lower()
+
+        # 1. Coincidia con zona preferida (40%)
+        zona_preferida = preferencias.get('ubicacion', '').lower()
+        if zona_preferida and zona_preferida in zona:
+            puntuacion += 0.4
+        elif zona_preferida:
+            # Búsqueda parcial de coincidencia
+            if any(palabra in zona for palabra in zona_preferida.split()):
+                puntuacion += 0.25
+
+        # 2. Potencial de desarrollo (30%)
+        demanda = valorizacion.get('demanda_sector', '').lower()
+        if demanda in ['muy_alta', 'alta']:
+            puntuacion += 0.3
+        elif demanda == 'media':
+            puntuacion += 0.15
+
+        # 3. Filtros UV/Manzana (20%)
+        uv_preferida = preferencias.get('unidad_vecinal', '').lower()
+        mz_preferida = preferencias.get('manzana', '').lower()
+
+        if propiedad.get('unidad_vecinal') and uv_preferida:
+            if uv_preferida in str(propiedad.get('unidad_vecinal', '')).lower():
+                puntuacion += 0.2
+
+        if propiedad.get('manzana') and mz_preferida:
+            if mz_preferida in str(propiedad.get('manzana', '')).lower():
+                puntuacion += 0.1
+
+        # 4. Accesibilidad y conectividad (10%)
+        if self.guias_urbanas:
+            coords = ubicacion.get('coordenadas', {})
+            if coords:
+                servicios_transporte = self._encontrar_servicios_cercanos(
+                    coords, ['transporte'], 2.0
+                )
+                if len(servicios_transporte) >= 3:
+                    puntuacion += 0.1
+                elif len(servicios_transporte) >= 1:
+                    puntuacion += 0.05
+
+        return min(1.0, puntuacion)
+
+    def _evaluar_precio_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
+        """Evalúa el precio desde perspectiva de inversión."""
+        presupuesto = perfil.get('presupuesto', {})
+        caracteristicas = propiedad.get('caracteristicas_principales', {})
+
+        presupuesto_min = presupuesto.get('min', 0)
+        presupuesto_max = presupuesto.get('max', float('inf'))
+        precio = caracteristicas.get('precio', 0)
+
+        if not precio:
+            return 0.0
+
+        # 1. Adecuación al rango de inversión (70%)
+        if presupuesto_min <= precio <= presupuesto_max:
+            puntuacion_precio = 0.7
+        elif precio < presupuesto_min:
+            # Por debajo del mínimo - podría ser buena oportunidad
+            margen = presupuesto_max - presupuesto_min
+            diferencia = presupuesto_min - precio
+            puntuacion_precio = 0.7 - (diferencia / margen) * 0.3
+            puntuacion_precio = max(0.2, puntuacion_precio)
+        else:
+            # Por encima del máximo
+            exceso = precio - presupuesto_max
+            margen = presupuesto_max - presupuesto_min
+            penalizacion = 0.7 - (exceso / margen) * 0.5
+            puntuacion_precio = max(0.1, penalizacion)
+
+        # 2. Potencial de negociación (30%)
+        valorizacion = propiedad.get('valorizacion_sector', {})
+        demanda = valorizacion.get('demanda_sector', '').lower()
+
+        if demanda == 'media':
+            puntuacion_precio += 0.2  # Mayor potencial de negociación
+        elif demanda == 'baja':
+            puntuacion_precio += 0.3
+        elif demanda in ['alta', 'muy_alta']:
+            puntuacion_precio += 0.05  # Menor potencial de negociación
+
+        return min(1.0, puntuacion_precio)
+
+    def _evaluar_servicios_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
+        """Evalúa servicios que impactan el valor de inversión."""
+        if not self.guias_urbanas:
+            return 0.5  # Valor neutro
+
+        ubicacion = propiedad.get('ubicacion', {})
+        coords = ubicacion.get('coordenadas', {})
+
+        if not coords:
+            return 0.3
+
+        # Servicios que impactan más el valor de inversión
+        servicios_valor = ['transporte', 'abastecimiento', 'educacion', 'salud']
+        puntuacion = 0.0
+
+        # Buscar servicios en diferentes radios
+        for radio in [1.0, 2.0, 3.0]:
+            servicios_cercanos = self._encontrar_servicios_cercanos(
+                coords, servicios_valor, radio
+            )
+
+            if servicios_cercanos:
+                # Categorizar servicios
+                servicios_por_categoria = {}
+                for servicio in servicios_cercanos:
+                    categoria = servicio['categoria']
+                    if categoria not in servicios_por_categoria:
+                        servicios_por_categoria[categoria] = []
+                    servicios_por_categoria[categoria].append(servicio)
+
+                # Evaluar diversidad y cantidad
+                diversidad = len(servicios_por_categoria) / len(servicios_valor)
+                cantidad = len(servicios_cercanos)
+
+                # Ponderar por radio (más cercano = más valor)
+                peso_radio = 1.0 / radio
+                puntuacion_radio = (diversidad * 0.6 + min(cantidad / 10, 1.0) * 0.4) * peso_radio
+                puntuacion = max(puntuacion, puntuacion_radio)
+
+        return min(1.0, puntuacion)
+
+    def _evaluar_caracteristicas_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
+        """Evalúa características del inmueble para inversión."""
+        caracteristicas = propiedad.get('caracteristicas_principales', {})
+        preferencias = perfil.get('preferencias', {})
+
+        puntuacion = 0.0
+
+        # 1. Tipo de propiedad preferido (40%)
+        tipo_preferido = preferencias.get('tipo_propiedad', '').lower()
+        tipo_actual = propiedad.get('tipo', '').lower()
+
+        if tipo_preferido and tipo_preferido in tipo_actual:
+            puntuacion += 0.4
+        elif tipo_preferido:
+            # Coincidencias parciales
+            if tipo_preferido == 'departamento' and 'departamento' in tipo_actual:
+                puntuacion += 0.4
+            elif tipo_preferido == 'casa' and 'casa' in tipo_actual:
+                puntuacion += 0.4
+            elif tipo_preferido == 'terreno' and 'terreno' in tipo_actual:
+                puntuacion += 0.4
+
+        # 2. Superficie (30%)
+        superficie = caracteristicas.get('superficie_m2', 0)
+        if superficie >= 100:  # Superficie generosa
+            puntuacion += 0.3
+        elif superficie >= 60:
+            puntuacion += 0.2
+        elif superficie > 0:
+            puntuacion += 0.1
+
+        # 3. Características atractivas para inversión (30%)
+        detalles = propiedad.get('detalles_construccion', {})
+        condominio = propiedad.get('condominio', {})
+
+        caracteristicas_inversion = 0
+        if detalles.get('cochera_garaje', False):
+            caracteristicas_inversion += 1
+        if condominio.get('es_condominio_cerrado', False):
+            caracteristicas_inversion += 1
+        if detalles.get('amoblado', False):
+            caracteristicas_inversion += 1
+        if caracteristicas.get('habitaciones', 0) >= 3:
+            caracteristicas_inversion += 1
+
+        if caracteristicas_inversion >= 3:
+            puntuacion += 0.3
+        elif caracteristicas_inversion >= 2:
+            puntuacion += 0.2
+        elif caracteristicas_inversion >= 1:
+            puntuacion += 0.1
+
+        return min(1.0, puntuacion)
+
+    def _evaluar_disponibilidad(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
+        """Evalúa disponibilidad y actualidad de la propiedad."""
+        # 1. Fecha de relevamiento (60%)
+        fecha_relevamiento = propiedad.get('fecha_relevamiento', '')
+        if fecha_relevamiento:
+            try:
+                from datetime import datetime, timedelta
+                fecha_dt = datetime.strptime(fecha_relevamiento, '%Y.%m.%d')
+                dias_desde_relevamiento = (datetime.now() - fecha_dt).days
+
+                if dias_desde_relevamiento <= 7:
+                    puntuacion = 0.6  # Muy reciente
+                elif dias_desde_relevamiento <= 30:
+                    puntuacion = 0.4  # Reciente
+                elif dias_desde_relevamiento <= 90:
+                    puntuacion = 0.2  # Moderado
+                else:
+                    puntuacion = 0.1  # Antiguo
+            except:
+                puntuacion = 0.3
+        else:
+            puntuacion = 0.2
+
+        # 2. Estado de disponibilidad (40%)
+        estado = propiedad.get('estado', '').lower()
+        if estado in ['disponible', 'en_venta', 'venta']:
+            puntuacion += 0.4
+        elif estado in ['reservado', 'en_negociacion']:
+            puntuacion += 0.2
+        else:
+            puntuacion += 0.1
+
+        return min(1.0, puntuacion)
 
     def obtener_estadisticas_rendimiento(self) -> Dict[str, Any]:
         """Retorna estadísticas de rendimiento del motor."""

@@ -25,18 +25,47 @@ sistema_consulta = SistemaConsultaCitrino()
 motor_recomendacion = RecommendationEngine()
 motor_mejorado = RecommendationEngineMejorado()
 
-# Cargar base de datos al iniciar
+# Cargar base de datos de relevamiento al iniciar
 @app.before_request
 def cargar_datos():
     if not hasattr(app, 'datos_cargados'):
-        print("Cargando base de datos...")
-        sistema_consulta.cargar_base_datos("data/bd_final/propiedades_limpias.json")
-        motor_recomendacion.cargar_propiedades(sistema_consulta.propiedades)
+        print("Cargando base de datos de relevamiento...")
 
-        # Cargar datos para el motor mejorado
+        # Intentar cargar base de datos de relevamiento
+        try:
+            with open("data/base_datos_relevamiento.json", 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                propiedades_relevamiento = data.get('propiedades', [])
+                print(f"Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
+
+                # Cargar en ambos motores
+                motor_recomendacion.cargar_propiedades(propiedades_relevamiento)
+                motor_mejorado.cargar_propiedades(propiedades_relevamiento)
+
+                # También cargar en el sistema de consulta para compatibilidad
+                sistema_consulta.propiedades = propiedades_relevamiento
+                sistema_consulta.estadisticas_globales['total_propiedades'] = len(propiedades_relevamiento)
+
+        except FileNotFoundError:
+            print("Error: No se encontró data/base_datos_relevamiento.json")
+            print("Ejecute: python scripts/procesar_datos_relevamiento.py")
+            # Cargar base de datos antigua como fallback
+            try:
+                sistema_consulta.cargar_base_datos("data/bd_final/propiedades_limpias.json")
+                motor_recomendacion.cargar_propiedades(sistema_consulta.propiedades)
+                motor_mejorado.cargar_propiedades(sistema_consulta.propiedades)
+                print("Cargada base de datos antigua como fallback")
+            except Exception as e:
+                print(f"Error cargando fallback: {e}")
+                return
+
+        except Exception as e:
+            print(f"Error cargando base de datos de relevamiento: {e}")
+            return
+
+        # Cargar guía urbana municipal para enriquecimiento
         print("Cargando guía urbana municipal...")
         try:
-            motor_mejorado.cargar_propiedades(sistema_consulta.propiedades)
             motor_mejorado.cargar_guias_urbanas("data/guia_urbana_municipal_completa.json")
             print("Guía urbana cargada exitosamente")
         except Exception as e:
@@ -56,11 +85,11 @@ def health_check():
 
 @app.route('/api/buscar', methods=['POST'])
 def buscar_propiedades():
-    """Busca propiedades según filtros"""
+    """Busca propiedades según filtros incluyendo UV/Manzana"""
     try:
         data = request.get_json()
 
-        # Aplicar filtros
+        # Aplicar filtros con soporte UV/Manzana
         filtros = {}
 
         if 'zona' in data:
@@ -72,54 +101,72 @@ def buscar_propiedades():
         if 'precio_max' in data and data['precio_max']:
             filtros['precio_max'] = float(data['precio_max'])
 
-        if 'superficie_min' in data and data['superficie_min']:
-            filtros['superficie_min'] = float(data['superficie_min'])
+        if 'tipo_propiedad' in data:
+            filtros['tipo_propiedad'] = data['tipo_propiedad']
 
-        if 'superficie_max' in data and data['superficie_max']:
-            filtros['superficie_max'] = float(data['superficie_max'])
+        # Nuevos filtros UV/Manzana
+        if 'unidad_vecinal' in data:
+            filtros['unidad_vecinal'] = data['unidad_vecinal']
 
-        if 'habitaciones_min' in data and data['habitaciones_min']:
-            filtros['habitaciones_min'] = int(data['habitaciones_min'])
+        if 'manzana' in data:
+            filtros['manzana'] = data['manzana']
 
-        if 'banos_min' in data and data['banos_min']:
-            filtros['banos_min'] = int(data['banos_min'])
-
-        if 'tiene_garaje' in data:
-            filtros['tiene_garaje'] = bool(data['tiene_garaje'])
-
-        # Realizar búsqueda
-        resultados = sistema_consulta.buscar_por_filtros(filtros)
+        # Usar el motor mejorado para búsquedas avanzadas
+        resultados = motor_mejorado.buscar_por_filtros(filtros)
 
         # Limitar resultados
         limite = data.get('limite', 20)
         resultados = resultados[:limite]
 
-        # Formatear resultados
+        # Formatear resultados para inversores
         propiedades_formateadas = []
         for prop in resultados:
+            # Adaptar formato para datos de relevamiento
             caract = prop.get('caracteristicas_principales', {})
             ubicacion = prop.get('ubicacion', {})
 
+            # Para datos de relevamiento, usar campos directos
+            if not caract:
+                caract = {
+                    'precio': prop.get('precio', 0),
+                    'superficie_m2': prop.get('superficie', 0),
+                    'habitaciones': prop.get('habitaciones', 0),
+                    'banos_completos': prop.get('banos', 0)
+                }
+
+            if not ubicacion:
+                ubicacion = {
+                    'zona': prop.get('zona', ''),
+                    'direccion': prop.get('direccion', ''),
+                    'coordenadas': {
+                        'lat': prop.get('latitud'),
+                        'lng': prop.get('longitud')
+                    } if prop.get('latitud') and prop.get('longitud') else {}
+                }
+
             prop_formateada = {
                 'id': prop.get('id', ''),
-                'nombre': prop.get('nombre', ''),
+                'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
                 'precio': caract.get('precio', 0),
                 'superficie_m2': caract.get('superficie_m2', 0),
                 'habitaciones': caract.get('habitaciones', 0),
                 'banos': caract.get('banos_completos', 0),
-                'garaje': caract.get('cochera_garaje', False),
-                'espacios_garaje': caract.get('numero_espacios_garaje', 0),
                 'zona': ubicacion.get('zona', ''),
                 'direccion': ubicacion.get('direccion', ''),
+                'unidad_vecinal': prop.get('unidad_vecinal', ''),
+                'manzana': prop.get('manzana', ''),
+                'fecha_relevamiento': prop.get('fecha_relevamiento', ''),
                 'fuente': prop.get('fuente', ''),
-                'descripcion': prop.get('descripcion', '')[:300] + '...' if len(prop.get('descripcion', '')) > 300 else prop.get('descripcion', '')
+                'descripcion': prop.get('descripcion', '')[:300] + '...' if len(prop.get('descripcion', '')) > 300 else prop.get('descripcion', ''),
+                'coordenadas': ubicacion.get('coordenadas', {})
             }
             propiedades_formateadas.append(prop_formateada)
 
         return jsonify({
             'success': True,
             'total_resultados': len(resultados),
-            'propiedades': propiedades_formateadas
+            'propiedades': propiedades_formateadas,
+            'fuente_datos': 'relevamiento'
         })
 
     except Exception as e:
@@ -199,26 +246,92 @@ def recomendar_propiedades():
 
 @app.route('/api/estadisticas', methods=['GET'])
 def obtener_estadisticas():
-    """Obtiene estadísticas generales"""
+    """Obtiene estadísticas generales de propiedades de relevamiento"""
     try:
+        propiedades = sistema_consulta.propiedades
+
+        if not propiedades:
+            return jsonify({
+                'success': True,
+                'estadisticas': {
+                    'total_propiedades': 0,
+                    'mensaje': 'No hay propiedades cargadas'
+                }
+            })
+
+        # Calcular estadísticas básicas
+        precios = []
+        superficies = []
+        zonas = set()
+        tipos = set()
+
+        for prop in propiedades:
+            # Extraer precio
+            precio = prop.get('precio') or prop.get('caracteristicas_principales', {}).get('precio', 0)
+            if precio and precio > 0:
+                precios.append(precio)
+
+            # Extraer superficie
+            superficie = prop.get('superficie') or prop.get('caracteristicas_principales', {}).get('superficie_m2', 0)
+            if superficie and superficie > 0:
+                superficies.append(superficie)
+
+            # Extraer zona
+            zona = prop.get('zona') or prop.get('ubicacion', {}).get('zona', '')
+            if zona:
+                zonas.add(zona)
+
+            # Extraer tipo
+            tipo = prop.get('tipo_propiedad', '')
+            if tipo:
+                tipos.add(tipo)
+
+        # Calcular estadísticas
         stats = {
-            'total_propiedades': sistema_consulta.estadisticas_globales['total_propiedades'],
-            'precio_promedio': sistema_consulta.estadisticas_globales['precio_promedio'],
-            'precio_minimo': sistema_consulta.estadisticas_globales['precio_minimo'],
-            'precio_maximo': sistema_consulta.estadisticas_globales['precio_maximo'],
-            'superficie_promedio': sistema_consulta.estadisticas_globales['superficie_promedio'],
-            'total_zonas': sistema_consulta.estadisticas_globales['total_zonas'],
-            'distribucion_zonas': {},
-            'distribucion_precios': {}
+            'total_propiedades': len(propiedades),
+            'fuente_datos': 'relevamiento',
+            'precio_promedio': sum(precios) / len(precios) if precios else 0,
+            'precio_minimo': min(precios) if precios else 0,
+            'precio_maximo': max(precios) if precios else 0,
+            'superficie_promedio': sum(superficies) / len(superficies) if superficies else 0,
+            'total_zonas': len(zonas),
+            'total_tipos': len(tipos)
         }
 
-        # Agregar distribución por zonas
-        for zona, props in list(sistema_consulta.indices['zona'].items())[:10]:
-            stats['distribucion_zonas'][zona] = len(props)
+        # Agregar distribución por zonas (top 10)
+        distribucion_zonas = {}
+        for zona in sorted(zonas)[:10]:
+            count = sum(1 for prop in propiedades
+                       if (prop.get('zona') or prop.get('ubicacion', {}).get('zona', '')) == zona)
+            distribucion_zonas[zona] = count
+
+        stats['distribucion_zonas'] = distribucion_zonas
 
         # Agregar distribución por precios
-        for rango, props in sistema_consulta.indices['precio'].items():
-            stats['distribucion_precios'][rango] = len(props)
+        distribucion_precios = {
+            '0-50k': 0,
+            '50k-100k': 0,
+            '100k-150k': 0,
+            '150k-200k': 0,
+            '200k-300k': 0,
+            '300k+': 0
+        }
+
+        for precio in precios:
+            if precio < 50000:
+                distribucion_precios['0-50k'] += 1
+            elif precio < 100000:
+                distribucion_precios['50k-100k'] += 1
+            elif precio < 150000:
+                distribucion_precios['100k-150k'] += 1
+            elif precio < 200000:
+                distribucion_precios['150k-200k'] += 1
+            elif precio < 300000:
+                distribucion_precios['200k-300k'] += 1
+            else:
+                distribucion_precios['300k+'] += 1
+
+        stats['distribucion_precios'] = distribucion_precios
 
         return jsonify({
             'success': True,
@@ -233,12 +346,28 @@ def obtener_estadisticas():
 
 @app.route('/api/zonas', methods=['GET'])
 def obtener_zonas():
-    """Obtiene lista de todas las zonas disponibles"""
+    """Obtiene lista de todas las zonas disponibles de relevamiento"""
     try:
-        zonas = list(sistema_consulta.indices['zona'].keys())
+        propiedades = sistema_consulta.propiedades
+
+        if not propiedades:
+            return jsonify({
+                'success': True,
+                'zonas': [],
+                'mensaje': 'No hay propiedades cargadas'
+            })
+
+        # Extraer zonas únicas de las propiedades
+        zonas = set()
+        for prop in propiedades:
+            zona = prop.get('zona') or prop.get('ubicacion', {}).get('zona', '')
+            if zona:
+                zonas.add(zona)
+
         return jsonify({
             'success': True,
-            'zonas': sorted(zonas)
+            'zonas': sorted(zonas),
+            'total_zonas': len(zonas)
         })
     except Exception as e:
         return jsonify({
@@ -248,54 +377,72 @@ def obtener_zonas():
 
 @app.route('/api/recomendar-mejorado', methods=['POST'])
 def recomendar_propiedades_mejorado():
-    """Genera recomendaciones con motor mejorado (georreferenciación real)"""
+    """Genera recomendaciones para inversores con filtros UV/Manzana"""
     try:
         data = request.get_json()
 
-        # Formatear perfil para el motor
+        # Formatear perfil para inversores
         perfil = {
-            'id': data.get('id', 'perfil_mejorado'),
+            'id': data.get('id', 'perfil_inversor'),
             'presupuesto': {
                 'min': data.get('presupuesto_min', 0),
                 'max': data.get('presupuesto_max', 1000000)
             },
-            'composicion_familiar': {
-                'adultos': data.get('adultos', 1),
-                'ninos': data.get('ninos', []),
-                'adultos_mayores': data.get('adultos_mayores', 0)
-            },
             'preferencias': {
                 'ubicacion': data.get('zona_preferida', ''),
-                'tipo_propiedad': data.get('tipo_propiedad', '')
+                'tipo_propiedad': data.get('tipo_propiedad', ''),
+                'unidad_vecinal': data.get('unidad_vecinal', ''),
+                'manzana': data.get('manzana', ''),
+                'disponibilidad_dias': data.get('disponibilidad_dias', 90)
             },
             'necesidades': data.get('necesidades', [])
         }
 
-        # Generar recomendaciones con motor mejorado
+        # Generar recomendaciones con motor especializado para inversores
         recomendaciones = motor_mejorado.generar_recomendaciones(
             perfil,
             limite=data.get('limite', 5),
             umbral_minimo=data.get('umbral_minimo', 0.3)
         )
 
-        # Formatear resultados
+        # Formatear resultados para inversores
         resultados_formateados = []
         for rec in recomendaciones:
             prop = rec['propiedad']
+
+            # Adaptar formato para datos de relevamiento
             caract = prop.get('caracteristicas_principales', {})
+            if not caract:
+                caract = {
+                    'precio': prop.get('precio', 0),
+                    'superficie_m2': prop.get('superficie', 0),
+                    'habitaciones': prop.get('habitaciones', 0),
+                    'banos_completos': prop.get('banos', 0)
+                }
+
             ubicacion = prop.get('ubicacion', {})
+            if not ubicacion:
+                ubicacion = {
+                    'zona': prop.get('zona', ''),
+                    'direccion': prop.get('direccion', '')
+                }
 
             resultado = {
                 'id': prop.get('id', ''),
-                'nombre': prop.get('nombre', ''),
+                'nombre': prop.get('tipo_propiedad', f"Inversión en {prop.get('zona', 'Zona')}"),
                 'precio': caract.get('precio', 0),
                 'superficie_m2': caract.get('superficie_m2', 0),
                 'habitaciones': caract.get('habitaciones', 0),
                 'banos': caract.get('banos_completos', 0),
                 'zona': ubicacion.get('zona', ''),
+                'unidad_vecinal': prop.get('unidad_vecinal', ''),
+                'manzana': prop.get('manzana', ''),
+                'fecha_relevamiento': prop.get('fecha_relevamiento', ''),
                 'compatibilidad': round(rec['compatibilidad'], 1),
                 'justificacion': rec.get('justificacion', ''),
-                'fuente': prop.get('fuente', '')
+                'servicios_cercanos': rec.get('servicios_cercanos', ''),
+                'fuente': prop.get('fuente', ''),
+                'coordenadas': ubicacion.get('coordenadas', {})
             }
             resultados_formateados.append(resultado)
 
@@ -303,7 +450,8 @@ def recomendar_propiedades_mejorado():
             'success': True,
             'total_recomendaciones': len(resultados_formateados),
             'recomendaciones': resultados_formateados,
-            'motor': 'mejorado_con_georreferenciacion'
+            'motor': 'especializado_inversores',
+            'fuente_datos': 'relevamiento'
         })
 
     except Exception as e:
