@@ -83,8 +83,8 @@ Citrino es una plataforma especializada en análisis y recomendación de propied
 
 ### Inicio Rápido (Recomendado)
 ```bash
-# Verificar estado del sistema
-python verificar_servicios.py
+# Ejecutar pruebas rápidas
+pytest
 
 # Iniciar sistema completo (API + Frontend)
 # Nota: Los scripts individuales están abajo si necesitas control manual
@@ -105,14 +105,14 @@ python -m http.server 8080
 
 ### Procesamiento de Datos
 ```bash
-# Procesar datos de scraping actualizados
-python scripts/procesar_datos_relevamiento.py
+# Construir dataset de relevamiento (Excel -> JSON)
+python scripts/build_relevamiento_dataset.py
 
-# Validar calidad de datos procesados
-python scripts/validar_dataset_mejorado.py
+# Construir dataset de servicios urbanos
+python scripts/build_urban_services_dataset.py
 
-# Evaluar rendimiento del sistema de inversión
-python scripts/evaluacion_completa_sistema.py
+# Generar inventario de ejemplo para demostraciones
+python scripts/build_sample_inventory.py
 ```
 
 ### CLI para Inversores
@@ -192,21 +192,16 @@ python src/cli.py natural-query "busco propiedad con potencial de plusvalía en 
 
 ### Test Structure
 - **`test_api.py`** - Comprehensive API endpoint testing
-- **`test_api_simple.py`** - Basic API functionality tests
-- **`test_motor_enriquecido.py`** - Enhanced recommendation engine tests
-- **`test_prospectos_enriquecidos.py`** - Lead scoring system tests
+- **`test_api_simple.py`** - Basic API smoke checks (manual helper)
 
 ### Running Tests
 ```bash
 # Run all tests
-python -m pytest tests/ -v
+pytest
 
 # Test specific components
-python tests/test_api.py
-python tests/test_motor_enriquecido.py
-
-# Run API integration tests
-python tests/test_api_simple.py
+pytest tests/test_api.py -v
+pytest tests/test_api_simple.py -v
 ```
 
 ## Performance Optimization
@@ -233,10 +228,9 @@ python tests/test_api_simple.py
 5. **Validation** - Quality checks and deduplication
 
 ### Key Processing Scripts
-- **`procesar_datos_citrino.py`** - Main data processing pipeline
-- **`integrar_guia_urbana.py`** - Municipal urban guide integration
-- **`validar_dataset_mejorado.py`** - Data quality validation
-- **`evaluacion_completa_sistema.py`** - System performance evaluation
+- **`build_relevamiento_dataset.py`** - Main data processing pipeline (scraping Excel → JSON)
+- **`build_urban_services_dataset.py`** - Municipal urban guide integration
+- **`build_sample_inventory.py`** - Sample inventory generator for demos/tests
 
 ## Development Guidelines
 
@@ -268,12 +262,6 @@ python tests/test_api_simple.py
 
 ### Emergency Commands
 ```bash
-# Quick system verification
-python verificar_servicios.py
-
-# Auto-start demo (includes API server)
-./iniciar_demo.bat
-
 # Manual recovery steps
 python api/server.py &          # Start API in background
 streamlit run demo_stable.py    # Start demo interface

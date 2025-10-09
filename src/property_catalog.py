@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-"""
-Sistema de consulta y análisis para la base de datos integrada de Citrino.
-"""
+"""Property catalog query service for the Citrino platform."""
 
 import json
 import pandas as pd
@@ -10,9 +7,10 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import logging
 
-# Configuración de logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 class SistemaConsultaCitrino:
     """Sistema de consulta y análisis para la base de datos de Citrino."""
@@ -391,6 +389,7 @@ class SistemaConsultaCitrino:
 
         print("="*80)
 
+
 def main():
     """Función principal."""
     print("=== SISTEMA DE CONSULTA Y ANÁLISIS CITRINO ===")
@@ -408,6 +407,7 @@ def main():
     sistema.ejecutar_consulta_ejemplo()
 
     print("\n=== SISTEMA LISTO PARA CONSULTAS ===")
+
 
 if __name__ == "__main__":
     main()

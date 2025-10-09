@@ -11,11 +11,10 @@ from flask_cors import CORS
 
 # Agregar los directorios src y scripts al path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'scripts'))
 
 from recommendation_engine import RecommendationEngine
 from recommendation_engine_mejorado import RecommendationEngineMejorado
-from sistema_consulta import SistemaConsultaCitrino
+from property_catalog import SistemaConsultaCitrino
 
 app = Flask(__name__)
 CORS(app)  # Permite peticiones desde otros dominios
@@ -48,7 +47,7 @@ def cargar_datos():
 
         except FileNotFoundError:
             print("Error: No se encontró data/base_datos_relevamiento.json")
-            print("Ejecute: python scripts/procesar_datos_relevamiento.py")
+            print("Ejecute: python scripts/build_relevamiento_dataset.py")
             # Cargar base de datos antigua como fallback
             try:
                 sistema_consulta.cargar_base_datos("data/bd_final/propiedades_limpias.json")

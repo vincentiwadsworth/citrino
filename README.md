@@ -82,10 +82,9 @@ API Backend/
 ```
 Procesamiento/
 ├── scripts/
-│   ├── procesar_datos_relevamiento.py      # ETL de datos de mercado
-│   ├── integrar_guia_urbana.py             # Integración municipal
-│   ├── validar_dataset_relevamiento.py     # Validación de calidad
-│   └── evaluacion_inversion.py             # Evaluación de oportunidades
+│   ├── build_relevamiento_dataset.py       # ETL de datos de mercado
+│   ├── build_urban_services_dataset.py     # Integración municipal
+│   └── build_sample_inventory.py           # Inventario de muestra para demos/tests
 └── data/
     ├── raw/                                 # Datos de relevamiento Excel
     ├── base_datos_relevamiento.json        # Propiedades de mercado
@@ -159,13 +158,12 @@ python -m http.server 8080
 ### 5. Verificar Instalación
 
 ```bash
-python verificar_servicios.py
+pytest
 ```
 
 Deberías ver:
 ```
-[OK] API: Funcionando correctamente
-[OK] Streamlit: No responde (normal si no está iniciado)
+======================== 6 passed ========================
 ```
 
 ## 🎮 Uso del Sistema
@@ -283,25 +281,24 @@ console.log(`Encontradas ${data.total_results} propiedades`);
 
 ```bash
 # Ejecutar todas las pruebas
-python -m pytest tests/ -v
+pytest
 
 # Pruebas específicas
-python tests/test_api.py              # API endpoints
-python tests/test_motor_enriquecido.py  # Motor de recomendación
-python tests/test_prospectos_enriquecidos.py  # Scoring de prospectos
+pytest tests/test_api.py -v           # API endpoints
+pytest tests/test_api_simple.py -v    # Smoke tests manuales
 ```
 
 ### Validación del Sistema
 
 ```bash
-# Evaluación completa del sistema
-python scripts/evaluacion_completa_sistema.py
+# Regenerar dataset de relevamiento (Excel -> JSON)
+python scripts/build_relevamiento_dataset.py
 
-# Validación de calidad de datos
-python scripts/validar_dataset_mejorado.py
+# Regenerar dataset de servicios urbanos
+python scripts/build_urban_services_dataset.py
 
-# Benchmark de rendimiento
-python scripts/benchmar_rendimiento.py
+# Generar inventario de ejemplo para demos/pruebas
+python scripts/build_sample_inventory.py
 ```
 
 ## 🚀 Despliegue en Producción
@@ -406,13 +403,9 @@ python api/server.py
 - Revisar consola del navegador
 
 #### Rendimiento Lento
-```bash
-# Limpiar caché
-python scripts/limpiar_cache.py
-
-# Verificar uso de memoria
-python scripts/monitoreo_rendimiento.py
-```
+- Verificar logs del backend (`api/server.py`) para identificar cuellos de botella
+- Asegurarse de que los datasets estén actualizados (`build_relevamiento_dataset.py`, `build_urban_services_dataset.py`)
+- Confirmar que el cache interno del motor no se esté invalidando continuamente
 
 ### Debug Mode
 
