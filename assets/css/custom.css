@@ -1,7 +1,8 @@
 /* ===== Citrino - Estilos Personalizados ===== */
 
-/* Variables de Color */
+/* Variables de Color y Sistema de Diseño Unificado */
 :root {
+    /* Colores Base */
     --citrino-primary: #0d6efd;
     --citrino-secondary: #6c757d;
     --citrino-success: #198754;
@@ -10,15 +11,45 @@
     --citrino-info: #0dcaf0;
     --citrino-light: #f8f9fa;
     --citrino-dark: #212529;
+    
+    /* Gradientes Unificados */
     --citrino-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --citrino-gradient-alt: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --citrino-gradient-alt: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    
+    /* Sistema de Sombras Consistente */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    
+    /* Sistema de Espaciado */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Radios de Borde Unificados */
+    --radius-sm: 10px;
+    --radius-md: 15px;
+    --radius-lg: 20px;
+    --radius-full: 50px;
+    
+    /* Transiciones */
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Tamaños Mínimos Touch */
+    --touch-target: 44px;
 }
 
 /* ===== Hero Section ===== */
 .hero-section {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: var(--citrino-gradient-alt);
     position: relative;
     overflow: hidden;
+    min-height: 80vh;
 }
 
 .hero-section::before {
@@ -47,17 +78,17 @@
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
     text-align: center;
-    transition: all 0.3s ease;
+    transition: var(--transition-base);
     height: 100%;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-lg);
 }
 
 .stat-icon {
@@ -82,18 +113,18 @@
 
 /* ===== Feature Cards ===== */
 .feature-card {
-    padding: 2rem;
+    padding: var(--spacing-lg);
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
     height: 100%;
     border: 1px solid #e9ecef;
 }
 
 .feature-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-xl);
 }
 
 .feature-icon {
@@ -117,9 +148,9 @@
 /* ===== Action Cards ===== */
 .action-card {
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-base);
     height: 100%;
     border: 1px solid #e9ecef;
     overflow: hidden;
@@ -127,7 +158,7 @@
 
 .action-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-xl);
 }
 
 .action-icon {
@@ -143,10 +174,10 @@
 /* ===== Step Cards ===== */
 .step-card {
     background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
     height: 100%;
     position: relative;
     overflow: hidden;
@@ -164,7 +195,7 @@
 
 .step-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-xl);
 }
 
 .step-number {
@@ -339,10 +370,25 @@
     animation: fadeInRight 0.6s ease-out;
 }
 
-/* ===== Responsive Design ===== */
+/* ===== Responsive Design (Mobile-First) ===== */
+
+/* Tablets y dispositivos medianos */
+@media (max-width: 992px) {
+    .hero-section {
+        min-height: 70vh;
+        padding: var(--spacing-xl) 0;
+    }
+    
+    .stat-card {
+        padding: var(--spacing-md);
+    }
+}
+
+/* Tablets pequeñas */
 @media (max-width: 768px) {
     .hero-section {
-        padding: 4rem 0;
+        min-height: auto;
+        padding: var(--spacing-lg) 0;
     }
 
     .hero-content h1 {
@@ -350,51 +396,82 @@
     }
 
     .stat-card {
-        padding: 1.5rem;
-        margin-bottom: 1rem;
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
     }
 
-    .feature-card {
-        margin-bottom: 2rem;
-    }
-
-    .action-card {
-        margin-bottom: 2rem;
-    }
-
+    .feature-card,
+    .action-card,
     .step-card {
-        margin-bottom: 2rem;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    /* Asegurar que los botones sean touch-friendly */
+    .btn {
+        min-height: var(--touch-target);
+        padding: 0.75rem 1.5rem;
     }
 }
 
+/* Móviles */
 @media (max-width: 576px) {
+    :root {
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+    }
+    
+    .hero-section {
+        padding: var(--spacing-md) 0;
+    }
+    
     .display-3 {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        line-height: 1.3;
     }
 
     .display-5 {
         font-size: 1.5rem;
     }
-
-    .btn-lg {
-        padding: 0.5rem 1.5rem;
-        font-size: 1rem;
+    
+    .display-6 {
+        font-size: 1.25rem;
     }
 
-    .hero-stats .row {
-        gap: 1rem;
+    .btn-lg {
+        padding: 0.625rem 1.5rem;
+        font-size: 1rem;
+        min-height: var(--touch-target);
     }
 
     .stat-card {
-        padding: 1rem;
+        padding: var(--spacing-sm);
     }
 
     .stat-number {
-        font-size: 1.8rem;
+        font-size: 1.75rem;
     }
 
     .stat-icon {
         font-size: 2rem;
+    }
+    
+    .feature-icon,
+    .step-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    /* Mejorar legibilidad de texto */
+    .lead {
+        font-size: 1rem;
+    }
+    
+    /* Cards más compactas en móvil */
+    .feature-card,
+    .action-card,
+    .step-card {
+        padding: var(--spacing-md);
     }
 }
 
