@@ -254,6 +254,7 @@ class ProcesadorDatosRelevamiento:
 
             # Columnas de descripción
             'descripcion': 'descripcion',
+            'descripción': 'descripcion',  # Con acento
             'description': 'descripcion',
             'observaciones': 'descripcion'
         }
@@ -366,17 +367,8 @@ class ProcesadorDatosRelevamiento:
         Returns:
             Diccionario de propiedad enriquecido
         """
-        # Solo enriquecer si faltan datos críticos
-        necesita_enriquecimiento = (
-            not propiedad.get('precio') or
-            not propiedad.get('habitaciones') or
-            not propiedad.get('banos') or
-            not propiedad.get('zona') or
-            not propiedad.get('tipo_propiedad')
-        )
-
-        if not necesita_enriquecimiento:
-            return propiedad
+        # Para proveedor 02, siempre intentar enriquecer si hay descripción
+        # porque sabemos que los datos están en texto libre
 
         try:
             logger.info(f"Enriqueciendo propiedad {propiedad['id']} con LLM...")

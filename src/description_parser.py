@@ -211,10 +211,10 @@ JSON:"""
             logger.info(f"Llamando LLM para extraer datos...")
             self.stats["llm_calls"] += 1
             
-            response = self.llm.process_natural_language(prompt)
+            response = self.llm.consultar(prompt)
             
             # Parsear respuesta
-            extracted_data = self._parse_llm_extraction(response["respuesta"])
+            extracted_data = self._parse_llm_extraction(response)
             
             # Guardar en caché
             if use_cache:

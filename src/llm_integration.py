@@ -152,7 +152,7 @@ JSON:"""
             raise ValueError(f"Error procesando respuesta: {e}")
 
     def _call_zai(self, prompt: str) -> str:
-        """Realiza llamada a la API de Z.AI."""
+        """Realiza llamada a la API de Z.AI (formato OpenAI)."""
         url = "https://api.z.ai/api/paas/v4/chat/completions"
 
         payload = {
@@ -177,7 +177,22 @@ JSON:"""
             response.raise_for_status()
 
             data = response.json()
-            return data["choices"][0]["message"]["content"]
+            
+            # z.ai puede devolver diferentes formatos
+            # Intentar formato Anthropic primero
+            if "content" in data and isinstance(data["content"], list):
+                return data["content"][0]["text"]
+            # Formato OpenAI/alternativo
+            elif "choices" in data:
+                return data["choices"][0]["message"]["content"]
+            # Formato directo
+            elif "text" in data:
+                return data["text"]
+            else:
+                # Log para debugging
+                import json
+                print(f"DEBUG - Respuesta completa de z.ai:\n{json.dumps(data, indent=2)}")
+                raise ValueError(f"Formato de respuesta no reconocido. Keys disponibles: {list(data.keys())}")
 
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"Error de conexión con Z.AI: {e}")
@@ -382,6 +397,29 @@ JSON:"""
             return False
 
         return True
+
+    def consultar(self, prompt: str) -> str:
+        """
+        Realiza una consulta genérica al LLM.
+
+        Args:
+            prompt: Texto del prompt
+
+        Returns:
+            Respuesta del LLM como texto
+
+        Raises:
+            ValueError: Si el proveedor no está soportado o hay error en la respuesta
+            ConnectionError: Si hay error de conexión
+        """
+        if self.config.provider == "zai":
+            return self._call_zai(prompt)
+        elif self.config.provider == "openrouter":
+            return self._call_openrouter(prompt)
+        elif self.config.provider == "openai":
+            return self._call_openai(prompt)
+        else:
+            raise ValueError(f"Proveedor no soportado: {self.config.provider}")
 
     def obtener_info_configuracion(self) -> Dict[str, Any]:
         """
