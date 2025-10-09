@@ -207,11 +207,11 @@
             <div class="row mb-5">
                 <div class="col-lg-12 text-center">
                     <h1 class="display-5 fw-bold mb-3">
-                        <i class="bi bi-person-plus-fill text-primary me-3"></i>
-                        Crear Perfil de Cliente
+                        <i class="bi bi-graph-up-arrow text-primary me-3"></i>
+                        Crear Perfil de Inversor
                     </h1>
                     <p class="lead text-muted">
-                        Completa el formulario para recibir recomendaciones personalizadas basadas en tus necesidades específicas
+                        Define tus criterios de inversión para recibir oportunidades inmobiliarias con alto potencial de retorno
                     </p>
                 </div>
             </div>
@@ -334,7 +334,7 @@
                     <div class="section-icon">
                         <i class="bi bi-people-fill"></i>
                     </div>
-                    <h4 class="mb-4">Composición Familiar</h4>
+                    <h4 class="mb-4">Perfil del Inversor</h4>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-floating">
@@ -355,10 +355,16 @@
                                 <label for="adultosMayores">Adultos Mayores</label>
                             </div>
                         </div>
-                        <div class="col-12" id="edadesNinosContainer" style="display: none;">
-                            <label class="form-label">Edades de los niños (separadas por coma):</label>
-                            <input type="text" class="form-control" id="edadesNinos" placeholder="Ej: 5, 8, 12">
-                            <small class="text-muted">Ingresa las edades de los niños separadas por comas</small>
+                        <div class="col-12" id="tipoInversionContainer">
+                            <label class="form-label">Tipo de Inversión:</label>
+                            <select class="form-select" id="tipoInversion">
+                                <option value="">Seleccionar tipo</option>
+                                <option value="residencial">Residencial (venta/alquiler)</option>
+                                <option value="comercial">Comercial (oficinas/locales)</option>
+                                <option value="desarrollo">Desarrollo inmobiliario</option>
+                                <option value="terrenos">Terrenos para urbanizar</option>
+                                <option value="mixto">Mixto (combinado)</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">

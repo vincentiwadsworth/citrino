@@ -347,14 +347,14 @@
                 Puedes describirme en lenguaje natural lo que buscas, y te ayudaré a encontrar las propiedades perfectas para ti.
             </p>
             <div class="quick-suggestions justify-content-center mb-4">
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy una familia joven con 2 hijos buscando departamento en Equipetrol')">
-                    Familia joven
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy un inversor buscando propiedades con buen potencial de retorno en Santa Cruz')">
+                    Inversor capitalista
                 </div>
                 <div class="suggestion-chip" onclick="useQuickSuggestion('Busco una casa para inversión con plusvalía en zona norte')">
                     Inversor
                 </div>
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy profesional joven buscando monoambiente moderno cerca de mi trabajo')">
-                    Profesional joven
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Busco desarrollo inmobiliario en zonas con alta demanda comercial')">
+                    Desarrollador inmobiliario
                 </div>
             </div>
             <button class="btn btn-primary btn-lg" onclick="startChat()">
@@ -449,14 +449,14 @@
                 <!-- Chat Input -->
                 <div class="chat-input-container">
                     <div class="quick-suggestions" id="quickSuggestions">
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué zonas tienen mejores opciones para familias?')">
-                            Zonas para familias
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué zonas tienen mejor potencial de inversión?')">
+                            Zonas con potencial
                         </div>
                         <div class="suggestion-chip" onclick="useQuickSuggestion('Busco algo con buen potencial de reventa')">
                             Opción de inversión
                         </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Necesito estar cerca de colegios y hospitales')">
-                            Cercanía a servicios
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Busco zonas con alta demanda comercial y corporativa')">
+                            Alta demanda
                         </div>
                         <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué opciones hay con garaje incluido?')">
                             Con garaje
@@ -571,7 +571,7 @@
             // Enviar mensaje de bienvenida
             const welcomeMessage = {
                 type: 'assistant',
-                content: '¡Hola! Soy tu asistente inmobiliario de Citrino. Puedes describirme en lenguaje natural lo que buscas, como:\n\n• "Soy una familia con 2 hijos buscando departamento en Equipetrol"\n• "Busco una casa para inversión con presupuesto de $200,000"\n• "Necesito algo cerca de colegios y parques"\n\n¿Qué tipo de propiedad estás buscando?',
+                content: '¡Hola! Soy tu asistente de inversión inmobiliaria de Citrino. Puedes describirme en lenguaje natural lo que buscas, como:\n\n• "Soy un inversor buscando propiedades con potencial de retorno en Equipetrol"\n• "Busco desarrollo inmobiliario con presupuesto de $500,000"\n• "Necesito zonas con alta demanda comercial"\n\n¿Qué tipo de inversión estás buscando?',
                 timestamp: new Date().toISOString()
             };
 
