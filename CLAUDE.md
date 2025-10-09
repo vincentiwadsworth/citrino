@@ -305,6 +305,17 @@ pytest tests/test_api_simple.py -v
 - Implement proper error handling and logging
 - Maintain thread safety for cached data
 
+### CRITICAL: PROHIBICIÓN DE EMOJIS
+**ESTRICTAMENTE PROHIBIDO usar emojis en cualquier código, comentarios, logs o documentación.**
+- **MOTIVO**: Los emojis consumen una cantidad excesiva e innecesaria de tokens
+- **REGLA**: Texto plano únicamente. Sin caracteres Unicode innecesarios
+- **CONSECUENCIA**: Violación grave de las mejores prácticas de desarrollo
+- **ALTERNATIVAS**: Use texto descriptivo en lugar de símbolos
+  - ❌ "🔴 Error" → ✅ "ERROR:"
+  - ❌ "✅ Success" → ✅ "SUCCESS:"
+  - ❌ "⚠️ Warning" → ✅ "WARNING:"
+  - ❌ "📁 File" → ✅ "FILE:"
+
 ### Data Handling
 - Always validate coordinates before distance calculations
 - Use the Haversine formula for geographic distances
