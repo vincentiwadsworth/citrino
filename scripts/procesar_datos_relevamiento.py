@@ -120,7 +120,9 @@ class ProcesadorDatosRelevamiento:
             'monto': 'precio',
             'precio_venta': 'precio',
 
-            # Columnas de tipo
+            # Columnas de tipo (extraído del título)
+            'título': 'titulo',
+            'titulo': 'titulo',
             'tipo': 'tipo_propiedad',
             'tipo_propiedad': 'tipo_propiedad',
             'property_type': 'tipo_propiedad',
@@ -132,6 +134,7 @@ class ProcesadorDatosRelevamiento:
             'ubicacion': 'zona',
             'location': 'zona',
             'sector': 'zona',
+            'características_-_ubicación': 'ubicacion_caracteristicas',
 
             # Columnas de dirección
             'direccion': 'direccion',
@@ -153,6 +156,8 @@ class ProcesadorDatosRelevamiento:
             'm2': 'superficie',
             'metros_cuadrados': 'superficie',
             'surface': 'superficie',
+            'sup._terreno': 'superficie_terreno',
+            'sup._construida': 'superficie_construida',
 
             # Columnas de habitaciones
             'habitaciones': 'habitaciones',
@@ -167,10 +172,21 @@ class ProcesadorDatosRelevamiento:
             'bathrooms': 'banos',
             'baths': 'banos',
 
+            # Columnas adicionales
+            'garajes': 'garajes',
+            'url': 'url',
+            'agente': 'agente',
+            'teléfono': 'telefono',
+            'correo': 'correo',
+            'detalles': 'detalles',
+            'características_-_servicios': 'servicios_caracteristicas',
+            'características_-_interior': 'interior_caracteristicas',
+            'características_-_exterior': 'exterior_caracteristicas',
+            'características_-_general': 'general_caracteristicas',
+
             # Columnas de descripción
             'descripcion': 'descripcion',
             'description': 'descripcion',
-            'detalles': 'descripcion',
             'observaciones': 'descripcion'
         }
 
@@ -187,21 +203,37 @@ class ProcesadorDatosRelevamiento:
     def procesar_propiedad(self, row: pd.Series, fecha_relevamiento: str, source_file: str) -> Dict[str, Any]:
         """Procesa una fila de propiedad y la convierte al formato estándar."""
         try:
+            # Extraer tipo de propiedad desde el título si no está disponible
+            titulo = self.limpiar_texto(str(row.get('titulo', '')))
+            tipo_propiedad = self.limpiar_texto(str(row.get('tipo_propiedad', '')))
+
+            if not tipo_propiedad and titulo:
+                tipo_propiedad = self.extraer_tipo_propiedad_desde_titulo(titulo)
+
             # Extraer datos básicos
             propiedad = {
                 'id': f"{source_file}_{row.name}",
-                'tipo_propiedad': self.limpiar_texto(str(row.get('tipo_propiedad', ''))),
+                'titulo': titulo,
+                'tipo_propiedad': tipo_propiedad,
                 'precio': self.limpiar_precio(row.get('precio')),
                 'zona': self.limpiar_texto(str(row.get('zona', ''))),
                 'direccion': self.limpiar_texto(str(row.get('direccion', ''))),
                 'latitud': self.limpiar_coordenada(row.get('latitud')),
                 'longitud': self.limpiar_coordenada(row.get('longitud')),
                 'superficie': self.limpiar_numero(row.get('superficie')),
+                'superficie_terreno': self.limpiar_numero(row.get('superficie_terreno')),
+                'superficie_construida': self.limpiar_numero(row.get('superficie_construida')),
                 'habitaciones': self.limpiar_numero(row.get('habitaciones')),
                 'banos': self.limpiar_numero(row.get('banos')),
+                'garajes': self.limpiar_numero(row.get('garajes')),
                 'descripcion': self.limpiar_texto(str(row.get('descripcion', ''))),
                 'fecha_relevamiento': fecha_relevamiento,
                 'fuente': source_file,
+                'url': self.limpiar_texto(str(row.get('url', ''))),
+                'agente': self.limpiar_texto(str(row.get('agente', ''))),
+                'telefono': self.limpiar_texto(str(row.get('telefono', ''))),
+                'correo': self.limpiar_texto(str(row.get('correo', ''))),
+                'detalles': self.limpiar_texto(str(row.get('detalles', ''))),
                 'unidad_vecinal': self.extraer_uv(row),
                 'manzana': self.extraer_manzana(row)
             }
@@ -288,16 +320,43 @@ class ProcesadorDatosRelevamiento:
 
         return ''
 
+    def extraer_tipo_propiedad_desde_titulo(self, titulo: str) -> str:
+        """Extrae el tipo de propiedad desde el título."""
+        if not titulo:
+            return ''
+
+        titulo_lower = titulo.lower()
+
+        # Palabras clave para diferentes tipos de propiedades
+        tipos_propiedad = {
+            'casa': ['casa', 'chalet', 'casa familiar', 'casa de campo', 'residencia'],
+            'departamento': ['departamento', 'apartamento', 'depto', 'apto', 'monoambiente', 'studio', 'suite'],
+            'penthouse': ['penthouse', 'ph', 'dúplex', 'duplex', 'ático', 'attic'],
+            'terreno': ['terreno', 'lote', 'solar', 'parcela'],
+            'oficina': ['oficina', 'local comercial', 'local', 'consultorio'],
+            'galpón': ['galpón', 'galpon', 'depósito', 'bodega', 'almacén'],
+            'edificio': ['edificio', 'torre', 'conjunto', 'complejo']
+        }
+
+        # Buscar palabras clave en el título
+        for tipo, palabras in tipos_propiedad.items():
+            for palabra in palabras:
+                if palabra in titulo_lower:
+                    return tipo
+
+        # Si no se encuentra ningún tipo específico, intentar inferir
+        if any(palabra in titulo_lower for palabra in ['venta', 'alquiler', 'alquilar']):
+            return 'propiedad'  # Genérico pero válido
+
+        return ''
+
     def validar_propiedad(self, propiedad: Dict[str, Any]) -> bool:
         """Valida que la propiedad tenga datos mínimos requeridos."""
-        # Requerir al menos precio o zona
-        if not propiedad.get('precio') and not propiedad.get('zona'):
+        # Requerir al menos precio o coordenadas
+        if not propiedad.get('precio') and not (propiedad.get('latitud') and propiedad.get('longitud')):
             return False
 
-        # Requerir tipo de propiedad
-        if not propiedad.get('tipo_propiedad'):
-            return False
-
+        # El tipo de propiedad se puede extraer del título, así que no es obligatorio aquí
         return True
 
     def procesar_todos_los_archivos(self) -> List[Dict[str, Any]]:

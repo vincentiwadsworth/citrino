@@ -6,7 +6,7 @@
 class CitrinoAPI {
     constructor() {
         // Configuración base de la API
-        this.baseURL = 'http://localhost:5000/api';
+        this.baseURL = 'http://localhost:5001/api';
         this.timeout = 30000; // 30 segundos
 
         // Configuración de headers por defecto
