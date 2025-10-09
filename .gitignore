@@ -6,6 +6,9 @@ data/**/*.xlsx
 data/*.csv
 data/**/*.csv
 
+# EXCEPCIÓN: Permitir archivo esencial para producción
+!data/base_datos_relevamiento.json
+
 # Ignorar archivos temporales y caché
 *.tmp
 *.cache
