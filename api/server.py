@@ -17,7 +17,20 @@ from recommendation_engine_mejorado import RecommendationEngineMejorado
 from property_catalog import SistemaConsultaCitrino
 
 app = Flask(__name__)
-CORS(app)  # Permite peticiones desde otros dominios
+
+# Configuración de CORS para producción
+ALLOWED_ORIGINS = [
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'http://localhost:5500',  # Live Server
+    'https://*.github.io',     # GitHub Pages
+]
+
+# En producción, añadir origen específico de GitHub Pages
+if os.getenv('GITHUB_PAGES_URL'):
+    ALLOWED_ORIGINS.append(os.getenv('GITHUB_PAGES_URL'))
+
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permitir todos los orígenes para /api/*
 
 # Inicializar sistemas
 sistema_consulta = SistemaConsultaCitrino()
@@ -513,8 +526,13 @@ Basado en análisis de 76,853 propiedades en Santa Cruz de la Sierra
     return briefing
 
 if __name__ == '__main__':
+    # Configuración para desarrollo vs producción
+    port = int(os.getenv('PORT', 5001))
+    debug = os.getenv('FLASK_ENV', 'development') == 'development'
+    
     print("Iniciando API Citrino...")
-    print("Endpoint: http://localhost:5000")
-    print("Documentación: http://localhost:5000/api/health")
+    print(f"Endpoint: http://localhost:{port}")
+    print(f"Documentación: http://localhost:{port}/api/health")
+    print(f"Entorno: {'Producción' if not debug else 'Desarrollo'}")
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=debug, host='0.0.0.0', port=port)

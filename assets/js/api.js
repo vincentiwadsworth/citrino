@@ -5,9 +5,18 @@
 
 class CitrinoAPI {
     constructor() {
-        // Configuración base de la API
-        this.baseURL = 'http://localhost:5001/api';
+        // Detectar entorno automáticamente
+        const isDev = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname === '';
+        
+        // Configuración base de la API según entorno
+        this.baseURL = isDev 
+            ? 'http://localhost:5001/api'
+            : (window.CITRINO_API_URL || 'https://citrino-api.onrender.com/api');
+        
         this.timeout = 30000; // 30 segundos
+        this.isDevelopment = isDev;
 
         // Configuración de headers por defecto
         this.defaultHeaders = {
@@ -19,6 +28,10 @@ class CitrinoAPI {
         this.isOnline = navigator.onLine;
         this.connectionRetryCount = 0;
         this.maxRetries = 3;
+        
+        // Log del entorno
+        console.log(`[Citrino API] Entorno: ${isDev ? 'Desarrollo' : 'Producción'}`);
+        console.log(`[Citrino API] Base URL: ${this.baseURL}`);
 
         // Event listeners para conexión
         window.addEventListener('online', () => {
