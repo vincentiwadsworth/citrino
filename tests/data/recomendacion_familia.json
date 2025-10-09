@@ -1,0 +1,43 @@
+{
+  "briefing_personalizado": "ESTIMADO CLIENTE,\n\nGracias por su inter\u00e9s en nuestras propiedades. Basado en sus necesidades espec\u00edficas, hemos preparado las siguientes recomendaciones personalizadas:\n\nRESUMEN DE SU B\u00daSQUEDA:\n\u2022 Presupuesto: $200,000 - $280,000 USD\n\u2022 Composici\u00f3n: 2 adultos\" + (f\", 2 ni\u00f1os\" if ninos else \"\") + \"\n\u2022 Zona de preferencia: Equipetrol\n\u2022 Total de opciones ideales encontradas: 3\n\nRECOMENDACIONES PRINCIPALES:\n\n1. Casa en Busch-Equipetrol oeste (33)\n   \u2022 Precio: $269,595 USD\n   \u2022 Ubicaci\u00f3n: Equipetrol\n   \u2022 Caracter\u00edsticas: 3 habitaciones, 2 ba\u00f1os, 159 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 73.0%\n   \u2022 Justificaci\u00f3n: Precio de $269,595 se ajusta al presupuesto m\u00e1ximo. 3 habitaciones disponibles. Superficie generosa: 159m\u00b2 (39.8m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 2 espacios de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: gimnasio, area_barbacoa. Estado de conservaci\u00f3n: muy_bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n2. Casa en Equipetrol este (34)\n   \u2022 Precio: $256,800 USD\n   \u2022 Ubicaci\u00f3n: Equipetrol\n   \u2022 Caracter\u00edsticas: 3 habitaciones, 3 ba\u00f1os, 188 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 73.0%\n   \u2022 Justificaci\u00f3n: Precio de $256,800 se ajusta al presupuesto m\u00e1ximo. 3 habitaciones disponibles. Superficie generosa: 188m\u00b2 (47.0m\u00b2 por persona). 3 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: piscina_comunitaria, seguridad_24h. Estado de conservaci\u00f3n: bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n3. Casa en Equipetrol norte (59-PSU-5)\n   \u2022 Precio: $265,881 USD\n   \u2022 Ubicaci\u00f3n: Equipetrol\n   \u2022 Caracter\u00edsticas: 5 habitaciones, 2 ba\u00f1os, 203 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 73.0%\n   \u2022 Justificaci\u00f3n: Precio de $265,881 se ajusta al presupuesto m\u00e1ximo. 5 habitaciones adecuadas para 4 personas. Superficie generosa: 203m\u00b2 (50.8m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: piscina_comunitaria, seguridad_24h. Estado de conservaci\u00f3n: nuevo. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n\nPR\u00d3XIMOS PASOS:\n1. Podemos coordinar visitas a las propiedades de su inter\u00e9s\n2. Ofrecemos asesor\u00eda legal y financiera completa\n3. Contamos con herramientas exclusivas de negociaci\u00f3n\n\nCONTACTO:\nPara m\u00e1s informaci\u00f3n o coordinar visitas, por favor contacte a su asesor comercial de Citrino.\n\n---\nEste briefing fue generado autom\u00e1ticamente por el sistema inteligente de Citrino\nBasado en an\u00e1lisis de 76,853 propiedades en Santa Cruz de la Sierra\n",
+  "recomendaciones": [
+    {
+      "banos": 2,
+      "compatibilidad": 73.0,
+      "fuente": "franz_excel",
+      "habitaciones": 3,
+      "id": "franz_a261494d",
+      "justificacion": "Precio de $269,595 se ajusta al presupuesto m\u00e1ximo. 3 habitaciones disponibles. Superficie generosa: 159m\u00b2 (39.8m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 2 espacios de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: gimnasio, area_barbacoa. Estado de conservaci\u00f3n: muy_bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Busch-Equipetrol oeste (33)",
+      "precio": 269595,
+      "superficie_m2": 159,
+      "zona": "Equipetrol"
+    },
+    {
+      "banos": 3,
+      "compatibilidad": 73.0,
+      "fuente": "franz_excel",
+      "habitaciones": 3,
+      "id": "franz_b45dac65",
+      "justificacion": "Precio de $256,800 se ajusta al presupuesto m\u00e1ximo. 3 habitaciones disponibles. Superficie generosa: 188m\u00b2 (47.0m\u00b2 por persona). 3 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: piscina_comunitaria, seguridad_24h. Estado de conservaci\u00f3n: bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Equipetrol este (34)",
+      "precio": 256800,
+      "superficie_m2": 188,
+      "zona": "Equipetrol"
+    },
+    {
+      "banos": 2,
+      "compatibilidad": 73.0,
+      "fuente": "franz_excel",
+      "habitaciones": 5,
+      "id": "franz_2cc9fdc8",
+      "justificacion": "Precio de $265,881 se ajusta al presupuesto m\u00e1ximo. 5 habitaciones adecuadas para 4 personas. Superficie generosa: 203m\u00b2 (50.8m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Equipetrol. Condominio cerrado con seguridad 24h. Amenidades: piscina_comunitaria, seguridad_24h. Estado de conservaci\u00f3n: nuevo. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Equipetrol norte (59-PSU-5)",
+      "precio": 265881,
+      "superficie_m2": 203,
+      "zona": "Equipetrol"
+    }
+  ],
+  "success": true,
+  "total_recomendaciones": 3
+}

@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Virtual - Citrino</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            background: white;
+            overflow-y: auto;
+            padding: 2rem;
+            min-height: 400px;
+            max-height: 600px;
+        }
+
+        .chat-input-container {
+            background: white;
+            border-radius: 0 0 20px 20px;
+            padding: 1.5rem;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.assistant {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant .message-bubble {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            border: 1px solid #e9ecef;
+            max-width: 70%;
+        }
+
+        .typing-indicator.show {
+            display: inline-block;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6c757d;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-chip {
+            background: #e8f0fe;
+            border: 1px solid #d2e3fc;
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-chip:hover {
+            background: #d2e3fc;
+            transform: translateY(-2px);
+        }
+
+        .chat-input-group {
+            position: relative;
+        }
+
+        .chat-input {
+            border-radius: 50px;
+            border: 2px solid #e9ecef;
+            padding-right: 120px;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+
+        .send-button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            text-align: center;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .profile-summary {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background: #dc3545;
+        }
+
+        .status-processing {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        .extracted-profile {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .profile-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .profile-value {
+            color: #28a745;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: calc(100vh - 120px);
+                margin: 1rem;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .welcome-card {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .quick-suggestions {
+                gap: 0.3rem;
+            }
+
+            .suggestion-chip {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        .voice-button {
+            position: absolute;
+            right: 65px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background: #6c757d;
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .voice-button:hover {
+            background: #5a6268;
+        }
+
+        .voice-button.recording {
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Overlay -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-card">
+            <div class="section-icon mx-auto mb-3">
+                <i class="bi bi-robot"></i>
+            </div>
+            <h3 class="mb-3">¡Hola! Soy tu asistente inmobiliario</h3>
+            <p class="text-muted mb-4">
+                Puedes describirme en lenguaje natural lo que buscas, y te ayudaré a encontrar las propiedades perfectas para ti.
+            </p>
+            <div class="quick-suggestions justify-content-center mb-4">
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy una familia joven con 2 hijos buscando departamento en Equipetrol')">
+                    Familia joven
+                </div>
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Busco una casa para inversión con plusvalía en zona norte')">
+                    Inversor
+                </div>
+                <div class="suggestion-chip" onclick="useQuickSuggestion('Soy profesional joven buscando monoambiente moderno cerca de mi trabajo')">
+                    Profesional joven
+                </div>
+            </div>
+            <button class="btn btn-primary btn-lg" onclick="startChat()">
+                <i class="bi bi-chat-dots me-2"></i>Comenzar a chatear
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-house-heart-fill me-2"></i>Citrino
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="perfil.html">
+                            <i class="bi bi-person-plus me-1"></i>Perfil de Cliente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="chat.html">
+                            <i class="bi bi-chat-dots me-1"></i>Asistente Virtual
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="resultados.html">
+                            <i class="bi bi-search me-1"></i>Resultados
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-4">
+        <div class="container">
+            <div class="chat-container">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <div class="section-icon me-3">
+                                    <i class="bi bi-robot"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Asistente Virtual Citrino</h5>
+                                    <p class="mb-0">
+                                        <span class="status-indicator status-online" id="statusIndicator"></span>
+                                        <span id="statusText">En línea - Listo para ayudarte</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearChat()">
+                                <i class="bi bi-trash me-1"></i>Limpiar chat
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportChat()">
+                                <i class="bi bi-download me-1"></i>Exportar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Los mensajes se agregarán aquí dinámicamente -->
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="ms-2">Escribiendo...</span>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <div class="quick-suggestions" id="quickSuggestions">
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué zonas tienen mejores opciones para familias?')">
+                            Zonas para familias
+                        </div>
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Busco algo con buen potencial de reventa')">
+                            Opción de inversión
+                        </div>
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('Necesito estar cerca de colegios y hospitales')">
+                            Cercanía a servicios
+                        </div>
+                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué opciones hay con garaje incluido?')">
+                            Con garaje
+                        </div>
+                    </div>
+                    <div class="chat-input-group">
+                        <textarea
+                            class="form-control chat-input"
+                            id="chatInput"
+                            placeholder="Describe lo que buscas..."
+                            rows="1"
+                            maxlength="500"></textarea>
+                        <button class="voice-button" id="voiceButton" onclick="toggleVoiceRecording()">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        <button class="send-button" id="sendButton" onclick="sendMessage()">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Presiona Enter para enviar, Shift+Enter para nueva línea</small>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API Module -->
+    <script src="assets/js/api.js"></script>
+    <!-- Main JS -->
+    <script src="assets/js/main.js"></script>
+    <!-- Chat-specific JS -->
+    <script>
+        // Variables globales
+        let chatHistory = [];
+        let currentProfile = null;
+        let isProcessing = false;
+        let voiceRecognition = null;
+        let isRecording = false;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChat();
+            initializeVoiceRecognition();
+            loadChatHistory();
+        });
+
+        // Inicializar chat
+        function initializeChat() {
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+
+                // Habilitar/deshabilitar botón de enviar
+                sendButton.disabled = !this.value.trim() || isProcessing;
+            });
+
+            // Enviar con Enter
+            chatInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Ocultar welcome overlay si ya hay historial
+            if (chatHistory.length > 0) {
+                document.getElementById('welcomeOverlay').style.display = 'none';
+            }
+        }
+
+        // Inicializar reconocimiento de voz
+        function initializeVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                voiceRecognition = new SpeechRecognition();
+
+                voiceRecognition.continuous = false;
+                voiceRecognition.interimResults = false;
+                voiceRecognition.lang = 'es-ES';
+
+                voiceRecognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('chatInput').value = transcript;
+                    document.getElementById('chatInput').dispatchEvent(new Event('input'));
+                    stopVoiceRecording();
+                };
+
+                voiceRecognition.onerror = function(event) {
+                    console.error('Error en reconocimiento de voz:', event.error);
+                    stopVoiceRecording();
+                    showToast('Error al reconocer voz. Intenta escribir tu mensaje.', 'error');
+                };
+
+                voiceRecognition.onend = function() {
+                    stopVoiceRecording();
+                };
+            } else {
+                // Ocultar botón de voz si no es compatible
+                document.getElementById('voiceButton').style.display = 'none';
+            }
+        }
+
+        // Comenzar chat
+        function startChat() {
+            document.getElementById('welcomeOverlay').style.display = 'none';
+
+            // Enviar mensaje de bienvenida
+            const welcomeMessage = {
+                type: 'assistant',
+                content: '¡Hola! Soy tu asistente inmobiliario de Citrino. Puedes describirme en lenguaje natural lo que buscas, como:\n\n• "Soy una familia con 2 hijos buscando departamento en Equipetrol"\n• "Busco una casa para inversión con presupuesto de $200,000"\n• "Necesito algo cerca de colegios y parques"\n\n¿Qué tipo de propiedad estás buscando?',
+                timestamp: new Date().toISOString()
+            };
+
+            addMessage(welcomeMessage);
+        }
+
+        // Usar sugerencia rápida
+        function useQuickSuggestion(text) {
+            document.getElementById('chatInput').value = text;
+            document.getElementById('chatInput').dispatchEvent(new Event('input'));
+            sendMessage();
+        }
+
+        // Enviar mensaje
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message || isProcessing) return;
+
+            // Agregar mensaje del usuario
+            const userMessage = {
+                type: 'user',
+                content: message,
+                timestamp: new Date().toISOString()
+            };
+
+            addMessage(userMessage);
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Mostrar indicador de escritura
+            showTypingIndicator();
+            updateStatus('processing', 'Procesando tu solicitud...');
+
+            isProcessing = true;
+            document.getElementById('sendButton').disabled = true;
+
+            try {
+                // Procesar mensaje con LLM
+                const result = await processMessageWithLLM(message);
+
+                if (result.success) {
+                    // Extraer perfil del mensaje
+                    const extractedProfile = result.data.profile;
+
+                    if (extractedProfile) {
+                        // Mostrar perfil extraído
+                        const profileMessage = {
+                            type: 'assistant',
+                            content: `He entendido que buscas:\n\n${formatProfileSummary(extractedProfile)}`,
+                            timestamp: new Date().toISOString(),
+                            profile: extractedProfile
+                        };
+
+                        addMessage(profileMessage);
+
+                        // Guardar perfil actual
+                        currentProfile = extractedProfile;
+
+                        // Preguntar si desea ver recomendaciones
+                        setTimeout(() => {
+                            const confirmMessage = {
+                                type: 'assistant',
+                                content: '¿Te gustaría que te muestre las propiedades que coinciden con tu perfil?',
+                                timestamp: new Date().toISOString(),
+                                showRecommendationButton: true
+                            };
+                            addMessage(confirmMessage);
+                        }, 1000);
+
+                    } else {
+                        // Mensaje de respuesta normal
+                        const responseMessage = {
+                            type: 'assistant',
+                            content: result.data.response || 'Entendido. ¿Podrías darme más detalles sobre lo que buscas?',
+                            timestamp: new Date().toISOString()
+                        };
+
+                        addMessage(responseMessage);
+                    }
+                } else {
+                    throw new Error(result.error);
+                }
+
+            } catch (error) {
+                console.error('Error procesando mensaje:', error);
+
+                const errorMessage = {
+                    type: 'assistant',
+                    content: 'Lo siento, tuve problemas para procesar tu solicitud. Por favor, intenta describir tu búsqueda de otra manera o usa el formulario de perfil detallado.',
+                    timestamp: new Date().toISOString(),
+                    isError: true
+                };
+
+                addMessage(errorMessage);
+            } finally {
+                hideTypingIndicator();
+                updateStatus('online', 'En línea - Listo para ayudarte');
+                isProcessing = false;
+                document.getElementById('sendButton').disabled = false;
+            }
+        }
+
+        // Procesar mensaje con LLM (simulado)
+        async function processMessageWithLLM(message) {
+            // Simulación de procesamiento LLM
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Análisis simple del mensaje para extraer información
+            const profile = extractProfileFromMessage(message);
+
+            if (profile) {
+                return {
+                    success: true,
+                    data: {
+                        profile: profile,
+                        response: 'He analizado tu solicitud y encontrado un perfil. A continuación te muestro las propiedades recomendadas.'
+                    }
+                };
+            } else {
+                return {
+                    success: true,
+                    data: {
+                        response: generateContextualResponse(message)
+                    }
+                };
+            }
+        }
+
+        // Extraer perfil del mensaje
+        function extractProfileFromMessage(message) {
+            const lowerMessage = message.toLowerCase();
+
+            // Análisis simple del mensaje
+            let profile = {
+                id: 'chat_profile_' + Date.now(),
+                nombreCliente: 'Cliente del Chat',
+                presupuesto_min: null,
+                presupuesto_max: null,
+                adultos: 1,
+                ninos: [],
+                adultos_mayores: 0,
+                zona_preferida: null,
+                tipo_propiedad: null,
+                necesidades: [],
+                caracteristicas_deseadas: []
+            };
+
+            // Extraer presupuesto
+            const presupuestoMatch = message.match(/\$(\d+(?:,\d+)*)/g);
+            if (presupuestoMatch) {
+                const amounts = presupuestoMatch.map(p => parseInt(p.replace('$', '').replace(',', '')));
+                profile.presupuesto_min = Math.min(...amounts) * 0.8;
+                profile.presupuesto_max = Math.max(...amounts) * 1.2;
+            } else {
+                const numMatch = message.match(/(\d+(?:,\d+)*)\s*(k|m)/i);
+                if (numMatch) {
+                    const amount = parseInt(numMatch[1].replace(',', ''));
+                    const multiplier = numMatch[2].toLowerCase() === 'k' ? 1000 : 1000000;
+                    profile.presupuesto_min = amount * multiplier * 0.8;
+                    profile.presupuesto_max = amount * multiplier * 1.2;
+                }
+            }
+
+            // Extraer composición familiar
+            if (lowerMessage.includes('familia') || lowerMessage.includes('hijos')) {
+                profile.adultos = 2;
+                const hijoMatch = message.match(/(\d+)\s*(?:hijos?|niños?)/i);
+                if (hijoMatch) {
+                    const numHijos = parseInt(hijoMatch[1]);
+                    profile.ninos = Array(numHijos).fill(8); // Edad estimada
+                }
+            }
+
+            // Extraer zona
+            const zonas = ['equipetrol', 'santa mónica', 'urbari', 'los olivos', 'zona norte', 'zona sur', 'centro'];
+            for (const zona of zonas) {
+                if (lowerMessage.includes(zona)) {
+                    profile.zona_preferida = zona.charAt(0).toUpperCase() + zona.slice(1);
+                    break;
+                }
+            }
+
+            // Extraer tipo de propiedad
+            if (lowerMessage.includes('departamento') || lowerMessage.includes('apartamento')) {
+                profile.tipo_propiedad = 'departamento';
+            } else if (lowerMessage.includes('casa')) {
+                profile.tipo_propiedad = 'casa';
+            } else if (lowerMessage.includes('penthouse')) {
+                profile.tipo_propiedad = 'penthouse';
+            }
+
+            // Extraer necesidades
+            if (lowerMessage.includes('colegio') || lowerMessage.includes('escuela')) {
+                profile.necesidades.push('escuela_primaria');
+            }
+            if (lowerMessage.includes('universidad')) {
+                profile.necesidades.push('universidad');
+            }
+            if (lowerMessage.includes('hospital') || lowerMessage.includes('clinica')) {
+                profile.necesidades.push('hospital');
+            }
+            if (lowerMessage.includes('supermercado')) {
+                profile.necesidades.push('supermercado');
+            }
+            if (lowerMessage.includes('parque')) {
+                profile.necesidades.push('parque');
+            }
+            if (lowerMessage.includes('seguridad')) {
+                profile.necesidades.push('seguridad_privada');
+            }
+
+            // Extraer características
+            if (lowerMessage.includes('garaje') || lowerMessage.includes('estacionamiento')) {
+                profile.caracteristicas_deseadas.push('garaje');
+            }
+            if (lowerMessage.includes('amoblado')) {
+                profile.caracteristicas_deseadas.push('amoblado');
+            }
+            if (lowerMessage.includes('piscina')) {
+                profile.caracteristicas_deseadas.push('piscina');
+            }
+            if (lowerMessage.includes('gimnasio')) {
+                profile.caracteristicas_deseadas.push('gimnasio');
+            }
+
+            // Verificar si se extrajo información suficiente
+            const hasInfo = profile.presupuesto_max || profile.zona_preferida || profile.tipo_propiedad || profile.necesidades.length > 0;
+
+            return hasInfo ? profile : null;
+        }
+
+        // Generar respuesta contextual
+        function generateContextualResponse(message) {
+            const lowerMessage = message.toLowerCase();
+
+            if (lowerMessage.includes('precio') || lowerMessage.includes('cuánto') || lowerMessage.includes('costo')) {
+                return 'Los precios en Santa Cruz varían según la zona. Por ejemplo, en Equipetrol los departamentos pueden ir desde $80,000 hasta $300,000+, mientras que en zonas más económicas puedes encontrar opciones desde $50,000. ¿En qué zona te interesa buscar y cuál es tu presupuesto?';
+            }
+
+            if (lowerMessage.includes('zona') || lowerMessage.includes('área') || lowerMessage.includes('sector')) {
+                return 'Las zonas más populares en Santa Cruz son:\n• **Equipetrol**: Lujo, seguridad, centros comerciales\n• **Santa Mónica**: Familiar, colegios, parques\n• **Urbari**: Moderna, profesional, acceso rápido\n• **Los Olivos**: Tranquila, residencial, buena plusvalía\n\n¿Qué tipo de estilo de vida prefieres?';
+            }
+
+            if (lowerMessage.includes('inversión') || lowerMessage.includes('renta') || lowerMessage.includes('plusvalía')) {
+                return 'Para inversión te recomiendo zonas con alta plusvalía como Equipetrol, Urbari o áreas en desarrollo cerca de nuevos centros comerciales. Estos sectores ofrecen mejor rendimiento a largo plazo. ¿Tienes un rango de presupuesto específico para la inversión?';
+            }
+
+            if (lowerMessage.includes('familia') || lowerMessage.includes('niños') || lowerMessage.includes('hijos')) {
+                return 'Para familias te sugiero zonas con buenos colegios, parques y seguridad como Santa Mónica o Los Olivos. También es importante considerar accesos y servicios cercanos. ¿Cuántos hijos tienes y qué edades?';
+            }
+
+            return 'Entiendo tu interés. Para darte las mejores recomendaciones, podrías contarme más sobre:\n• Tu presupuesto aproximado\n• Si es para vivir o invertir\n• Cuántas personas vivirán allí\n• Zonas de preferencia\n• Servicios importantes para ti (colegios, hospitales, etc.)';
+        }
+
+        // Formatear resumen del perfil
+        function formatProfileSummary(profile) {
+            const items = [];
+
+            if (profile.presupuesto_max) {
+                items.push(`Presupuesto: $${profile.presupuesto_min?.toLocaleString() || 0} - $${profile.presupuesto_max.toLocaleString()}`);
+            }
+
+            if (profile.adultos || profile.ninos.length > 0 || profile.adultos_mayores > 0) {
+                const totalPersonas = profile.adultos + profile.ninos.length + profile.adultos_mayores;
+                const descripcion = [];
+                if (profile.adultos) descripcion.push(`${profile.adultos} adultos`);
+                if (profile.ninos.length > 0) descripcion.push(`${profile.ninos.length} niños`);
+                if (profile.adultos_mayores > 0) descripcion.push(`${profile.adultos_mayores} adultos mayores`);
+                items.push(`Personas: ${descripcion.join(', ')}`);
+            }
+
+            if (profile.zona_preferida) {
+                items.push(`Zona: ${profile.zona_preferida}`);
+            }
+
+            if (profile.tipo_propiedad) {
+                items.push(`Tipo: ${profile.tipo_propiedad}`);
+            }
+
+            if (profile.necesidades.length > 0) {
+                items.push(`Servicios: ${profile.necesidades.join(', ')}`);
+            }
+
+            if (profile.caracteristicas_deseadas.length > 0) {
+                items.push(`Características: ${profile.caracteristicas_deseadas.join(', ')}`);
+            }
+
+            return items.join(' • ') || 'Perfil básico';
+        }
+
+        // Agregar mensaje al chat
+        function addMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${message.type}`;
+            messageElement.innerHTML = `
+                <div class="message-bubble">
+                    ${message.type === 'assistant' ? formatAssistantMessage(message.content) : escapeHtml(message.content)}
+                    ${message.profile ? createProfileSummary(message.profile) : ''}
+                    ${message.showRecommendationButton ? createRecommendationButton() : ''}
+                </div>
+                <div class="message-time">${formatTime(message.timestamp)}</div>
+            `;
+
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Guardar en historial
+            chatHistory.push(message);
+            saveChatHistory();
+        }
+
+        // Formatear mensaje del asistente
+        function formatAssistantMessage(content) {
+            // Convertir saltos de línea a <br>
+            return content.replace(/\n/g, '<br>')
+                         // Convertir **texto** a <strong>texto</strong>
+                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                         // Convertir *texto* a <em>texto</em>
+                         .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        // Crear resumen de perfil
+        function createProfileSummary(profile) {
+            return `
+                <div class="extracted-profile">
+                    <div class="profile-item">
+                        <span class="profile-label">Presupuesto:</span>
+                        <span class="profile-value">$${profile.presupuesto_min?.toLocaleString() || 0} - $${profile.presupuesto_max?.toLocaleString() || 0}</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Personas:</span>
+                        <span class="profile-value">${profile.adultos} adultos, ${profile.ninos.length} niños</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Zona:</span>
+                        <span class="profile-value">${profile.zona_preferida || 'No especificada'}</span>
+                    </div>
+                    <div class="profile-item">
+                        <span class="profile-label">Tipo:</span>
+                        <span class="profile-value">${profile.tipo_propiedad || 'No especificado'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Crear botón de recomendación
+        function createRecommendationButton() {
+            return `
+                <div class="mt-3">
+                    <button class="btn btn-primary btn-sm" onclick="showRecommendations()">
+                        <i class="bi bi-search me-2"></i>Ver recomendaciones
+                    </button>
+                </div>
+            `;
+        }
+
+        // Mostrar recomendaciones
+        function showRecommendations() {
+            if (currentProfile) {
+                const params = new URLSearchParams();
+                Object.keys(currentProfile).forEach(key => {
+                    if (currentProfile[key] !== null && currentProfile[key] !== undefined && currentProfile[key] !== '') {
+                        params.set(key, typeof currentProfile[key] === 'object' ? JSON.stringify(currentProfile[key]) : currentProfile[key]);
+                    }
+                });
+                window.location.href = `resultados.html?${params.toString()}`;
+            }
+        }
+
+        // Mostrar/ocultar indicador de escritura
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('show');
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('show');
+        }
+
+        // Actualizar estado
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+
+            indicator.className = 'status-indicator status-' + status;
+            statusText.textContent = text;
+        }
+
+        // Limpiar chat
+        function clearChat() {
+            if (confirm('¿Estás seguro de que quieres limpiar todo el historial del chat?')) {
+                chatHistory = [];
+                currentProfile = null;
+                document.getElementById('chatMessages').innerHTML = '';
+                localStorage.removeItem('citrino_chat_history');
+                showToast('Chat limpiado correctamente', 'success');
+            }
+        }
+
+        // Exportar chat
+        function exportChat() {
+            const exportData = {
+                chatHistory: chatHistory,
+                currentProfile: currentProfile,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+            const exportFileDefaultName = `citrino_chat_${new Date().toISOString().split('T')[0]}.json`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+
+            showToast('Chat exportado correctamente', 'success');
+        }
+
+        // Guardar historial del chat
+        function saveChatHistory() {
+            try {
+                localStorage.setItem('citrino_chat_history', JSON.stringify(chatHistory));
+            } catch (error) {
+                console.error('Error al guardar historial del chat:', error);
+            }
+        }
+
+        // Cargar historial del chat
+        function loadChatHistory() {
+            try {
+                const saved = localStorage.getItem('citrino_chat_history');
+                if (saved) {
+                    chatHistory = JSON.parse(saved);
+
+                    // Restaurar mensajes en la interfaz
+                    const messagesContainer = document.getElementById('chatMessages');
+                    chatHistory.forEach(message => {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `message ${message.type}`;
+                        messageElement.innerHTML = `
+                            <div class="message-bubble">
+                                ${message.type === 'assistant' ? formatAssistantMessage(message.content) : escapeHtml(message.content)}
+                                ${message.profile ? createProfileSummary(message.profile) : ''}
+                                ${message.showRecommendationButton ? createRecommendationButton() : ''}
+                            </div>
+                            <div class="message-time">${formatTime(message.timestamp)}</div>
+                        `;
+                        messagesContainer.appendChild(messageElement);
+                    });
+
+                    if (chatHistory.length > 0) {
+                        document.getElementById('welcomeOverlay').style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar historial del chat:', error);
+            }
+        }
+
+        // Toggle grabación de voz
+        function toggleVoiceRecording() {
+            if (isRecording) {
+                stopVoiceRecording();
+            } else {
+                startVoiceRecording();
+            }
+        }
+
+        // Iniciar grabación de voz
+        function startVoiceRecording() {
+            if (!voiceRecognition) {
+                showToast('Tu navegador no soporta reconocimiento de voz', 'error');
+                return;
+            }
+
+            try {
+                voiceRecognition.start();
+                isRecording = true;
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.classList.add('recording');
+                voiceButton.innerHTML = '<i class="bi bi-stop-circle"></i>';
+                updateStatus('processing', 'Escuchando...');
+            } catch (error) {
+                console.error('Error al iniciar grabación:', error);
+                showToast('Error al iniciar grabación de voz', 'error');
+            }
+        }
+
+        // Detener grabación de voz
+        function stopVoiceRecording() {
+            if (voiceRecognition && isRecording) {
+                voiceRecognition.stop();
+            }
+
+            isRecording = false;
+            const voiceButton = document.getElementById('voiceButton');
+            voiceButton.classList.remove('recording');
+            voiceButton.innerHTML = '<i class="bi bi-mic"></i>';
+            updateStatus('online', 'En línea - Listo para ayudarte');
+        }
+
+        // Utilidades
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('es-BO', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const alertClass = type === 'success' ? 'alert-success' :
+                             type === 'error' ? 'alert-danger' : 'alert-info';
+            const icon = type === 'success' ? 'bi-check-circle-fill' :
+                        type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+
+            const toastHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 1060;" role="alert">
+                    <i class="bi ${icon} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', toastHtml);
+
+            setTimeout(() => {
+                const alert = document.querySelector('.alert:last-of-type');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

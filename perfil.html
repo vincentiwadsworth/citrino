@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Cliente - Citrino</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-section:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+
+        .need-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            margin: 0.25rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .need-tag:hover {
+            background: #e9ecef;
+        }
+
+        .need-tag.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e9ecef;
+            z-index: 1050;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .form-floating label {
+            color: #6c757d;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #667eea;
+        }
+
+        .error-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .error-feedback.show {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            min-width: 300px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .saved-profiles {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .profile-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .profile-card.selected {
+            background: #e8f0fe;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .need-tag {
+                font-size: 0.9rem;
+                padding: 0.2rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message alert alert-success alert-dismissible fade" id="successMessage">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span id="successText">¡Perfil guardado exitosamente!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-house-heart-fill me-2"></i>Citrino
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="perfil.html">
+                            <i class="bi bi-person-plus me-1"></i>Perfil de Cliente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="chat.html">
+                            <i class="bi bi-chat-dots me-1"></i>Asistente Virtual
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="resultados.html">
+                            <i class="bi bi-search me-1"></i>Resultados
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-5">
+        <div class="container">
+            <!-- Header -->
+            <div class="row mb-5">
+                <div class="col-lg-12 text-center">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="bi bi-person-plus-fill text-primary me-3"></i>
+                        Crear Perfil de Cliente
+                    </h1>
+                    <p class="lead text-muted">
+                        Completa el formulario para recibir recomendaciones personalizadas basadas en tus necesidades específicas
+                    </p>
+                </div>
+            </div>
+
+            <!-- Saved Profiles -->
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>Perfiles Guardados
+                            </h5>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="loadSavedProfiles()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+                            </button>
+                        </div>
+                        <div id="savedProfilesContainer" class="saved-profiles">
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-inbox display-4"></i>
+                                <p class="mt-2">No hay perfiles guardados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profileForm" novalidate>
+                <!-- Información Básica -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h4 class="mb-4">Información Básica</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="nombreCliente" placeholder="Nombre del cliente" required>
+                                <label for="nombreCliente">Nombre del Cliente</label>
+                                <div class="error-feedback" id="nombreClienteError">Por favor, ingrese el nombre del cliente</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telefono" placeholder="Teléfono de contacto">
+                                <label for="telefono">Teléfono de Contacto</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" placeholder="Correo electrónico">
+                                <label for="email">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="tipoCliente">
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="comprador">Comprador</option>
+                                    <option value="inversor">Inversor</option>
+                                    <option value="inquilino">Inquilino</option>
+                                </select>
+                                <label for="tipoCliente">Tipo de Cliente</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Presupuesto -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <h4 class="mb-4">Presupuesto</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="presupuestoMin" placeholder="Presupuesto mínimo" required>
+                                <label for="presupuestoMin">Presupuesto Mínimo (USD)</label>
+                                <div class="error-feedback" id="presupuestoMinError">Ingrese un presupuesto mínimo válido</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="presupuestoMax" placeholder="Presupuesto máximo" required>
+                                <label for="presupuestoMax">Presupuesto Máximo (USD)</label>
+                                <div class="error-feedback" id="presupuestoMaxError">Ingrese un presupuesto máximo válido</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="tipoFinanciamiento">
+                                    <option value="contado">Contado</option>
+                                    <option value="credito">Crédito Hipotecario</option>
+                                    <option value="mixto">Mixto</option>
+                                    <option value="por_definir">Por definir</option>
+                                </select>
+                                <label for="tipoFinanciamiento">Tipo de Financiamiento</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="plazoMeses">
+                                    <option value="">Seleccionar plazo</option>
+                                    <option value="60">5 años</option>
+                                    <option value="120">10 años</option>
+                                    <option value="180">15 años</option>
+                                    <option value="240">20 años</option>
+                                    <option value="300">25 años</option>
+                                    <option value="360">30 años</option>
+                                </select>
+                                <label for="plazoMeses">Plazo (meses)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Composición Familiar -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h4 class="mb-4">Composición Familiar</h4>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="adultos" placeholder="Adultos" min="1" required>
+                                <label for="adultos">Número de Adultos</label>
+                                <div class="error-feedback" id="adultosError">Debe haber al menos 1 adulto</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="ninosCount" placeholder="Niños" min="0">
+                                <label for="ninosCount">Número de Niños</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="adultosMayores" placeholder="Adultos mayores" min="0">
+                                <label for="adultosMayores">Adultos Mayores</label>
+                            </div>
+                        </div>
+                        <div class="col-12" id="edadesNinosContainer" style="display: none;">
+                            <label class="form-label">Edades de los niños (separadas por coma):</label>
+                            <input type="text" class="form-control" id="edadesNinos" placeholder="Ej: 5, 8, 12">
+                            <small class="text-muted">Ingresa las edades de los niños separadas por comas</small>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="mascotas">
+                                    <option value="no">No tengo mascotas</option>
+                                    <option value="perro">Perro</option>
+                                    <option value="gato">Gato</option>
+                                    <option value="ambos">Perro y gato</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                                <label for="mascotas">Mascotas</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="estiloVida">
+                                    <option value="">Seleccionar estilo</option>
+                                    <option value="tranquilo">Tranquilo</option>
+                                    <option value="activo">Activo</option>
+                                    <option value="social">Social</option>
+                                    <option value="privado">Privado</option>
+                                    <option value="familiar">Familiar</option>
+                                </select>
+                                <label for="estiloVida">Estilo de Vida</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferencias de Ubicación -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <h4 class="mb-4">Preferencias de Ubicación</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="zonaPreferida" required>
+                                    <option value="">Seleccionar zona</option>
+                                    <option value="Equipetrol">Equipetrol</option>
+                                    <option value="Santa Mónica">Santa Mónica</option>
+                                    <option value="Urbari">Urbari</option>
+                                    <option value="Los Olivos">Los Olivos</option>
+                                    <option value="Zona Norte">Zona Norte</option>
+                                    <option value="Zona Sur">Zona Sur</option>
+                                    <option value="Centro">Centro</option>
+                                    <option value="San Martín">San Martín</option>
+                                    <option value="Pampa de la Isla">Pampa de la Isla</option>
+                                    <option value="Samaipata">Samaipata</option>
+                                </select>
+                                <label for="zonaPreferida">Zona Preferida</label>
+                                <div class="error-feedback" id="zonaPreferidaError">Seleccione una zona preferida</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="seguridad">
+                                    <option value="">Seleccionar nivel</option>
+                                    <option value="alta">Alta (prioridad máxima)</option>
+                                    <option value="media">Media (importante)</option>
+                                    <option value="baja">Baja (no es prioridad)</option>
+                                </select>
+                                <label for="seguridad">Nivel de Seguridad Requerido</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="ubicacionDetalles" placeholder="Detalles de ubicación" style="height: 100px"></textarea>
+                                <label for="ubicacionDetalles">Detalles de ubicación preferida</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Propiedad -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h4 class="mb-4">Tipo de Propiedad</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="tipoPropiedad" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="departamento">Departamento</option>
+                                    <option value="casa">Casa</option>
+                                    <option value="penthouse">Penthouse</option>
+                                    <option value="duplex">Dúplex</option>
+                                    <option value="chalet">Chalet</option>
+                                    <option value="townhouse">Townhouse</option>
+                                    <option value="oficina">Oficina</option>
+                                    <option value="local">Local Comercial</option>
+                                    <option value="terreno">Terreno</option>
+                                </select>
+                                <label for="tipoPropiedad">Tipo de Propiedad</label>
+                                <div class="error-feedback" id="tipoPropiedadError">Seleccione un tipo de propiedad</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="antiguedad">
+                                    <option value="">Cualquier antigüedad</option>
+                                    <option value="estrenar">A estrenar</option>
+                                    <option value="0-5">0-5 años</option>
+                                    <option value="5-10">5-10 años</option>
+                                    <option value="10-20">10-20 años</option>
+                                    <option value="20+">Más de 20 años</option>
+                                </select>
+                                <label for="antiguedad">Antigüedad Preferida</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Características Deseadas -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <h4 class="mb-4">Características Deseadas</h4>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="habitacionesMin" placeholder="Habitaciones mínimas" min="0">
+                                <label for="habitacionesMin">Habitaciones Mínimas</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="banosMin" placeholder="Baños mínimos" min="0">
+                                <label for="banosMin">Baños Mínimos</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="garajeEspacios" placeholder="Espacios de garaje" min="0">
+                                <label for="garajeEspacios">Espacios de Garaje</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="superficieMin" placeholder="Superficie mínima" min="0">
+                                <label for="superficieMin">Superficie Mínima (m²)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="orientacion">
+                                    <option value="">Sin preferencia</option>
+                                    <option value="norte">Norte</option>
+                                    <option value="sur">Sur</option>
+                                    <option value="este">Este</option>
+                                    <option value="oeste">Oeste</option>
+                                    <option value="norte-este">Norte-Este</option>
+                                    <option value="norte-oeste">Norte-Oeste</option>
+                                </select>
+                                <label for="orientacion">Orientación Preferida</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Características Adicionales:</label>
+                            <div class="row g-2">
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="amoblado" value="amoblado">
+                                        <label class="form-check-label" for="amoblado">Amoblado</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="jardin" value="jardin">
+                                        <label class="form-check-label" for="jardin">Jardín</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="piscina" value="piscina">
+                                        <label class="form-check-label" for="piscina">Piscina</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gimnasio" value="gimnasio">
+                                        <label class="form-check-label" for="gimnasio">Gimnasio</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="ascensor" value="ascensor">
+                                        <label class="form-check-label" for="ascensor">Ascensor</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="terraza" value="terraza">
+                                        <label class="form-check-label" for="terraza">Terraza</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="balcon" value="balcon">
+                                        <label class="form-check-label" for="balcon">Balcón</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sala_estudio" value="sala_estudio">
+                                        <label class="form-check-label" for="sala_estudio">Sala de Estudio</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Servicios Necesarios -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                    <h4 class="mb-4">Servicios Cercanos Necesarios</h4>
+                    <p class="text-muted mb-3">Selecciona los servicios que necesitas cerca de tu nueva propiedad:</p>
+                    <div class="needs-container" id="needsContainer">
+                        <!-- Los needs tags se generarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Observaciones Adicionales -->
+                <div class="form-section fade-in-up">
+                    <div class="section-icon">
+                        <i class="bi bi-chat-left-text"></i>
+                    </div>
+                    <h4 class="mb-4">Observaciones Adicionales</h4>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="observaciones" placeholder="Observaciones adicionales" style="height: 120px"></textarea>
+                        <label for="observaciones">Información adicional que sea relevante para tu búsqueda</label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-lg-12 text-center">
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="saveProfile()">
+                                <i class="bi bi-save me-2"></i>Guardar Perfil
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search me-2"></i>Buscar Propiedades
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-lg" onclick="clearForm()">
+                                <i class="bi bi-x-circle me-2"></i>Limpiar Formulario
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="mb-0">
+                        <i class="bi bi-house-heart-fill me-2"></i>Citrino - Sistema de Recomendación Inmobiliaria
+                    </p>
+                    <small class="text-white-50">
+                        Inteligencia artificial para encontrar tu hogar ideal en Santa Cruz de la Sierra
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API Module -->
+    <script src="assets/js/api.js"></script>
+    <!-- Main JS -->
+    <script src="assets/js/main.js"></script>
+    <!-- Profile-specific JS -->
+    <script>
+        // Servicios disponibles
+        const availableNeeds = [
+            'escuela_primaria', 'escuela_secundaria', 'universidad',
+            'supermercado', 'hospital', 'clinica', 'farmacia',
+            'transporte_publico', 'gimnasio', 'parque', 'banco',
+            'restaurante', 'centro_comercial', 'area_verde',
+            'guarderia', 'veterinaria', 'iglesia', 'seguridad_privada'
+        ];
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNeeds();
+            loadSavedProfiles();
+            setupEventListeners();
+            updateProgressBar();
+        });
+
+        // Inicializar las etiquetas de necesidades
+        function initializeNeeds() {
+            const container = document.getElementById('needsContainer');
+            const labels = {
+                'escuela_primaria': 'Escuela Primaria',
+                'escuela_secundaria': 'Escuela Secundaria',
+                'universidad': 'Universidad',
+                'supermercado': 'Supermercado',
+                'hospital': 'Hospital',
+                'clinica': 'Clínica',
+                'farmacia': 'Farmacia',
+                'transporte_publico': 'Transporte Público',
+                'gimnasio': 'Gimnasio',
+                'parque': 'Parque',
+                'banco': 'Banco',
+                'restaurante': 'Restaurante',
+                'centro_comercial': 'Centro Comercial',
+                'area_verde': 'Área Verde',
+                'guarderia': 'Guardería',
+                'veterinaria': 'Veterinaria',
+                'iglesia': 'Iglesia',
+                'seguridad_privada': 'Seguridad Privada'
+            };
+
+            container.innerHTML = '';
+            availableNeeds.forEach(need => {
+                const tag = document.createElement('span');
+                tag.className = 'need-tag';
+                tag.textContent = labels[need] || need;
+                tag.onclick = () => toggleNeed(tag, need);
+                container.appendChild(tag);
+            });
+        }
+
+        // Toggle de necesidades
+        function toggleNeed(element, need) {
+            element.classList.toggle('selected');
+            updateProgressBar();
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Número de niños change
+            document.getElementById('ninosCount').addEventListener('change', function() {
+                const container = document.getElementById('edadesNinosContainer');
+                if (this.value > 0) {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                    document.getElementById('edadesNinos').value = '';
+                }
+                updateProgressBar();
+            });
+
+            // Validación en tiempo real
+            const requiredFields = ['nombreCliente', 'presupuestoMin', 'presupuestoMax', 'adultos', 'zonaPreferida', 'tipoPropiedad'];
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', () => validateField(fieldId));
+                    field.addEventListener('input', updateProgressBar);
+                }
+            });
+
+            // Validación de presupuesto
+            document.getElementById('presupuestoMin').addEventListener('change', validateBudget);
+            document.getElementById('presupuestoMax').addEventListener('change', validateBudget);
+
+            // Form submit
+            document.getElementById('profileForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        // Validar campo individual
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(fieldId + 'Error');
+
+            if (!field.value.trim()) {
+                if (errorElement) {
+                    errorElement.classList.add('show');
+                }
+                field.classList.add('is-invalid');
+                return false;
+            } else {
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        // Validar presupuesto
+        function validateBudget() {
+            const minField = document.getElementById('presupuestoMin');
+            const maxField = document.getElementById('presupuestoMax');
+            const minError = document.getElementById('presupuestoMinError');
+            const maxError = document.getElementById('presupuestoMaxError');
+
+            let isValid = true;
+
+            if (minField.value && parseFloat(minField.value) <= 0) {
+                minError.textContent = 'El presupuesto mínimo debe ser mayor a 0';
+                minError.classList.add('show');
+                minField.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                minError.classList.remove('show');
+                minField.classList.remove('is-invalid');
+            }
+
+            if (maxField.value && parseFloat(maxField.value) <= 0) {
+                maxError.textContent = 'El presupuesto máximo debe ser mayor a 0';
+                maxError.classList.add('show');
+                maxField.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                maxError.classList.remove('show');
+                maxField.classList.remove('is-invalid');
+            }
+
+            if (minField.value && maxField.value && parseFloat(minField.value) >= parseFloat(maxField.value)) {
+                maxError.textContent = 'El presupuesto máximo debe ser mayor al mínimo';
+                maxError.classList.add('show');
+                maxField.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Actualizar barra de progreso
+        function updateProgressBar() {
+            const form = document.getElementById('profileForm');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            const filledInputs = Array.from(inputs).filter(input => input.value.trim() !== '');
+            const progress = (filledInputs.length / inputs.length) * 100;
+
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Obtener necesidades seleccionadas
+        function getSelectedNeeds() {
+            const selectedTags = document.querySelectorAll('.need-tag.selected');
+            return Array.from(selectedTags).map(tag => {
+                const text = tag.textContent;
+                // Convertir de texto de vuelta a valor
+                const valueMap = {
+                    'Escuela Primaria': 'escuela_primaria',
+                    'Escuela Secundaria': 'escuela_secundaria',
+                    'Universidad': 'universidad',
+                    'Supermercado': 'supermercado',
+                    'Hospital': 'hospital',
+                    'Clínica': 'clinica',
+                    'Farmacia': 'farmacia',
+                    'Transporte Público': 'transporte_publico',
+                    'Gimnasio': 'gimnasio',
+                    'Parque': 'parque',
+                    'Banco': 'banco',
+                    'Restaurante': 'restaurante',
+                    'Centro Comercial': 'centro_comercial',
+                    'Área Verde': 'area_verde',
+                    'Guardería': 'guarderia',
+                    'Veterinaria': 'veterinaria',
+                    'Iglesia': 'iglesia',
+                    'Seguridad Privada': 'seguridad_privada'
+                };
+                return valueMap[text] || text.toLowerCase().replace(/\s+/g, '_');
+            });
+        }
+
+        // Obtener características adicionales
+        getAdditionalFeatures = function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // Guardar perfil
+        async function saveProfile() {
+            if (!validateForm()) {
+                showToast('Por favor, completa los campos requeridos', 'error');
+                return;
+            }
+
+            const profileData = getFormData();
+            const result = await window.citrinoAPI.saveProfile(profileData);
+
+            if (result.success) {
+                showToast('¡Perfil guardado exitosamente!', 'success');
+                loadSavedProfiles();
+            } else {
+                showToast('Error al guardar el perfil: ' + result.error, 'error');
+            }
+        }
+
+        // Cargar perfiles guardados
+        function loadSavedProfiles() {
+            const profiles = window.citrinoAPI.getStoredProfiles();
+            const container = document.getElementById('savedProfilesContainer');
+
+            if (profiles.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-inbox display-4"></i>
+                        <p class="mt-2">No hay perfiles guardados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = profiles.map(profile => `
+                <div class="profile-card" onclick="loadProfile('${profile.id}')" data-profile-id="${profile.id}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${profile.nombreCliente || 'Perfil sin nombre'}</h6>
+                            <p class="mb-1 text-muted">
+                                <i class="bi bi-currency-dollar me-1"></i>
+                                $${profile.presupuesto_min?.toLocaleString() || 0} - $${profile.presupuesto_max?.toLocaleString() || 0}
+                            </p>
+                            <p class="mb-0">
+                                <i class="bi bi-geo-alt me-1"></i>${profile.zona_preferida || 'Sin especificar'}
+                                <span class="ms-3"><i class="bi bi-building me-1"></i>${profile.tipo_propiedad || 'Sin especificar'}</span>
+                            </p>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteProfile('${profile.id}', event)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cargar perfil específico
+        function loadProfile(profileId) {
+            const profiles = window.citrinoAPI.getStoredProfiles();
+            const profile = profiles.find(p => p.id === profileId);
+
+            if (!profile) return;
+
+            // Marcar perfil como seleccionado
+            document.querySelectorAll('.profile-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-profile-id="${profileId}"]`).classList.add('selected');
+
+            // Llenar formulario
+            Object.keys(profile).forEach(key => {
+                const field = document.getElementById(key);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = profile[key];
+                    } else {
+                        field.value = profile[key] || '';
+                    }
+                }
+            });
+
+            // Cargar necesidades
+            document.querySelectorAll('.need-tag').forEach(tag => {
+                tag.classList.remove('selected');
+            });
+
+            if (profile.necesidades) {
+                profile.necesidades.forEach(need => {
+                    const tag = document.querySelector(`.need-tag:nth-child(${availableNeeds.indexOf(need) + 1})`);
+                    if (tag) tag.classList.add('selected');
+                });
+            }
+
+            updateProgressBar();
+            showToast('Perfil cargado correctamente', 'success');
+        }
+
+        // Eliminar perfil
+        async function deleteProfile(profileId, event) {
+            event.stopPropagation();
+
+            if (!confirm('¿Estás seguro de que quieres eliminar este perfil?')) {
+                return;
+            }
+
+            const result = await window.citrinoAPI.deleteProfile(profileId);
+            if (result.success) {
+                showToast('Perfil eliminado correctamente', 'success');
+                loadSavedProfiles();
+            } else {
+                showToast('Error al eliminar el perfil: ' + result.error, 'error');
+            }
+        }
+
+        // Obtener datos del formulario
+        function getFormData() {
+            const edadesNinos = document.getElementById('edadesNinos').value
+                .split(',')
+                .map(age => parseInt(age.trim()))
+                .filter(age => !isNaN(age));
+
+            return {
+                nombreCliente: document.getElementById('nombreCliente').value,
+                telefono: document.getElementById('telefono').value,
+                email: document.getElementById('email').value,
+                tipoCliente: document.getElementById('tipoCliente').value,
+                presupuesto_min: parseFloat(document.getElementById('presupuestoMin').value),
+                presupuesto_max: parseFloat(document.getElementById('presupuestoMax').value),
+                tipoFinanciamiento: document.getElementById('tipoFinanciamiento').value,
+                plazoMeses: document.getElementById('plazoMeses').value,
+                adultos: parseInt(document.getElementById('adultos').value),
+                ninos: edadesNinos,
+                adultos_mayores: parseInt(document.getElementById('adultosMayores').value),
+                mascotas: document.getElementById('mascotas').value,
+                estilo_vida: document.getElementById('estiloVida').value,
+                zona_preferida: document.getElementById('zonaPreferida').value,
+                seguridad: document.getElementById('seguridad').value,
+                ubicacionDetalles: document.getElementById('ubicacionDetalles').value,
+                tipo_propiedad: document.getElementById('tipoPropiedad').value,
+                antiguedad: document.getElementById('antiguedad').value,
+                habitacionesMin: parseInt(document.getElementById('habitacionesMin').value),
+                banosMin: parseInt(document.getElementById('banosMin').value),
+                garajeEspacios: parseInt(document.getElementById('garajeEspacios').value),
+                superficieMin: parseFloat(document.getElementById('superficieMin').value),
+                orientacion: document.getElementById('orientacion').value,
+                caracteristicas_deseadas: getAdditionalFeatures(),
+                necesidades: getSelectedNeeds(),
+                observaciones: document.getElementById('observaciones').value
+            };
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            let isValid = true;
+
+            // Validar campos requeridos
+            const requiredFields = ['nombreCliente', 'presupuestoMin', 'presupuestoMax', 'adultos', 'zonaPreferida', 'tipoPropiedad'];
+            requiredFields.forEach(fieldId => {
+                if (!validateField(fieldId)) {
+                    isValid = false;
+                }
+            });
+
+            // Validar presupuesto
+            if (!validateBudget()) {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Manejar submit del formulario
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            if (!validateForm()) {
+                showToast('Por favor, completa los campos requeridos correctamente', 'error');
+                return;
+            }
+
+            const profileData = getFormData();
+
+            // Guardar perfil
+            await saveProfile();
+
+            // Redirigir a resultados
+            const params = new URLSearchParams();
+            Object.keys(profileData).forEach(key => {
+                if (profileData[key] !== null && profileData[key] !== undefined && profileData[key] !== '') {
+                    params.set(key, typeof profileData[key] === 'object' ? JSON.stringify(profileData[key]) : profileData[key]);
+                }
+            });
+
+            window.location.href = `resultados.html?${params.toString()}`;
+        }
+
+        // Limpiar formulario
+        function clearForm() {
+            if (confirm('¿Estás seguro de que quieres limpiar todo el formulario?')) {
+                document.getElementById('profileForm').reset();
+                document.querySelectorAll('.need-tag.selected').forEach(tag => {
+                    tag.classList.remove('selected');
+                });
+                document.querySelectorAll('.is-valid').forEach(field => {
+                    field.classList.remove('is-valid');
+                });
+                document.getElementById('edadesNinosContainer').style.display = 'none';
+                updateProgressBar();
+                showToast('Formulario limpiado correctamente', 'success');
+            }
+        }
+
+        // Mostrar toast
+        function showToast(message, type = 'info') {
+            const alertClass = type === 'success' ? 'alert-success' :
+                             type === 'error' ? 'alert-danger' : 'alert-info';
+            const icon = type === 'success' ? 'bi-check-circle-fill' :
+                        type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+
+            const toastHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 1060;" role="alert">
+                    <i class="bi ${icon} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', toastHtml);
+
+            // Auto remover después de 3 segundos
+            setTimeout(() => {
+                const alert = document.querySelector('.alert:last-of-type');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

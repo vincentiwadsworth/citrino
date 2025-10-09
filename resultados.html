@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - Citrino</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/custom.css">
+
+    <style>
+        .results-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+        }
+
+        .filter-sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .property-image {
+            height: 250px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1976d2;
+            font-size: 3rem;
+        }
+
+        .property-body {
+            padding: 1.5rem;
+        }
+
+        .property-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-location {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .property-features {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-tag {
+            background: #f8f9fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .compatibility-score {
+            background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .compatibility-score.high {
+            background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+        }
+
+        .compatibility-score.medium {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+        }
+
+        .compatibility-score.low {
+            background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+        }
+
+        .search-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1060;
+        }
+
+        .loading-spinner {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .sort-options {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e9ecef;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .map-view {
+            height: 400px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .map-view.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .filter-sidebar {
+                position: static;
+                margin-bottom: 2rem;
+                max-height: none;
+            }
+
+            .property-card {
+                margin-bottom: 1rem;
+            }
+
+            .results-header {
+                padding: 2rem 0;
+            }
+
+            .property-features {
+                gap: 0.5rem;
+            }
+
+            .feature-tag {
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h6 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .price-range-slider {
+            margin: 1rem 0;
+        }
+
+        .stats-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .recommendation-reason {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-contact {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-details {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+
+        .btn-favorite {
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ffcc02;
+        }
+
+        .btn-favorite.active {
+            background: #f57c00;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h5>Buscando propiedades ideales para ti...</h5>
+            <p class="text-muted">Analizando 76,853 propiedades con IA</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="bi bi-house-heart-fill me-2"></i>Citrino
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="perfil.html">
+                            <i class="bi bi-person-plus me-1"></i>Perfil de Cliente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="chat.html">
+                            <i class="bi bi-chat-dots me-1"></i>Asistente Virtual
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="resultados.html">
+                            <i class="bi bi-search me-1"></i>Resultados
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Results Header -->
+    <header class="results-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="bi bi-search me-3"></i>Resultados de Búsqueda
+                    </h1>
+                    <p class="lead">
+                        Propiedades seleccionadas especialmente para ti basadas en tus preferencias
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-5">
+        <div class="container">
+            <!-- Search Summary -->
+            <div class="search-summary" id="searchSummary">
+                <!-- Se llenará dinámicamente -->
+            </div>
+
+            <div class="row">
+                <!-- Filters Sidebar -->
+                <div class="col-lg-3">
+                    <div class="filter-sidebar">
+                        <h5 class="mb-4">
+                            <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                        </h5>
+
+                        <!-- View Toggle -->
+                        <div class="view-toggle mb-4">
+                            <button class="view-btn active" onclick="toggleView('grid')">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>Grilla
+                            </button>
+                            <button class="view-btn" onclick="toggleView('list')">
+                                <i class="bi bi-list me-1"></i>Lista
+                            </button>
+                            <button class="view-btn" onclick="toggleView('map')">
+                                <i class="bi bi-map me-1"></i>Mapa
+                            </button>
+                        </div>
+
+                        <!-- Sort Options -->
+                        <div class="sort-options mb-4">
+                            <label class="form-label fw-bold">Ordenar por:</label>
+                            <select class="form-select" id="sortSelect" onchange="sortResults()">
+                                <option value="compatibility">Mejor compatibilidad</option>
+                                <option value="price-low">Precio: Menor a Mayor</option>
+                                <option value="price-high">Precio: Mayor a Menor</option>
+                                <option value="surface-large">Superficie: Mayor a Menor</option>
+                                <option value="surface-small">Superficie: Menor a Mayor</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="filter-section">
+                            <h6>Rango de Precio</h6>
+                            <div class="price-range-slider">
+                                <input type="range" class="form-range" id="priceMin" min="0" max="500000" step="10000" oninput="updatePriceFilter()">
+                                <input type="range" class="form-range" id="priceMax" min="0" max="500000" step="10000" oninput="updatePriceFilter()">
+                                <div class="d-flex justify-content-between">
+                                    <small>$<span id="priceMinValue">0</span></small>
+                                    <small>$<span id="priceMaxValue">500,000</span></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property Type -->
+                        <div class="filter-section">
+                            <h6>Tipo de Propiedad</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterDepartamento" onchange="filterResults()">
+                                <label class="form-check-label" for="filterDepartamento">
+                                    Departamento
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterCasa" onchange="filterResults()">
+                                <label class="form-check-label" for="filterCasa">
+                                    Casa
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterPenthouse" onchange="filterResults()">
+                                <label class="form-check-label" for="filterPenthouse">
+                                    Penthouse
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Bedrooms -->
+                        <div class="filter-section">
+                            <h6>Habitaciones</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter1Dorm" onchange="filterResults()">
+                                <label class="form-check-label" for="filter1Dorm">
+                                    1 Dormitorio
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter2Dorm" onchange="filterResults()">
+                                <label class="form-check-label" for="filter2Dorm">
+                                    2 Dormitorios
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter3Dorm" onchange="filterResults()">
+                                <label class="form-check-label" for="filter3Dorm">
+                                    3+ Dormitorios
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="filter-section">
+                            <h6>Características</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterGarage" onchange="filterResults()">
+                                <label class="form-check-label" for="filterGarage">
+                                    Garaje
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterAmoblado" onchange="filterResults()">
+                                <label class="form-check-label" for="filterAmoblado">
+                                    Amoblado
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterPiscina" onchange="filterResults()">
+                                <label class="form-check-label" for="filterPiscina">
+                                    Piscina
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="filter-section">
+                            <h6>Exportar Resultados</h6>
+                            <div class="export-buttons">
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportToPDF()">
+                                    <i class="bi bi-file-pdf me-1"></i>PDF
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="exportToExcel()">
+                                    <i class="bi bi-file-excel me-1"></i>Excel
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="shareResults()">
+                                    <i class="bi bi-share me-1"></i>Compartir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="col-lg-9">
+                    <!-- Map View -->
+                    <div class="map-view" id="mapView">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center">
+                                <i class="bi bi-map display-1 text-muted"></i>
+                                <p class="text-muted mt-3">Vista de mapa (en desarrollo)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div id="resultsContainer">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-container">
+                        <nav aria-label="Navegación de resultados">
+                            <ul class="pagination" id="pagination">
+                                <!-- Se generará dinámicamente -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="mb-0">
+                        <i class="bi bi-house-heart-fill me-2"></i>Citrino - Sistema de Recomendación Inmobiliaria
+                    </p>
+                    <small class="text-white-50">
+                        76,853 propiedades analizadas con IA para encontrar tu hogar ideal
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API Module -->
+    <script src="assets/js/api.js"></script>
+    <!-- Main JS -->
+    <script src="assets/js/main.js"></script>
+    <!-- Results-specific JS -->
+    <script>
+        // Variables globales
+        let searchProfile = {};
+        let searchResults = [];
+        let filteredResults = [];
+        let currentPage = 1;
+        let resultsPerPage = 9;
+        let currentView = 'grid';
+        let favorites = [];
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeResults();
+        });
+
+        // Inicializar resultados
+        async function initializeResults() {
+            try {
+                // Obtener parámetros de búsqueda
+                searchProfile = getSearchProfileFromURL();
+
+                if (Object.keys(searchProfile).length === 0) {
+                    showToast('No se encontraron criterios de búsqueda. Redirigiendo...', 'warning');
+                    setTimeout(() => {
+                        window.location.href = 'perfil.html';
+                    }, 2000);
+                    return;
+                }
+
+                // Mostrar resumen de búsqueda
+                displaySearchSummary();
+
+                // Realizar búsqueda
+                await performSearch();
+
+            } catch (error) {
+                console.error('Error al inicializar resultados:', error);
+                hideLoading();
+                showError('Error al cargar los resultados. Por favor, intenta nuevamente.');
+            }
+        }
+
+        // Obtener perfil de búsqueda desde URL
+        function getSearchProfileFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const profile = {};
+
+            // Iterar sobre todos los parámetros
+            for (const [key, value] of params.entries()) {
+                try {
+                    // Intentar parsear JSON
+                    if (value.startsWith('[') || value.startsWith('{')) {
+                        profile[key] = JSON.parse(value);
+                    } else if (!isNaN(value) && value.includes('.')) {
+                        profile[key] = parseFloat(value);
+                    } else if (!isNaN(value)) {
+                        profile[key] = parseInt(value);
+                    } else {
+                        profile[key] = value;
+                    }
+                } catch (e) {
+                    profile[key] = value;
+                }
+            }
+
+            return profile;
+        }
+
+        // Mostrar resumen de búsqueda
+        function displaySearchSummary() {
+            const container = document.getElementById('searchSummary');
+
+            const stats = [];
+
+            if (searchProfile.presupuesto_max) {
+                stats.push(`Presupuesto: $${searchProfile.presupuesto_min?.toLocaleString() || 0} - $${searchProfile.presupuesto_max.toLocaleString()}`);
+            }
+
+            if (searchProfile.zona_preferida) {
+                stats.push(`Zona: ${searchProfile.zona_preferida}`);
+            }
+
+            if (searchProfile.tipo_propiedad) {
+                stats.push(`Tipo: ${searchProfile.tipo_propiedad}`);
+            }
+
+            if (searchProfile.adultos || searchProfile.ninos?.length > 0) {
+                const personas = [];
+                if (searchProfile.adultos) personas.push(`${searchProfile.adultos} adultos`);
+                if (searchProfile.ninos?.length) personas.push(`${searchProfile.ninos.length} niños`);
+                stats.push(`Personas: ${personas.join(', ')}`);
+            }
+
+            container.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-3">
+                            <i class="bi bi-search me-2"></i>Búsqueda Personalizada
+                        </h5>
+                        <div class="mb-2">
+                            ${stats.map(stat => `<span class="stats-badge">${stat}</span>`).join('')}
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="modifySearch()">
+                                <i class="bi bi-pencil me-1"></i>Modificar búsqueda
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="saveSearch()">
+                                <i class="bi bi-bookmark me-1"></i>Guardar búsqueda
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <div class="h4 mb-1">
+                            <span id="resultsCount" class="text-primary">0</span> resultados
+                        </div>
+                        <small class="text-muted">Propiedades encontradas</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Realizar búsqueda
+        async function performSearch() {
+            try {
+                showLoading();
+
+                // Formatear perfil para la API
+                const formattedProfile = window.citrinoAPI.formatProfileForAPI(searchProfile);
+
+                // Realizar petición a la API
+                const result = await window.citrinoAPI.getEnhancedRecommendations(formattedProfile, {
+                    limite: 50,
+                    umbral_minimo: 0.3
+                });
+
+                if (result.success) {
+                    searchResults = result.recommendations || [];
+                    filteredResults = [...searchResults];
+
+                    // Guardar búsqueda en historial
+                    window.citrinoAPI.saveSearch({
+                        profile: searchProfile,
+                        results: searchResults,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    // Mostrar resultados
+                    displayResults();
+                    updatePagination();
+                    updateStats();
+
+                } else {
+                    throw new Error(result.error);
+                }
+
+            } catch (error) {
+                console.error('Error en búsqueda:', error);
+
+                // Si falla la API, mostrar resultados de demostración
+                showDemoResults();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar resultados de demostración
+        function showDemoResults() {
+            searchResults = generateDemoResults();
+            filteredResults = [...searchResults];
+            displayResults();
+            updatePagination();
+            updateStats();
+
+            showToast('Mostrando resultados de demostración. Conecta el servidor API para resultados reales.', 'info');
+        }
+
+        // Generar resultados de demostración
+        function generateDemoResults() {
+            const demoProperties = [
+                {
+                    id: 'demo_1',
+                    nombre: 'Departamento Moderno Equipetrol',
+                    precio: 185000,
+                    superficie_m2: 120,
+                    habitaciones: 3,
+                    banos: 2,
+                    zona: 'Equipetrol',
+                    compatibilidad: 95,
+                    justificacion: 'Excelente ubicación en zona premium, con acceso a centros comerciales y colegios de primer nivel. Ideal para familias.',
+                    fuente: 'Demo',
+                    caracteristicas: ['garaje', 'piscina', 'gimnasio', 'seguridad']
+                },
+                {
+                    id: 'demo_2',
+                    nombre: 'Penthouse Luxe Santa Mónica',
+                    precio: 320000,
+                    superficie_m2: 200,
+                    habitaciones: 4,
+                    banos: 3,
+                    zona: 'Santa Mónica',
+                    compatibilidad: 92,
+                    justificacion: 'Amplio espacio con vistas panorámicas, zona familiar tranquila y excelente infraestructura educativa.',
+                    fuente: 'Demo',
+                    caracteristicas: ['terraza', 'piscina', 'garaje doble', 'seguridad']
+                },
+                {
+                    id: 'demo_3',
+                    nombre: 'Casa Familiar Los Olivos',
+                    precio: 245000,
+                    superficie_m2: 180,
+                    habitaciones: 3,
+                    banos: 2,
+                    zona: 'Los Olivos',
+                    compatibilidad: 88,
+                    justificacion: 'Espaciosa casa en zona residencial con jardín y excelente potencial de plusvalía a largo plazo.',
+                    fuente: 'Demo',
+                    caracteristicas: ['jardin', 'garaje', 'area_verde']
+                },
+                {
+                    id: 'demo_4',
+                    nombre: 'Departamento Studio Urbari',
+                    precio: 95000,
+                    superficie_m2: 65,
+                    habitaciones: 1,
+                    banos: 1,
+                    zona: 'Urbari',
+                    compatibilidad: 85,
+                    justificacion: 'Opción moderna y accesible para profesionales jóvenes, excelente conexión con centros financieros.',
+                    fuente: 'Demo',
+                    caracteristicas: ['amoblado', 'gimnasio', 'seguridad']
+                },
+                {
+                    id: 'demo_5',
+                    nombre: 'Duplex Jardín San Martín',
+                    precio: 165000,
+                    superficie_m2: 150,
+                    habitaciones: 3,
+                    banos: 2,
+                    zona: 'San Martín',
+                    compatibilidad: 82,
+                    justificacion: 'Distribución funcional con espacios exteriores, zona en desarrollo con alta plusvalía potencial.',
+                    fuente: 'Demo',
+                    caracteristicas: ['jardin', 'terraza', 'garaje']
+                },
+                {
+                    id: 'demo_6',
+                    nombre: 'Loft Urbano Centro',
+                    precio: 125000,
+                    superficie_m2: 85,
+                    habitaciones: 2,
+                    banos: 1,
+                    zona: 'Centro',
+                    compatibilidad: 78,
+                    justificacion: 'Diseño contemporáneo en corazón urbano, ideal para quienes valoran la vida cultural y accesibilidad.',
+                    fuente: 'Demo',
+                    caracteristicas: ['diseño_moderno', 'acceso_rapido', 'amoblado']
+                }
+            ];
+
+            return demoProperties;
+        }
+
+        // Mostrar resultados
+        function displayResults() {
+            const container = document.getElementById('resultsContainer');
+
+            if (filteredResults.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="bi bi-search"></i>
+                        <h4>No se encontraron propiedades</h4>
+                        <p class="text-muted">Intenta ajustar los filtros de búsqueda o modifica tus criterios.</p>
+                        <button class="btn btn-primary" onclick="clearFilters()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Limpiar filtros
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * resultsPerPage;
+            const endIndex = startIndex + resultsPerPage;
+            const pageResults = filteredResults.slice(startIndex, endIndex);
+
+            const resultsHTML = pageResults.map(property => createPropertyCard(property)).join('');
+
+            container.innerHTML = `
+                <div class="row" id="resultsGrid">
+                    ${resultsHTML}
+                </div>
+            `;
+        }
+
+        // Crear tarjeta de propiedad
+        function createPropertyCard(property) {
+            const isFavorite = favorites.includes(property.id);
+            const compatibilityClass = property.compatibilidad >= 90 ? 'high' :
+                                     property.compatibilidad >= 70 ? 'medium' : 'low';
+
+            return `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="property-card">
+                        <div class="property-image">
+                            <i class="bi bi-house-door-fill"></i>
+                        </div>
+                        <div class="property-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <div class="property-price">$${property.precio.toLocaleString()}</div>
+                                    <div class="property-title">${property.nombre}</div>
+                                </div>
+                                <button class="btn btn-sm ${isFavorite ? 'btn-warning' : 'btn-outline-warning'}"
+                                        onclick="toggleFavorite('${property.id}')">
+                                    <i class="bi ${isFavorite ? 'bi-star-fill' : 'bi-star'}"></i>
+                                </button>
+                            </div>
+
+                            <div class="property-location">
+                                <i class="bi bi-geo-alt me-1"></i>${property.zona}
+                            </div>
+
+                            <div class="compatibility-score ${compatibilityClass}">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <strong>${property.compatibilidad}%</strong> Compatibilidad
+                            </div>
+
+                            <div class="property-features">
+                                <span class="feature-tag">
+                                    <i class="bi bi-door-closed me-1"></i>${property.habitaciones} dorm.
+                                </span>
+                                <span class="feature-tag">
+                                    <i class="bi bi-droplet me-1"></i>${property.banos} baños
+                                </span>
+                                <span class="feature-tag">
+                                    <i class="bi bi-rulers me-1"></i>${property.superficie_m2}m²
+                                </span>
+                            </div>
+
+                            <div class="recommendation-reason">
+                                <strong>¿Por qué te recomendamos esta propiedad?</strong>
+                                <p class="mb-0 mt-1">${property.justificacion}</p>
+                            </div>
+
+                            <div class="property-actions">
+                                <a href="#" class="btn-action btn-contact" onclick="contactProperty('${property.id}')">
+                                    <i class="bi bi-telephone me-1"></i>Contactar
+                                </a>
+                                <a href="#" class="btn-action btn-details" onclick="showDetails('${property.id}')">
+                                    <i class="bi bi-eye me-1"></i>Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Actualizar paginación
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                    `;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        // Cambiar página
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
+            if (page < 1 || page > totalPages) return;
+
+            currentPage = page;
+            displayResults();
+            updatePagination();
+
+            // Scroll to top of results
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            document.getElementById('resultsCount').textContent = filteredResults.length;
+        }
+
+        // Toggle vista
+        function toggleView(view) {
+            currentView = view;
+
+            // Actualizar botones
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Mostrar/ocultar mapa
+            const mapView = document.getElementById('mapView');
+            const resultsGrid = document.getElementById('resultsGrid');
+
+            if (view === 'map') {
+                mapView.classList.add('active');
+                resultsGrid.style.display = 'none';
+            } else {
+                mapView.classList.remove('active');
+                resultsGrid.style.display = 'flex';
+            }
+        }
+
+        // Ordenar resultados
+        function sortResults() {
+            const sortBy = document.getElementById('sortSelect').value;
+
+            switch (sortBy) {
+                case 'compatibility':
+                    filteredResults.sort((a, b) => b.compatibilidad - a.compatibilidad);
+                    break;
+                case 'price-low':
+                    filteredResults.sort((a, b) => a.precio - b.precio);
+                    break;
+                case 'price-high':
+                    filteredResults.sort((a, b) => b.precio - a.precio);
+                    break;
+                case 'surface-large':
+                    filteredResults.sort((a, b) => b.superficie_m2 - a.superficie_m2);
+                    break;
+                case 'surface-small':
+                    filteredResults.sort((a, b) => a.superficie_m2 - b.superficie_m2);
+                    break;
+            }
+
+            currentPage = 1;
+            displayResults();
+            updatePagination();
+        }
+
+        // Filtrar resultados
+        function filterResults() {
+            const filters = {
+                priceMin: parseInt(document.getElementById('priceMin').value),
+                priceMax: parseInt(document.getElementById('priceMax').value),
+                tipos: [],
+                habitaciones: [],
+                caracteristicas: []
+            };
+
+            // Obtener tipos seleccionados
+            if (document.getElementById('filterDepartamento').checked) filters.tipos.push('departamento');
+            if (document.getElementById('filterCasa').checked) filters.tipos.push('casa');
+            if (document.getElementById('filterPenthouse').checked) filters.tipos.push('penthouse');
+
+            // Obtener habitaciones seleccionadas
+            if (document.getElementById('filter1Dorm').checked) filters.habitaciones.push(1);
+            if (document.getElementById('filter2Dorm').checked) filters.habitaciones.push(2);
+            if (document.getElementById('filter3Dorm').checked) filters.habitaciones.push(3);
+
+            // Obtener características seleccionadas
+            if (document.getElementById('filterGarage').checked) filters.caracteristicas.push('garaje');
+            if (document.getElementById('filterAmoblado').checked) filters.caracteristicas.push('amoblado');
+            if (document.getElementById('filterPiscina').checked) filters.caracteristicas.push('piscina');
+
+            // Aplicar filtros
+            filteredResults = searchResults.filter(property => {
+                // Filtro de precio
+                if (property.precio < filters.priceMin || property.precio > filters.priceMax) {
+                    return false;
+                }
+
+                // Filtro de tipo
+                if (filters.tipos.length > 0 && !filters.tipos.includes(property.tipo_propiedad?.toLowerCase())) {
+                    return false;
+                }
+
+                // Filtro de habitaciones
+                if (filters.habitaciones.length > 0 && !filters.habitaciones.includes(property.habitaciones)) {
+                    return false;
+                }
+
+                // Filtro de características
+                if (filters.caracteristicas.length > 0) {
+                    const hasAllFeatures = filters.caracteristicas.every(feature =>
+                        property.caracteristicas?.includes(feature)
+                    );
+                    if (!hasAllFeatures) return false;
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            displayResults();
+            updatePagination();
+            updateStats();
+        }
+
+        // Actualizar filtro de precio
+        function updatePriceFilter() {
+            const minPrice = parseInt(document.getElementById('priceMin').value);
+            const maxPrice = parseInt(document.getElementById('priceMax').value);
+
+            document.getElementById('priceMinValue').textContent = minPrice.toLocaleString();
+            document.getElementById('priceMaxValue').textContent = maxPrice.toLocaleString();
+
+            filterResults();
+        }
+
+        // Limpiar filtros
+        function clearFilters() {
+            // Resetear checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Resetear rangos de precio
+            document.getElementById('priceMin').value = 0;
+            document.getElementById('priceMax').value = 500000;
+            updatePriceFilter();
+
+            // Resetear ordenamiento
+            document.getElementById('sortSelect').value = 'compatibility';
+
+            // Aplicar cambios
+            filteredResults = [...searchResults];
+            currentPage = 1;
+            displayResults();
+            updatePagination();
+            updateStats();
+
+            showToast('Filtros limpiados correctamente', 'success');
+        }
+
+        // Toggle favorito
+        function toggleFavorite(propertyId) {
+            const index = favorites.indexOf(propertyId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                showToast('Propiedad eliminada de favoritos', 'info');
+            } else {
+                favorites.push(propertyId);
+                showToast('Propiedad agregada a favoritos', 'success');
+            }
+
+            // Actualizar display
+            displayResults();
+        }
+
+        // Contactar propiedad
+        function contactProperty(propertyId) {
+            const property = searchResults.find(p => p.id === propertyId);
+            if (property) {
+                showToast(`Iniciando contacto para: ${property.nombre}`, 'info');
+                // Aquí iría la lógica de contacto real
+            }
+        }
+
+        // Mostrar detalles
+        function showDetails(propertyId) {
+            const property = searchResults.find(p => p.id === propertyId);
+            if (property) {
+                showToast(`Mostrando detalles de: ${property.nombre}`, 'info');
+                // Aquí iría la lógica para mostrar detalles en modal o nueva página
+            }
+        }
+
+        // Modificar búsqueda
+        function modifySearch() {
+            window.location.href = `perfil.html?${new URLSearchParams(searchProfile).toString()}`;
+        }
+
+        // Guardar búsqueda
+        function saveSearch() {
+            const savedSearch = {
+                id: 'search_' + Date.now(),
+                profile: searchProfile,
+                timestamp: new Date().toISOString(),
+                resultsCount: searchResults.length
+            };
+
+            const savedSearches = JSON.parse(localStorage.getItem('citrino_saved_searches') || '[]');
+            savedSearches.unshift(savedSearch);
+
+            // Mantener solo las últimas 10 búsquedas
+            if (savedSearches.length > 10) {
+                savedSearches.splice(10);
+            }
+
+            localStorage.setItem('citrino_saved_searches', JSON.stringify(savedSearches));
+            showToast('Búsqueda guardada correctamente', 'success');
+        }
+
+        // Exportar a PDF
+        function exportToPDF() {
+            showToast('Generando PDF...', 'info');
+            // Aquí iría la lógica de exportación a PDF
+            setTimeout(() => {
+                showToast('PDF descargado correctamente', 'success');
+            }, 2000);
+        }
+
+        // Exportar a Excel
+        function exportToExcel() {
+            showToast('Generando Excel...', 'info');
+            // Aquí iría la lógica de exportación a Excel
+            setTimeout(() => {
+                showToast('Excel descargado correctamente', 'success');
+            }, 2000);
+        }
+
+        // Compartir resultados
+        function shareResults() {
+            const shareUrl = window.location.href;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Resultados de búsqueda - Citrino',
+                    text: 'Mira estas propiedades que encontré para ti',
+                    url: shareUrl
+                });
+            } else {
+                // Copiar al portapapeles
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showToast('Enlace copiado al portapapeles', 'success');
+                });
+            }
+        }
+
+        // Utilidades
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showError(message) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `
+                <div class="no-results">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                    <h4>Ha ocurrido un error</h4>
+                    <p class="text-muted">${message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Reintentar
+                    </button>
+                </div>
+            `;
+        }
+
+        function showToast(message, type = 'info') {
+            const alertClass = type === 'success' ? 'alert-success' :
+                             type === 'error' ? 'alert-danger' :
+                             type === 'warning' ? 'alert-warning' : 'alert-info';
+            const icon = type === 'success' ? 'bi-check-circle-fill' :
+                        type === 'error' ? 'bi-exclamation-triangle-fill' :
+                        type === 'warning' ? 'bi-exclamation-circle-fill' : 'bi-info-circle-fill';
+
+            const toastHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3" style="z-index: 1060;" role="alert">
+                    <i class="bi ${icon} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', toastHtml);
+
+            setTimeout(() => {
+                const alert = document.querySelector('.alert:last-of-type');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

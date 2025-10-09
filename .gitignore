@@ -1,0 +1,54 @@
+# Ignorar archivos de datos grandes
+data/*.json
+data/**/*.json
+data/*.xlsx
+data/**/*.xlsx
+data/*.csv
+data/**/*.csv
+
+# Ignorar archivos temporales y caché
+*.tmp
+*.cache
+*.log
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignorar archivos de entorno virtual
+venv/
+env/
+ENV/
+
+# Ignorar archivos de configuración local
+.env
+.env.local
+.env.*.local
+
+# Ignorar archivos de construcción y distribución
+build/
+dist/
+*.egg-info/
+
+# Ignorar archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignorar archivos de sistema de macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignorar archivos de datos del proyecto
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignorar archivos de respaldo
+*.bak
+*.backup

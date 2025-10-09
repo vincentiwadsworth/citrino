@@ -1,0 +1,43 @@
+{
+  "briefing_personalizado": "ESTIMADO CLIENTE,\n\nGracias por su inter\u00e9s en nuestras propiedades. Basado en sus necesidades espec\u00edficas, hemos preparado las siguientes recomendaciones personalizadas:\n\nRESUMEN DE SU B\u00daSQUEDA:\n\u2022 Presupuesto: $180,000 - $250,000 USD\n\u2022 Composici\u00f3n: 2 adultos\" + (f\", 0 ni\u00f1os\" if ninos else \"\") + \"\n\u2022 Zona de preferencia: Zona Norte\n\u2022 Total de opciones ideales encontradas: 3\n\nRECOMENDACIONES PRINCIPALES:\n\n1. Casa en Norte 2do-5to anillo\n   \u2022 Precio: $218,385 USD\n   \u2022 Ubicaci\u00f3n: Zona Norte\n   \u2022 Caracter\u00edsticas: 4 habitaciones, 2 ba\u00f1os, 129 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 71.0%\n   \u2022 Justificaci\u00f3n: Precio de $218,385 est\u00e1 dentro del presupuesto ($250,000). 4 habitaciones adecuadas para 4 personas. Superficie generosa: 129m\u00b2 (32.2m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: seguridad_24h, gimnasio. Estado de conservaci\u00f3n: bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n2. Casa en Norte 2do-5to anillo\n   \u2022 Precio: $251,029 USD\n   \u2022 Ubicaci\u00f3n: Zona Norte\n   \u2022 Caracter\u00edsticas: 3 habitaciones, 3 ba\u00f1os, 236 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 71.0%\n   \u2022 Justificaci\u00f3n: 3 habitaciones disponibles. Superficie generosa: 236m\u00b2 (59.0m\u00b2 por persona). 3 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 2 espacios de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: seguridad_24h. Estado de conservaci\u00f3n: excelente. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n3. Casa en Norte 2do-5to anillo\n   \u2022 Precio: $243,895 USD\n   \u2022 Ubicaci\u00f3n: Zona Norte\n   \u2022 Caracter\u00edsticas: 4 habitaciones, 2 ba\u00f1os, 182 m\u00b2\n   \u2022 Compatibilidad con sus necesidades: 71.0%\n   \u2022 Justificaci\u00f3n: Precio de $243,895 se ajusta al presupuesto m\u00e1ximo. 4 habitaciones adecuadas para 4 personas. Superficie generosa: 182m\u00b2 (45.5m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: area_barbacoa, piscina_comunitaria. Estado de conservaci\u00f3n: muy_bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.\n\n\nPR\u00d3XIMOS PASOS:\n1. Podemos coordinar visitas a las propiedades de su inter\u00e9s\n2. Ofrecemos asesor\u00eda legal y financiera completa\n3. Contamos con herramientas exclusivas de negociaci\u00f3n\n\nCONTACTO:\nPara m\u00e1s informaci\u00f3n o coordinar visitas, por favor contacte a su asesor comercial de Citrino.\n\n---\nEste briefing fue generado autom\u00e1ticamente por el sistema inteligente de Citrino\nBasado en an\u00e1lisis de 76,853 propiedades en Santa Cruz de la Sierra\n",
+  "recomendaciones": [
+    {
+      "banos": 2,
+      "compatibilidad": 71.0,
+      "fuente": "franz_excel",
+      "habitaciones": 4,
+      "id": "franz_f41f548b",
+      "justificacion": "Precio de $218,385 est\u00e1 dentro del presupuesto ($250,000). 4 habitaciones adecuadas para 4 personas. Superficie generosa: 129m\u00b2 (32.2m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: seguridad_24h, gimnasio. Estado de conservaci\u00f3n: bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Norte 2do-5to anillo",
+      "precio": 218385,
+      "superficie_m2": 129,
+      "zona": "Zona Norte"
+    },
+    {
+      "banos": 3,
+      "compatibilidad": 71.0,
+      "fuente": "franz_excel",
+      "habitaciones": 3,
+      "id": "franz_899e96ef",
+      "justificacion": "3 habitaciones disponibles. Superficie generosa: 236m\u00b2 (59.0m\u00b2 por persona). 3 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 2 espacios de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: seguridad_24h. Estado de conservaci\u00f3n: excelente. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Norte 2do-5to anillo",
+      "precio": 251029,
+      "superficie_m2": 236,
+      "zona": "Zona Norte"
+    },
+    {
+      "banos": 2,
+      "compatibilidad": 71.0,
+      "fuente": "franz_excel",
+      "habitaciones": 4,
+      "id": "franz_0203adfd",
+      "justificacion": "Precio de $243,895 se ajusta al presupuesto m\u00e1ximo. 4 habitaciones adecuadas para 4 personas. Superficie generosa: 182m\u00b2 (45.5m\u00b2 por persona). 2 ba\u00f1os completos (adecuado para 4 personas). Cuenta con 1 espacio de garaje. Ubicada en zona premium: Zona Norte. Condominio cerrado con seguridad 24h. Amenidades: area_barbacoa, piscina_comunitaria. Estado de conservaci\u00f3n: muy_bueno. Zona con plusval\u00eda creciente. Zona con alta seguridad.",
+      "nombre": "Casa en Norte 2do-5to anillo",
+      "precio": 243895,
+      "superficie_m2": 182,
+      "zona": "Zona Norte"
+    }
+  ],
+  "success": true,
+  "total_recomendaciones": 3
+}
