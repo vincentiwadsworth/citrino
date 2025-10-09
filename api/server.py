@@ -57,7 +57,7 @@ def inicializar_datos():
         with open(ruta, 'r', encoding='utf-8') as f:
             data = json.load(f)
             propiedades_relevamiento = data.get('propiedades', [])
-            print(f"✅ Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
+            print(f"[OK] Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
 
             # Cargar en ambos motores
             motor_recomendacion.cargar_propiedades(propiedades_relevamiento)
@@ -69,18 +69,18 @@ def inicializar_datos():
             
             DATOS_CARGADOS = True
             print("=" * 60)
-            print("✅ CITRINO API LISTA")
+            print("[OK] CITRINO API LISTA")
             print("=" * 60)
             return True
             
     except FileNotFoundError as e:
-        print(f"❌ Error: No se encontró data/base_datos_relevamiento.json")
+        print(f"[ERROR] No se encontro data/base_datos_relevamiento.json")
         print(f"   Ruta buscada: {e}")
         print("   Ejecute: python scripts/build_relevamiento_dataset.py")
         return False
         
     except Exception as e:
-        print(f"❌ Error cargando base de datos de relevamiento: {e}")
+        print(f"[ERROR] Error cargando base de datos de relevamiento: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -106,6 +106,7 @@ def health_check():
             '/api/buscar',
             '/api/recomendar',
             '/api/recomendar-mejorado',
+            '/api/recomendar-mejorado-llm',
             '/api/estadisticas',
             '/api/zonas',
             '/api/chat/process'
@@ -541,6 +542,218 @@ Basado en análisis de 76,853 propiedades en Santa Cruz de la Sierra
 """
 
     return briefing
+
+def generar_briefing_ejecutivo_llm(recomendaciones, perfil, info_adicional):
+    """
+    Genera briefing ejecutivo enriquecido con Z.AI
+    """
+    if not os.getenv('ZAI_API_KEY') or not info_adicional:
+        # Fallback a briefing básico
+        return generar_briefing_personalizado(perfil, recomendaciones)
+    
+    try:
+        from llm_integration import LLMIntegration, LLMConfig
+        
+        llm = LLMIntegration(LLMConfig(
+            provider='zai',
+            api_key=os.getenv('ZAI_API_KEY'),
+            model='glm-4.5-air'
+        ))
+        
+        # Preparar contexto para el LLM
+        resumen_recs = "\n".join([
+            f"- {rec.get('nombre', 'Propiedad')}: ${rec.get('precio', 0):,} USD, {rec.get('zona', 'Sin zona')}, {rec.get('compatibilidad', 0)}% match"
+            for rec in recomendaciones[:5]
+        ])
+        
+        presupuesto_min = perfil.get('presupuesto', {}).get('min', perfil.get('presupuesto_min', 0))
+        presupuesto_max = perfil.get('presupuesto', {}).get('max', perfil.get('presupuesto_max', 0))
+        ubicacion = perfil.get('preferencias', {}).get('ubicacion', perfil.get('zona_preferida', 'No especificada'))
+        tipo_prop = perfil.get('preferencias', {}).get('tipo_propiedad', perfil.get('tipo_propiedad', 'Sin especificar'))
+        
+        prompt = f"""Eres un asesor inmobiliario senior. Genera un briefing ejecutivo profesional.
+
+CONTEXTO DE LA REUNIÓN:
+{info_adicional}
+
+PERFIL DEL PROSPECTO:
+- Presupuesto: ${presupuesto_min:,} - ${presupuesto_max:,} USD
+- Zona preferida: {ubicacion}
+- Tipo: {tipo_prop}
+
+RECOMENDACIONES TOP:
+{resumen_recs}
+
+Genera un briefing ejecutivo que incluya:
+
+1. RESUMEN EJECUTIVO (2-3 oraciones sobre el perfil del prospecto)
+
+2. ANÁLISIS DE MERCADO (2-3 oraciones sobre las tendencias en su zona de interés)
+
+3. RECOMENDACIONES CLAVE (por qué las propiedades seleccionadas son ideales)
+
+4. PREGUNTAS SUGERIDAS (3-4 preguntas inteligentes para la próxima reunión)
+
+5. PRÓXIMOS PASOS (acciones concretas recomendadas)
+
+Formato: Markdown, profesional, conciso (máximo 400 palabras)."""
+        
+        briefing_llm = llm._call_zai(prompt)
+        return briefing_llm
+        
+    except Exception as e:
+        print(f"Error generando briefing con LLM: {e}")
+        return generar_briefing_personalizado(perfil, recomendaciones)
+
+@app.route('/api/recomendar-mejorado-llm', methods=['POST'])
+def recomendar_con_llm():
+    """
+    Endpoint de recomendaciones con enriquecimiento Z.AI
+    
+    SIEMPRE genera:
+    - Briefing ejecutivo (valor principal de Citrino Reco)
+    
+    CONDICIONALMENTE genera:
+    - Análisis personalizado por propiedad (solo si hay informacion_llm)
+    """
+    try:
+        data = request.get_json()
+        
+        # Formatear perfil para inversores
+        perfil = {
+            'id': data.get('id', 'perfil_llm'),
+            'presupuesto': {
+                'min': data.get('presupuesto_min', 0),
+                'max': data.get('presupuesto_max', 1000000)
+            },
+            'preferencias': {
+                'ubicacion': data.get('zona_preferida', ''),
+                'tipo_propiedad': data.get('tipo_propiedad', ''),
+                'unidad_vecinal': data.get('unidad_vecinal', ''),
+                'manzana': data.get('manzana', ''),
+                'disponibilidad_dias': data.get('disponibilidad_dias', 90)
+            },
+            'necesidades': data.get('necesidades', [])
+        }
+        
+        # Generar recomendaciones con motor mejorado
+        recomendaciones = motor_mejorado.generar_recomendaciones(
+            perfil,
+            limite=data.get('limite', 6),
+            umbral_minimo=data.get('umbral_minimo', 0.3)
+        )
+        
+        # Formatear recomendaciones básicas
+        resultados_formateados = []
+        for rec in recomendaciones:
+            prop = rec['propiedad']
+            caract = prop.get('caracteristicas_principales', {})
+            if not caract:
+                caract = {
+                    'precio': prop.get('precio', 0),
+                    'superficie_m2': prop.get('superficie', 0),
+                    'habitaciones': prop.get('habitaciones', 0),
+                    'banos_completos': prop.get('banos', 0)
+                }
+
+            ubicacion = prop.get('ubicacion', {})
+            if not ubicacion:
+                ubicacion = {
+                    'zona': prop.get('zona', ''),
+                    'direccion': prop.get('direccion', '')
+                }
+
+            resultado = {
+                'id': prop.get('id', ''),
+                'nombre': prop.get('tipo_propiedad', f"Inversión en {prop.get('zona', 'Zona')}"),
+                'precio': caract.get('precio', 0),
+                'superficie_m2': caract.get('superficie_m2', 0),
+                'habitaciones': caract.get('habitaciones', 0),
+                'banos': caract.get('banos_completos', 0),
+                'zona': ubicacion.get('zona', ''),
+                'unidad_vecinal': prop.get('unidad_vecinal', ''),
+                'manzana': prop.get('manzana', ''),
+                'fecha_relevamiento': prop.get('fecha_relevamiento', ''),
+                'compatibilidad': round(rec['compatibilidad'], 1),
+                'justificacion': rec.get('justificacion', ''),
+                'servicios_cercanos': rec.get('servicios_cercanos', ''),
+                'fuente': prop.get('fuente', ''),
+                'coordenadas': ubicacion.get('coordenadas', {}),
+                'llm_usado': False
+            }
+            resultados_formateados.append(resultado)
+        
+        # Información adicional para enriquecimiento personalizado
+        info_adicional = data.get('informacion_llm', '')
+        has_llm_context = bool(info_adicional and info_adicional.strip())
+        
+        # 1. CONDICIONALMENTE enriquecer justificaciones (solo si hay contexto)
+        if has_llm_context and os.getenv('ZAI_API_KEY'):
+            try:
+                from llm_integration import LLMIntegration, LLMConfig
+                
+                llm = LLMIntegration(LLMConfig(
+                    provider='zai',
+                    api_key=os.getenv('ZAI_API_KEY'),
+                    model='glm-4.5-air'
+                ))
+                
+                # Enriquecer cada recomendación con análisis LLM
+                for rec in resultados_formateados[:5]:  # Solo top 5 para optimizar costos
+                    prompt = f"""Contexto de la reunión con el prospecto:
+{info_adicional}
+
+Propiedad recomendada:
+- Ubicación: {rec['zona']}
+- Precio: ${rec['precio']:,} USD
+- Características: {rec['habitaciones']} hab, {rec['banos']} baños, {rec['superficie_m2']} m²
+- Justificación técnica: {rec['justificacion']}
+
+Genera un análisis personalizado (2-3 oraciones) explicando:
+1. Por qué esta propiedad es ideal para este prospecto específico
+2. Qué aspectos mencionados en la reunión se alinean con la propiedad
+3. Una sugerencia o pregunta para la próxima conversación"""
+                    
+                    try:
+                        respuesta_llm = llm._call_zai(prompt)
+                        rec['analisis_personalizado'] = respuesta_llm
+                        rec['llm_usado'] = True
+                    except Exception as e:
+                        print(f"Error enriqueciendo propiedad {rec['id']} con LLM: {e}")
+                        rec['llm_usado'] = False
+            
+            except Exception as e:
+                print(f"Error inicializando LLM para enriquecimiento: {e}")
+        
+        # 2. SIEMPRE generar briefing ejecutivo (valor principal de Citrino Reco)
+        briefing = None
+        if os.getenv('ZAI_API_KEY'):
+            try:
+                briefing = generar_briefing_ejecutivo_llm(
+                    resultados_formateados, 
+                    data,
+                    info_adicional if has_llm_context else "Análisis general del mercado inmobiliario"
+                )
+            except Exception as e:
+                print(f"Advertencia: No se pudo generar briefing con Z.AI: {e}")
+                # No fallar - continuar sin briefing
+        
+        return jsonify({
+            'success': True,
+            'recommendations': resultados_formateados,
+            'briefing': briefing,  # SIEMPRE presente (o None si Z.AI no disponible)
+            'llmAvailable': bool(os.getenv('ZAI_API_KEY')),
+            'personalizedAnalysis': has_llm_context,  # Flag para frontend
+            'total': len(resultados_formateados),
+            'motor': 'mejorado_con_llm',
+            'fuente_datos': 'relevamiento'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
 
 @app.route('/api/chat/process', methods=['POST'])
 def process_chat_message():

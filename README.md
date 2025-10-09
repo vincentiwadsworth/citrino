@@ -6,7 +6,7 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 
 ## 📊 Estado Actual del Proyecto
 
-✅ **PRODUCCIÓN LISTA** - Versión 1.0 completa y funcional
+✅ **PRODUCCIÓN ACTIVA** - Versión 1.1 con integración Z.AI en desarrollo
 
 ### 🚀 Componentes Activos
 
@@ -20,10 +20,19 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 
 ### 📈 Métricas del Sistema
 
-- **🏘️ Propiedades de Relevamiento**: Actualizadas continuamente con coordenadas exactas
-- **🏢 Servicios Urbanos**: 4,777 (impactan valor y plusvalía)
-- **📍 Cobertura Geográfica**: 100% Santa Cruz de la Sierra y áreas metropolitanas
-- **🛠️ Uso interno**: Operado por el equipo de Citrino para ofrecer recomendaciones personalizadas a sus clientes
+- **🏘️ Propiedades**: 1,583 propiedades con coordenadas exactas
+- **🏢 Servicios Urbanos**: 4,777 servicios mapeados
+- **📍 Cobertura**: Santa Cruz de la Sierra y áreas metropolitanas
+- **🤖 LLM**: Z.AI (GLM-4.5-Air) integrado en Citrino Chat
+- **☁️ Deploy**: Backend en Render.com + Frontend en GitHub Pages
+- **🛠️ Uso**: Herramienta interna del equipo Citrino
+
+### 🔄 Trabajo en Progreso
+
+**Integración Z.AI en Citrino Reco** - Ver `INTEGRACION_LLM_CAMBIOS_PENDIENTES.md`:
+- Enriquecimiento de justificaciones con análisis personalizado
+- Generación de briefings ejecutivos con insights de mercado
+- Exportación de documentos en markdown
 
 ## 🎯 Características Principales
 
@@ -51,6 +60,68 @@ Esta herramienta se emplea exclusivamente por el equipo de Citrino para estudiar
 - **Bootstrap 5** con componentes funcionales
 - **Filtros avanzados** por zona, precio y características
 - **Comparativas detalladas** de propiedades seleccionadas
+
+## 🤖 Sistema de Recomendaciones con IA
+
+Citrino ofrece dos niveles de análisis según las necesidades del usuario:
+
+### Motor de Recomendación Base (`/api/recomendar-mejorado`)
+
+**Motor matemático determinístico:**
+- ✅ Algoritmo de scoring ponderado:
+  - Ubicación: 35%
+  - Precio: 25%
+  - Servicios cercanos: 20%
+  - Características: 15%
+  - Disponibilidad: 5%
+- ✅ Cálculo de distancias con fórmula Haversine
+- ✅ Justificaciones generadas con templates predefinidos
+- ✅ Funciona sin LLM - lógica 100% determinística
+- ✅ Respuesta instantánea
+
+**Ejemplo de justificación (template):**
+> "Esta propiedad tiene excelente ubicación en Equipetrol con proximidad a servicios esenciales. Precio competitivo dentro del rango solicitado."
+
+### Motor de Recomendación con Z.AI (`/api/recomendar-mejorado-llm`)
+
+**Motor matemático + Inteligencia Artificial:**
+- ✅ **MISMO algoritmo de scoring** que el motor base
+- ✅ **SIEMPRE genera briefing ejecutivo** con Z.AI:
+  - Análisis del mercado inmobiliario
+  - Tendencias de la zona
+  - Recomendaciones estratégicas
+  - Insights personalizados
+- ✅ **Enriquecimiento opcional** de justificaciones:
+  - Se activa cuando el usuario provee contexto adicional en `informacion_llm`
+  - Análisis personalizado por propiedad con lenguaje natural
+  - Considera motivaciones y necesidades específicas del cliente
+
+**Ejemplo de justificación enriquecida (Z.AI):**
+> "Considerando tu interés en inversión de mediano plazo, esta propiedad en Equipetrol ofrece alto potencial de plusvalía debido a los desarrollos urbanos planificados en la zona. La proximidad al nuevo centro comercial incrementará su valor estimado en 15-20% en los próximos 3 años."
+
+### Cuándo se Usa Cada Endpoint
+
+| Escenario | Endpoint | Z.AI | Briefing | Enriquecimiento |
+|-----------|----------|------|----------|----------------|
+| Usuario sin contexto adicional | `/recomendar-mejorado-llm` | ✅ | ✅ Siempre | ❌ Templates |
+| Usuario con contexto adicional | `/recomendar-mejorado-llm` | ✅ | ✅ Siempre | ✅ Personalizado |
+| Z.AI no disponible (fallback) | `/recomendar-mejorado` | ❌ | ❌ | ❌ Templates |
+
+### Configuración de Z.AI
+
+Para activar el motor con IA, configura la API key en `.env`:
+
+```bash
+# Obtener en https://z.ai/model-api
+ZAI_API_KEY=tu_clave_zai_aqui
+LLM_PROVIDER=zai
+LLM_MODEL=glm-4.5-air
+```
+
+**En producción (Render.com):**
+- Configura `ZAI_API_KEY` en las variables de entorno del dashboard
+- El briefing ejecutivo se generará automáticamente en cada recomendación
+- El enriquecimiento personalizado se activará cuando el usuario provea contexto
 
 ## 🏗️ Arquitectura del Sistema
 

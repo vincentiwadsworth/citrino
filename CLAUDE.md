@@ -73,11 +73,12 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 
 #### Directorios Clave
 - **`api/`** - Servidor REST y endpoints para inversores
-- **`src/`** - Motores de recomendación y lógica de inversión
+- **`src/`** - Motores de recomendación, lógica de inversión y integración LLM (`llm_integration.py`)
 - **`scripts/`** - Procesamiento de datos y análisis de mercado
-- **`tests/` - Suite de pruebas para el sistema de inversión
-- **`data/`** - Todos los archivos de datos de inversión
+- **`tests/`** - Suite de pruebas para el sistema de inversión
+- **`data/`** - Todos los archivos de datos de inversión (1,583 propiedades)
 - **`assets/`** - CSS y JavaScript del frontend moderno
+- **`docs/historico/`** - Documentación archivada de fases anteriores del proyecto
 
 ## Comandos de Desarrollo
 

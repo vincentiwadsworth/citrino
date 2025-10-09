@@ -326,6 +326,37 @@ class CitrinoAPI {
     }
 
     /**
+     * Genera recomendaciones enriquecidas con Z.AI
+     */
+    async getRecommendationsWithLLM(profile, options = {}) {
+        try {
+            const requestData = {
+                ...profile,
+                limite: options.limite || 6,
+                umbral_minimo: options.umbral_minimo || 0.3
+            };
+
+            const response = await this.request('/recomendar-mejorado-llm', {
+                method: 'POST',
+                body: JSON.stringify(requestData)
+            });
+
+            return {
+                success: true,
+                recommendations: response.recomendaciones || [],
+                briefing: response.briefing_ejecutivo,
+                llmAvailable: response.llm_disponible,
+                totalRecommendations: response.total_recomendaciones
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
      * Guarda un perfil de cliente
      */
     async saveProfile(profile) {
