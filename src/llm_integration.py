@@ -199,12 +199,19 @@ JSON:"""
         except KeyError as e:
             raise ValueError(f"Respuesta inesperada de Z.AI: {e}")
 
-    def _call_openrouter(self, prompt: str) -> str:
+    def _call_openrouter(self, prompt: str, model: str = None) -> str:
         """Realiza llamada a la API de OpenRouter."""
         url = "https://openrouter.ai/api/v1/chat/completions"
+        
+        # Obtener modelo de OpenRouter de env o usar el especificado
+        openrouter_model = model or os.getenv("OPENROUTER_MODEL", "qwen/qwen-2.5-72b-instruct:free")
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
+        
+        if not openrouter_key:
+            raise ValueError("OPENROUTER_API_KEY no configurada en .env")
 
         payload = {
-            "model": self.config.model,
+            "model": openrouter_model,
             "messages": [
                 {
                     "role": "user",
@@ -214,9 +221,16 @@ JSON:"""
             "max_tokens": self.config.max_tokens,
             "temperature": self.config.temperature
         }
+        
+        headers = {
+            "Authorization": f"Bearer {openrouter_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://citrino.app",
+            "X-Title": "Citrino ETL"
+        }
 
         try:
-            response = self.session.post(url, json=payload, timeout=30)
+            response = requests.post(url, json=payload, headers=headers, timeout=60)
             response.raise_for_status()
 
             data = response.json()
@@ -398,6 +412,108 @@ JSON:"""
 
         return True
 
+    def _get_provider_chain(self) -> List[tuple]:
+        """
+        Retorna lista ordenada de (provider, model) a intentar.
+        
+        Returns:
+            Lista de tuplas (provider_name, model_name)
+        """
+        chain = [(self.config.provider, self.config.model)]  # Primario primero
+        
+        # Agregar fallback si está habilitado
+        fallback_enabled = os.getenv("OPENROUTER_FALLBACK_ENABLED", "false").lower() == "true"
+        
+        if fallback_enabled and self.config.provider == "zai":
+            # Si primario es z.ai y hay OpenRouter configurado
+            if os.getenv("OPENROUTER_API_KEY"):
+                openrouter_model = os.getenv("OPENROUTER_MODEL", "qwen/qwen-2.5-72b-instruct:free")
+                chain.append(("openrouter", openrouter_model))
+        
+        return chain
+    
+    def consultar_con_fallback(self, prompt: str, use_fallback: bool = True) -> Dict[str, Any]:
+        """
+        Realiza consulta LLM con fallback automático.
+        
+        Args:
+            prompt: Texto del prompt
+            use_fallback: Si debe usar fallback en caso de error
+        
+        Returns:
+            Dict con:
+                - respuesta: str
+                - provider_usado: str
+                - model_usado: str
+                - fallback_activado: bool
+                - intentos: int
+        
+        Raises:
+            ConnectionError: Si todos los providers fallan
+        """
+        providers = self._get_provider_chain() if use_fallback else [(self.config.provider, self.config.model)]
+        errores = []
+        
+        for i, (provider, model) in enumerate(providers):
+            es_fallback = i > 0
+            
+            try:
+                print(f"[LLM] Intentando con provider: {provider} (modelo: {model})")
+                
+                if provider == "zai":
+                    respuesta = self._call_zai(prompt)
+                elif provider == "openrouter":
+                    respuesta = self._call_openrouter(prompt, model=model)
+                elif provider == "openai":
+                    respuesta = self._call_openai(prompt)
+                else:
+                    print(f"[LLM] Provider {provider} no soportado, saltando...")
+                    continue
+                
+                # Éxito!
+                if es_fallback:
+                    print(f"[LLM] >> Fallback exitoso: {provider} - {model}")
+                
+                return {
+                    "respuesta": respuesta,
+                    "provider_usado": provider,
+                    "model_usado": model,
+                    "fallback_activado": es_fallback,
+                    "intentos": i + 1
+                }
+                
+            except (ConnectionError, requests.HTTPError) as e:
+                error_msg = str(e)
+                errores.append(f"{provider}: {error_msg}")
+                
+                # Detectar rate limit
+                if "429" in error_msg or "Too Many Requests" in error_msg:
+                    print(f"[LLM] Rate limit en {provider}, probando fallback...")
+                    continue
+                
+                # Detectar server error
+                if any(code in error_msg for code in ["500", "502", "503", "504"]):
+                    print(f"[LLM] Error de servidor en {provider}, probando fallback...")
+                    continue
+                
+                # Otros errores de conexión
+                print(f"[LLM] Error en {provider}: {e}")
+                if not use_fallback or i == len(providers) - 1:
+                    # Si no hay fallback o es el último, propagar error
+                    if not use_fallback:
+                        raise
+            
+            except Exception as e:
+                error_msg = str(e)
+                errores.append(f"{provider}: {error_msg}")
+                print(f"[LLM] Error inesperado en {provider}: {e}")
+                
+                if not use_fallback:
+                    raise
+        
+        # Si todos los providers fallaron
+        raise ConnectionError(f"Todos los providers fallaron: {'; '.join(errores)}")
+    
     def consultar(self, prompt: str) -> str:
         """
         Realiza una consulta genérica al LLM.

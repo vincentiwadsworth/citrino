@@ -207,14 +207,29 @@ JSON:"""
             # Construir prompt
             prompt = self._build_extraction_prompt(descripcion, titulo)
             
-            # Llamar al LLM
+            # Llamar al LLM con fallback
             logger.info(f"Llamando LLM para extraer datos...")
             self.stats["llm_calls"] += 1
             
-            response = self.llm.consultar(prompt)
+            resultado_llm = self.llm.consultar_con_fallback(prompt, use_fallback=True)
+            
+            # Actualizar estadísticas de fallback
+            provider_usado = resultado_llm["provider_usado"]
+            if provider_usado == "zai":
+                self.fallback_stats["zai_success"] += 1
+            elif provider_usado == "openrouter":
+                self.fallback_stats["openrouter_used"] += 1
+            
+            if resultado_llm["fallback_activado"]:
+                logger.info(f">> Fallback activado: {resultado_llm['model_usado']}")
             
             # Parsear respuesta
-            extracted_data = self._parse_llm_extraction(response)
+            extracted_data = self._parse_llm_extraction(resultado_llm["respuesta"])
+            
+            # Agregar metadatos
+            extracted_data["_llm_provider"] = resultado_llm["provider_usado"]
+            extracted_data["_llm_model"] = resultado_llm["model_usado"]
+            extracted_data["_fallback_usado"] = resultado_llm["fallback_activado"]
             
             # Guardar en caché
             if use_cache:
@@ -227,6 +242,7 @@ JSON:"""
             
         except Exception as e:
             self.stats["errors"] += 1
+            self.fallback_stats["zai_failed"] += 1
             logger.error(f"Error extrayendo datos: {e}")
             return {
                 "precio": None,
@@ -238,7 +254,10 @@ JSON:"""
                 "superficie_construida": None,
                 "zona": None,
                 "tipo_propiedad": None,
-                "caracteristicas": []
+                "caracteristicas": [],
+                "_llm_provider": None,
+                "_llm_model": None,
+                "_fallback_usado": False
             }
 
     def get_stats(self) -> Dict[str, int]:
