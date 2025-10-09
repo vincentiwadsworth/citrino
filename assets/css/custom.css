@@ -161,6 +161,10 @@
     box-shadow: var(--shadow-xl);
 }
 
+.action-card .card-body {
+    padding: var(--spacing-lg);
+}
+
 .action-icon {
     width: 60px;
     height: 60px;
