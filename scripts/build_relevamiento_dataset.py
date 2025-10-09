@@ -19,6 +19,10 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 import logging
+from dotenv import load_dotenv
+
+# Cargar variables de entorno del archivo .env
+load_dotenv()
 
 # Agregar path para importar extractor de zonas y parser LLM
 sys.path.insert(0, str(Path(__file__).parent))
@@ -76,12 +80,14 @@ class ProcesadorDatosRelevamiento:
         logger.info(f"Se encontraron {len(files)} archivos Excel (incluyendo subcarpetas)")
         return sorted(files)
 
-    def procesar_archivo(self, filepath: str) -> List[Dict[str, Any]]:
+    def procesar_archivo(self, filepath: str, limitar_muestra: bool = False, max_registros: int = 3) -> List[Dict[str, Any]]:
         """
         Procesa un archivo Excel de relevamiento.
 
         Args:
             filepath: Ruta al archivo Excel
+            limitar_muestra: Si es True, limita a max_registros filas
+            max_registros: Número máximo de registros a procesar (solo si limitar_muestra=True)
 
         Returns:
             Lista de propiedades procesadas
@@ -92,7 +98,7 @@ class ProcesadorDatosRelevamiento:
 
             # Extraer fecha y código de proveedor del nombre de archivo
             fecha_relevamiento, codigo_proveedor = self.extraer_fecha_y_proveedor_desde_filename(filename)
-            
+
             if not fecha_relevamiento:
                 logger.warning(f"No se pudo extraer fecha/proveedor de {filename}")
             else:
@@ -104,6 +110,12 @@ class ProcesadorDatosRelevamiento:
                 logger.warning(f"No se pudieron leer datos de {filename}")
                 return []
 
+            # Limitar a primeros N registros si se solicita muestreo
+            if limitar_muestra:
+                total_filas = len(df)
+                df = df.head(max_registros)
+                logger.info(f"  Muestreo limitado a {len(df)} de {total_filas} registros")
+
             # Estandarizar columnas
             df = self.estandarizar_columnas(df)
 
@@ -111,8 +123,8 @@ class ProcesadorDatosRelevamiento:
             propiedades = []
             for index, row in df.iterrows():
                 propiedad = self.procesar_propiedad(
-                    row, 
-                    fecha_relevamiento, 
+                    row,
+                    fecha_relevamiento,
                     codigo_proveedor,
                     filename
                 )
@@ -532,14 +544,23 @@ class ProcesadorDatosRelevamiento:
         # El tipo de propiedad se puede extraer del título, así que no es obligatorio aquí
         return True
 
-    def procesar_todos_los_archivos(self) -> List[Dict[str, Any]]:
-        """Procesa todos los archivos Excel del directorio raw."""
+    def procesar_todos_los_archivos(self, limitar_muestra: bool = False, max_registros: int = 3) -> List[Dict[str, Any]]:
+        """
+        Procesa todos los archivos Excel del directorio raw.
+
+        Args:
+            limitar_muestra: Si es True, limita a max_registros por archivo
+            max_registros: Número máximo de registros por archivo
+
+        Returns:
+            Lista de propiedades únicas procesadas
+        """
         archivos = self.encontrar_archivos_excel()
 
         todas_las_propiedades = []
 
         for archivo in archivos:
-            propiedades = self.procesar_archivo(archivo)
+            propiedades = self.procesar_archivo(archivo, limitar_muestra, max_registros)
             todas_las_propiedades.extend(propiedades)
             self.processed_files.append(archivo)
 
@@ -605,13 +626,29 @@ class ProcesadorDatosRelevamiento:
 
 def main():
     """Función principal del script."""
+    import argparse
+
+    # Configurar argumentos de línea de comandos
+    parser = argparse.ArgumentParser(description='Procesar datos de relevamiento inmobiliario')
+    parser.add_argument('--muestra', action='store_true',
+                       help='Limitar procesamiento a primeros 3 registros de cada archivo')
+    parser.add_argument('--max-registros', type=int, default=3,
+                       help='Número máximo de registros por archivo (solo con --muestra)')
+
+    args = parser.parse_args()
+
     logger.info("Iniciando procesamiento de datos de relevamiento...")
+    if args.muestra:
+        logger.info(f"MODALIDAD MUESTREO: Limitando a {args.max_registros} registros por archivo")
 
     # Crear procesador
     procesador = ProcesadorDatosRelevamiento()
 
-    # Procesar todos los archivos
-    propiedades = procesador.procesar_todos_los_archivos()
+    # Procesar todos los archivos (con o sin limitación)
+    propiedades = procesador.procesar_todos_los_archivos(
+        limitar_muestra=args.muestra,
+        max_registros=args.max_registros
+    )
 
     if propiedades:
         # Guardar resultados

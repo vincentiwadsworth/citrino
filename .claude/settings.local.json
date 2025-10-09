@@ -7,7 +7,8 @@
       "Bash(python:*)",
       "Bash(streamlit run:*)",
       "Bash(curl:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
