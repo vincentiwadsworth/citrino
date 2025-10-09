@@ -68,10 +68,12 @@ class ProcesadorDatosRelevamiento:
         self.filename_pattern = re.compile(r'(\d{4}\.\d{2}\.\d{2})\s+(\d{2})\.xlsx')
 
     def encontrar_archivos_excel(self) -> List[str]:
-        """Encuentra todos los archivos Excel en el directorio raw."""
-        pattern = os.path.join(self.raw_data_dir, "*.xlsx")
-        files = glob.glob(pattern)
-        logger.info(f"Se encontraron {len(files)} archivos Excel")
+        """Encuentra todos los archivos Excel en el directorio raw y sus subcarpetas."""
+        pattern = os.path.join(self.raw_data_dir, "**", "*.xlsx")
+        files = glob.glob(pattern, recursive=True)
+        # Excluir archivos temporales de Excel (comienzan con ~$)
+        files = [f for f in files if not os.path.basename(f).startswith('~$')]
+        logger.info(f"Se encontraron {len(files)} archivos Excel (incluyendo subcarpetas)")
         return sorted(files)
 
     def procesar_archivo(self, filepath: str) -> List[Dict[str, Any]]:
