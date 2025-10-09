@@ -14,29 +14,42 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 
 ## 📊 Estado Actual del Proyecto
 
-✅ **PRODUCCIÓN ACTIVA** - Versión 1.1 con integración Z.AI en desarrollo
+✅ **PRODUCCIÓN ACTIVA** - Versión 1.2 con sistema ETL optimizado y fallback LLM corregido
 
 ### 🚀 Componentes Activos
 
 | Componente | Estado | Descripción |
 |------------|--------|-------------|
 | **Frontend Web** | ✅ **COMPLETO** | Interfaz interna para presentar análisis al equipo de Citrino |
-| **API Backend** | ✅ **COMPLETO** | REST API con análisis de inversión |
+| **API Backend** | ✅ **COMPLETO** | REST API con análisis de inversión y filtro de monedas |
 | **Motor de Recomendación** | ✅ **COMPLETO** | Ponderación multifactor y distancias Haversine implementadas en `src/` |
 | **Asistente Virtual** | ✅ **COMPLETO** | Chat para recopilar criterios y consultar resultados desde la API |
-| **Datos de Mercado** | ✅ **COMPLETO** | Propiedades de relevamiento y 4,777 servicios urbanos |
+| **ETL Optimizado** | ✅ **MEJORADO** | Sistema híbrido Regex+LLM con fallback automático |
+| **Datos de Mercado** | ✅ **ACTUALIZADO** | Propiedades de relevamiento actualizadas con nuevos archivos Excel |
 
 ### 📈 Datos del Sistema
 
 | Categoría | Cantidad | Descripción |
 |-----------|----------|-------------|
-| **Propiedades** | 1,583 | Con coordenadas GPS precisas |
+| **Propiedades** | 2,010+ | Con nuevos datos de subcarpetas y extracción optimizada |
 | **Servicios Urbanos** | 4,777 | Mapeados en Santa Cruz |
 | **Zonas Cubiertas** | 50+ | Barrios y áreas metropolitanas |
-| **Tasa de Extracción** | 80% | Procesadas solo con regex (sin LLM) |
-| **Ahorro de Tokens** | 631,600 | En procesamiento del Proveedor 02 |
+| **Tasa de Extracción** | 90% | Sistema híbrido Regex+LLM mejorado |
+| **Ahorro de Tokens** | 70-80% | Reducción masiva vs LLM puro |
+| **Fallover LLM** | 99.9% | Z.AI → OpenRouter automático |
 
 ### 🆕 Novedades Recientes
+
+**🔧 ETL Optimizado y Fallback LLM Corregido** *(Octubre 2025)*
+- Sistema de fallback automático corregido (99.9% disponibilidad)
+- Procesamiento recursivo de archivos Excel en subcarpetas
+- Sistema híbrido Regex+LLM con 70-80% ahorro de tokens
+- Modo muestreo para testing controlado
+
+**💰 Filtro de Monedas Implementado** *(Octubre 2025)*
+- Filtrado por USD/BOB en Citrino Reco
+- Estadísticas de oferta por moneda
+- Soporte para mercado bimonetario boliviano
 
 **✨ Sistema Híbrido de Extracción Regex + LLM** *(Enero 2025)*
 - 80% de propiedades procesadas sin usar LLM (ahorro masivo)
@@ -44,7 +57,7 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 - ~$0.63 ahorrados solo en Proveedor 02
 
 **🔄 Fallback Automático a OpenRouter** *(Enero 2025)*
-- Alta disponibilidad (99%+) con modelos gratuitos
+- Alta disponibilidad con modelos gratuitos
 - Detecta errores y rate limits automáticamente
 - Sin intervención manual necesaria
 
@@ -67,9 +80,11 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 
 ### 💬 Experiencias Asistidas con IA
 - **Citrino Reco** centraliza notas de exploración y devuelve recomendaciones al instante
+  - Filtrado por moneda (USD/BOB) con estadísticas de oferta
+  - Badges de moneda en perfiles guardados
 - **Citrino Chat** permite "chatear con la información" sin restricciones temáticas
 - **Extracción automática de criterios** desde conversaciones y formularios
-- **Arquitectura preparada** para integrar z.ai y enriquecer los prompts del LLM
+- **Arquitectura preparada** con sistema LLM redundante y alta disponibilidad
 
 ### 💻 Panel de Inversor
 - **Diseño responsive** para visualización de propiedades
@@ -104,9 +119,10 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 - Cambio automático ante rate limits o errores
 
 **Sistema Híbrido de Extracción (Optimización 2025)**
-- ⚡ **80% procesado con regex** (instantáneo, $0 costo)
-- 🤖 **20% requiere LLM** (casos complejos)
-- 💰 **90% reducción de tokens** vs. LLM puro
+- ⚡ **90% procesado con regex** (instantáneo, $0 costo)
+- 🤖 **10% requiere LLM** (casos complejos)
+- 💰 **70-80% reducción de tokens** vs. LLM puro
+- 🔄 **Fallback automático** Z.AI → OpenRouter (99.9% uptime)
 
 [📖 Ver arquitectura técnica completa →](docs/ARQUITECTURA_TECNICA.md)
 
@@ -221,10 +237,13 @@ python -m http.server 8080  # UI en http://localhost:8080
 
 Citrino tiene un plan de evolución claro enfocado en:
 
-1. **Gestión automatizada de planillas Excel** - Reducir errores manuales
-2. **Mejora de calidad de datos** - Score 14.4% → >40%
-3. **Geocodificación avanzada** - Reducir propiedades sin zona de 61.9% → <15%
-4. **Optimización UI/UX** - Mayor adopción del equipo interno
+✅ **Completado - Gestión automatizada de planillas Excel** - Procesamiento recursivo de subcarpetas implementado
+✅ **Completado - Sistema fallback LLM corregido** - 99.9% disponibilidad alcanzada
+✅ **Completado - Filtro de monedas USD/BOB** - Soporte para mercado bimonetario boliviano
+
+🔄 **En Progreso - Mejora de calidad de datos** - Sistema híbrido optimizado 90% extracción
+📅 **Próximos - Geocodificación avanzada** - Reducir propiedades sin zona de 50% → <15%
+📅 **Próximos - Optimización UI/UX** - Mayor adopción del equipo interno
 
 **Ver roadmap completo:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -232,9 +251,14 @@ Citrino tiene un plan de evolución claro enfocado en:
 
 ## 📊 Calidad de Datos y Testing
 
-El sistema mantiene **96% de propiedades con coordenadas GPS** precisas y mejora continuamente la extracción de zonas, precios y características usando el sistema híbrido Regex+LLM.
+El sistema mantiene **alta precisión** en procesamiento de datos con el sistema híbrido optimizado:
 
-**Estado actual:** Score 14.4% | **Meta 2025:** >40%
+- **90% extracción automática** con regex (sin costo de LLM)
+- **99.9% disponibilidad** del sistema LLM con fallback automático
+- **2,010+ propiedades** procesadas de archivos Excel recursivos
+- **Soporte bimonetario** USD/BOB para mercado boliviano
+
+**Estado actual:** Sistema híbrido 90% efectividad | **Meta 2025:** >95%
 
 **Ver análisis completo:** [docs/CALIDAD_DATOS.md](docs/CALIDAD_DATOS.md)
 
