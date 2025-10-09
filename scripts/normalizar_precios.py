@@ -20,13 +20,9 @@ class NormalizadorPrecios:
     """Normaliza y extrae precios desde diferentes fuentes."""
     
     def __init__(self):
-        # Tasas de cambio aproximadas (deberían actualizarse)
-        self.tasas_cambio = {
-            'usd': 1.0,      # Base
-            'bs': 0.145,     # ~6.9 Bs por USD
-            'bob': 0.145,    # Boliviano
-            '$us': 1.0,
-        }
+        # ELIMINADO: Sistema de conversión de monedas
+        # Mantener monedas originales (USD/BOB) sin conversión
+        # Razón: Economía bimonetaria - información relevante para clientes y análisis
         
         # Patrones para extraer precios
         self.patrones_precio = [
@@ -109,29 +105,23 @@ class NormalizadorPrecios:
         
         return None
     
-    def convertir_a_usd(self, precio: float, moneda: str) -> float:
-        """Convierte precio a USD."""
-        moneda_lower = moneda.lower()
-        tasa = self.tasas_cambio.get(moneda_lower, 1.0)
-        return round(precio * tasa, 2)
+    # ELIMINADO: convertir_a_usd() - Preservar moneda original sin conversión
     
     def normalizar_precio_propiedad(self, propiedad: Dict) -> Optional[Dict]:
         """
-        Normaliza el precio de una propiedad.
+        Normaliza el precio de una propiedad (sin conversión de moneda).
         
         Returns:
-            Dict con precio_usd, precio_original, moneda_original, metodo
+            Dict con precio, moneda, metodo
         """
         # 1. Revisar si ya tiene precio válido
         precio_actual = propiedad.get('precio')
-        moneda_actual = propiedad.get('moneda', 'usd')
+        moneda_actual = propiedad.get('moneda', 'USD')
         
         if precio_actual and precio_actual > 0:
-            precio_usd = self.convertir_a_usd(precio_actual, moneda_actual)
             return {
-                'precio_usd': precio_usd,
-                'precio_original': precio_actual,
-                'moneda_original': moneda_actual,
+                'precio': precio_actual,
+                'moneda': moneda_actual,
                 'metodo': 'campo_directo'
             }
         
@@ -140,11 +130,9 @@ class NormalizadorPrecios:
         resultado = self.extraer_precio(titulo)
         if resultado:
             precio, moneda = resultado
-            precio_usd = self.convertir_a_usd(precio, moneda)
             return {
-                'precio_usd': precio_usd,
-                'precio_original': precio,
-                'moneda_original': moneda,
+                'precio': precio,
+                'moneda': moneda,
                 'metodo': 'extraido_titulo'
             }
         
@@ -153,11 +141,9 @@ class NormalizadorPrecios:
         resultado = self.extraer_precio(descripcion)
         if resultado:
             precio, moneda = resultado
-            precio_usd = self.convertir_a_usd(precio, moneda)
             return {
-                'precio_usd': precio_usd,
-                'precio_original': precio,
-                'moneda_original': moneda,
+                'precio': precio,
+                'moneda': moneda,
                 'metodo': 'extraido_descripcion'
             }
         
@@ -168,9 +154,8 @@ class NormalizadorPrecios:
             # Fórmula aproximada: precio ≈ cuota * 166.79
             precio_estimado = credito * 166.79
             return {
-                'precio_usd': round(precio_estimado, 2),
-                'precio_original': credito,
-                'moneda_original': 'usd',
+                'precio': round(precio_estimado, 2),
+                'moneda': 'USD',  # Créditos usualmente en USD
                 'metodo': 'estimado_credito_mensual',
                 'estimado': True
             }
@@ -199,10 +184,9 @@ class NormalizadorPrecios:
             resultado = self.normalizar_precio_propiedad(prop)
             
             if resultado:
-                # Actualizar propiedad
-                prop['precio_usd'] = resultado['precio_usd']
-                prop['precio_original'] = resultado['precio_original']
-                prop['moneda_original'] = resultado['moneda_original']
+                # Actualizar propiedad - mantener moneda original
+                prop['precio'] = resultado['precio']
+                prop['moneda'] = resultado['moneda']
                 prop['precio_metodo'] = resultado['metodo']
                 
                 if resultado.get('estimado'):
