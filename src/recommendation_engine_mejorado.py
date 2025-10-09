@@ -598,6 +598,21 @@ class RecommendationEngineMejorado:
                 propiedades_filtradas = propiedades_precio
                 print(f"Filtrado por precio ${presupuesto_min:,}-${presupuesto_max:,}: {len(propiedades_filtradas)} propiedades")
 
+        # 5b. Filtro por moneda (USD/BOB) - Nuevo filtro para economía bimonetaria
+        moneda_preferida = presupuesto.get('moneda', '')
+        if moneda_preferida:
+            propiedades_moneda = []
+            for prop in propiedades_filtradas:
+                moneda_prop = prop.get('caracteristicas_principales', {}).get('moneda', 'USD')
+                if moneda_prop == moneda_preferida:
+                    propiedades_moneda.append(prop)
+
+            if propiedades_moneda:
+                propiedades_filtradas = propiedades_moneda
+                print(f"Filtrado por moneda {moneda_preferida}: {len(propiedades_filtradas)} propiedades")
+            else:
+                print(f"ADVERTENCIA: No hay propiedades en {moneda_preferida}, mostrando todas las monedas")
+
         # 6. Filtro por disponibilidad reciente
         dias_maximos = preferencias.get('disponibilidad_dias', 90)  # Por defecto 90 días
         if dias_maximos > 0:

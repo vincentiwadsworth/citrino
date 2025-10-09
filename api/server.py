@@ -416,7 +416,8 @@ def recomendar_propiedades_mejorado():
             'id': data.get('id', 'perfil_inversor'),
             'presupuesto': {
                 'min': data.get('presupuesto_min', 0),
-                'max': data.get('presupuesto_max', 1000000)
+                'max': data.get('presupuesto_max', 1000000),
+                'moneda': data.get('moneda', '')  # USD, BOB o vacío para todas
             },
             'preferencias': {
                 'ubicacion': data.get('zona_preferida', ''),
@@ -624,7 +625,8 @@ def recomendar_con_llm():
             'id': data.get('id', 'perfil_llm'),
             'presupuesto': {
                 'min': data.get('presupuesto_min', 0),
-                'max': data.get('presupuesto_max', 1000000)
+                'max': data.get('presupuesto_max', 1000000),
+                'moneda': data.get('moneda', '')  # USD, BOB o vacío para todas
             },
             'preferencias': {
                 'ubicacion': data.get('zona_preferida', ''),
