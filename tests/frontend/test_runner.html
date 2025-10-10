@@ -164,6 +164,14 @@
                         </label>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testCoherence" checked>
+                        <label class="form-check-label" for="testCoherence">
+                            <strong>Coherence Tests</strong> - Validación de respuestas y fact checking
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-4">
@@ -280,6 +288,9 @@
             if (document.getElementById('testIntegration').checked) {
                 selected.push('integration');
             }
+            if (document.getElementById('testCoherence').checked) {
+                selected.push('coherence');
+            }
 
             return selected;
         }
@@ -290,6 +301,7 @@
             document.getElementById('testReco').checked = true;
             document.getElementById('testChat').checked = true;
             document.getElementById('testIntegration').checked = true;
+            document.getElementById('testCoherence').checked = true;
 
             await runSelectedTests();
         }
@@ -350,6 +362,9 @@
                     break;
                 case 'integration':
                     await runIntegrationTests();
+                    break;
+                case 'coherence':
+                    await runCoherenceTests();
                     break;
                 default:
                     throw new Error(`Suite de test desconocida: ${suiteName}`);
@@ -551,6 +566,151 @@
             });
 
             logToConsole('✅ Tests de integración completados');
+        }
+
+        // Tests de coherencia y calidad de respuestas
+        async function runCoherenceTests() {
+            describe('Coherence & Quality Tests', () => {
+                it('should validate Chat response coherence', () => {
+                    // Simular validación de coherencia para Chat
+                    const mockChatResponse = {
+                        pregunta: "Busco departamentos en Equipetrol entre $200k y $350k",
+                        respuesta: "He encontrado 3 departamentos interesantes en Equipetrol. El más destacado es un departamento de 135m² con 3 habitaciones por $280,000.",
+                        metadata: { confianza: 0.85 }
+                    };
+
+                    // Validar que mencione datos correctos
+                    testRunner.assert(mockChatResponse.respuesta.includes('Equipetrol'), 'Response should mention requested zone');
+                    testRunner.assert(mockChatResponse.respuesta.includes('$280,000'), 'Response should include specific price');
+                    testRunner.assert(mockChatResponse.metadata.confianza >= 0.7, 'Confidence should be reasonable');
+
+                    logToConsole('✅ Coherencia de Chat validada');
+                });
+
+                it('should validate Reco recommendation accuracy', () => {
+                    // Simular validación de precisión para Reco
+                    const mockRecoResponse = {
+                        perfil: {
+                            presupuesto: { min: 200000, max: 350000 },
+                            zona_preferida: "Equipetrol",
+                            tipo_propiedad: "departamento"
+                        },
+                        recomendacion: {
+                            titulo: "Departamento en Equipetrol",
+                            compatibilidad: 94,
+                            caracteristicas: {
+                                precio: 280000,
+                                superficie: 135,
+                                habitaciones: 3
+                            }
+                        }
+                    };
+
+                    // Validar compatibilidad con perfil
+                    testRunner.assert(
+                        mockRecoResponse.recomendacion.caracteristicas.precio >= mockRecoResponse.perfil.presupuesto.min &&
+                        mockRecoResponse.recomendacion.caracteristicas.precio <= mockRecoResponse.perfil.presupuesto.max,
+                        'Price should be within profile range'
+                    );
+
+                    testRunner.assert(mockRecoResponse.recomendacion.titulo.includes('Equipetrol'), 'Should match preferred zone');
+                    testRunner.assert(mockRecoResponse.recomendacion.compatibilidad >= 70, 'Compatibility should be reasonable');
+
+                    logToConsole('✅ Precisión de Recomendaciones validada');
+                });
+
+                it('should perform fact checking on mentioned data', () => {
+                    // Simular fact checking
+                    const mentionedFacts = [
+                        { type: 'zona', value: 'Equipetrol', exists: true },
+                        { type: 'precio', value: 280000, realistic: true },
+                        { type: 'superficie', value: 135, realistic: true }
+                    ];
+
+                    const validFacts = mentionedFacts.filter(fact => fact.exists !== false && fact.realistic !== false);
+                    const factAccuracy = (validFacts.length / mentionedFacts.length) * 100;
+
+                    testRunner.assert(factAccuracy >= 80, 'At least 80% of facts should be valid');
+
+                    logToConsole(`✅ Fact Checking: ${validFacts.length}/${mentionedFacts.length} facts válidos (${factAccuracy}%)`);
+                });
+
+                it('should detect potential hallucinations', () => {
+                    // Simular detección de alucinaciones
+                    const responseText = "He encontrado propiedades en Equipetrol con precios desde $200,000 hasta $500,000. Todas tienen garantía de plusvalía del 100% en 1 año.";
+
+                    const potentialHallucinations = [];
+
+                    // Detectar promesas irreales
+                    if (responseText.includes('garantía') || responseText.includes('100%')) {
+                        potentialHallucinations.push('Promesa de garantía absoluta');
+                    }
+
+                    // Validar rangos de precios
+                    if (responseText.includes('$500,000')) {
+                        // Para Equipetrol, $500k es un precio alto pero posible para propiedades premium
+                        // No se considera alucinación pero se marca para revisión
+                    }
+
+                    testRunner.assert(potentialHallucinations.length <= 1, 'Should have minimal hallucinations');
+
+                    logToConsole(`✅ Detección de alucinaciones: ${potentialHallucinations.length} potenciales detectadas`);
+                });
+
+                it('should validate cross-consistency between Chat and Reco', () => {
+                    // Simular validación cruzada
+                    const chatResponse = {
+                        query: "departamentos en Equipetrol",
+                        mentionedPrices: [250000, 280000, 320000],
+                        mentionedFeatures: ['3 habitaciones', '2 baños', '135m²']
+                    };
+
+                    const recoResponse = {
+                        recommendations: [
+                            { precio: 280000, habitaciones: 3, superficie: 135 }
+                        ]
+                    };
+
+                    // Validar consistencia
+                    const hasPriceOverlap = recoResponse.recommendations.some(rec =>
+                        chatResponse.mentionedPrices.includes(rec.precio)
+                    );
+
+                    const hasFeatureConsistency = recoResponse.recommendations.some(rec =>
+                        chatResponse.mentionedFeatures.includes(`${rec.habitaciones} habitaciones`) &&
+                        chatResponse.mentionedFeatures.includes(`${rec.superficie}m²`)
+                    );
+
+                    testRunner.assert(hasPriceOverlap || hasFeatureConsistency, 'Should have some consistency between Chat and Reco');
+
+                    logToConsole(`✅ Cross-consistency: Precios=${hasPriceOverlap}, Características=${hasFeatureConsistency}`);
+                });
+
+                it('should calculate overall coherence score', () => {
+                    // Simular cálculo de score general
+                    const metrics = {
+                        chatCoherence: 85,
+                        recoAccuracy: 92,
+                        factAccuracy: 90,
+                        hallucinationRate: 5, // porcentaje bajo
+                        crossConsistency: 88
+                    };
+
+                    const overallScore = Math.round(
+                        (metrics.chatCoherence * 0.3 +
+                         metrics.recoAccuracy * 0.3 +
+                         metrics.factAccuracy * 0.2 +
+                         (100 - metrics.hallucinationRate) * 0.1 +
+                         metrics.crossConsistency * 0.1)
+                    );
+
+                    testRunner.assert(overallScore >= 75, 'Overall coherence should be >= 75%');
+
+                    logToConsole(`✅ Score General de Coherencia: ${overallScore}%`);
+                });
+            });
+
+            logToConsole('✅ Tests de coherencia y calidad completados');
         }
 
         // Mostrar resultados

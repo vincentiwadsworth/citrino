@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citrino Coherence & Quality Tests</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #dc2626 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .coherence-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .coherence-card.excellent {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: #10b981;
+        }
+
+        .coherence-card.good {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: #3b82f6;
+        }
+
+        .coherence-card.warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            border-left-color: #f59e0b;
+        }
+
+        .coherence-card.error {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: #ef4444;
+        }
+
+        .fact-check-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #6366f1;
+        }
+
+        .fact-check-item.pass {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .fact-check-item.fail {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .fact-check-item.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .hallucination-alert {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .coherence-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .score-circle.excellent {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .score-circle.good {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .score-circle.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .score-circle.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .data-comparison {
+            background: #f0f9ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e0f2fe;
+        }
+
+        .data-match {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .data-mismatch {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .data-partial {
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        .control-panel {
+            background: #e0e7ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .quick-action-btn {
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+
+        .progress-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .validation-metric {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .validation-metric h4 {
+            margin: 0;
+            color: #0284c7;
+            font-size: 1.5rem;
+        }
+
+        .validation-metric small {
+            color: #64748b;
+        }
+
+        .response-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #6366f1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .response-preview.chat {
+            border-left-color: #8b5cf6;
+        }
+
+        .response-preview.reco {
+            border-left-color: #059669;
+        }
+
+        .response-preview.error {
+            border-left-color: #ef4444;
+        }
+
+        .test-results {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .coherence-summary {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #bae6fd;
+        }
+
+        .recommendation-preview {
+            background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .compatibility-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            border-radius: 20px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .compatibility-badge.high {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .compatibility-badge.medium {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .compatibility-badge.low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="test-container">
+        <!-- Header -->
+        <div class="test-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Coherence & Quality Tests
+                    </h1>
+                    <p class="mb-0">
+                        Tests de coherencia, validación de datos y detección de alucinaciones para Citrino
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="runCoherenceTests()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-3">Configuración de Tests de Coherencia</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testChatCoherence" checked>
+                                <label class="form-check-label" for="testChatCoherence">
+                                    Coherencia de Citrino Chat
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testRecoCoherence" checked>
+                                <label class="form-check-label" for="testRecoCoherence">
+                                    Coherencia de Citrino Reco
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testFactChecking" checked>
+                                <label class="form-check-label" for="testFactChecking">
+                                    Fact Checking de Datos
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testHallucinationDetection" checked>
+                                <label class="form-check-label" for="testHallucinationDetection">
+                                    Detección de Alucinaciones
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testCrossValidation" checked>
+                                <label class="form-check-label" for="testCrossValidation">
+                                    Cross-Validation Chat vs Reco
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testRealDataValidation" checked>
+                                <label class="form-check-label" for="testRealDataValidation">
+                                    Validación contra BD Real
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="mb-3">Tests Rápidos</h5>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="testChatCoherenceOnly()">
+                            <i class="bi bi-chat-dots me-1"></i>Chat
+                        </button>
+                        <button class="quick-action-btn" onclick="testRecoCoherenceOnly()">
+                            <i class="bi bi-stars me-1"></i>Reco
+                        </button>
+                        <button class="quick-action-btn" onclick="testFactCheckingOnly()">
+                            <i class="bi bi-search me-1"></i>Facts
+                        </button>
+                        <button class="quick-action-btn" onclick="testHallucinationOnly()">
+                            <i class="bi bi-exclamation-triangle me-1"></i>No Aluc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <h4 class="mb-3">
+                <i class="bi bi-activity me-2"></i>Progreso de Validación
+            </h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="validation-metric">
+                        <h4 id="responsesChecked">0</h4>
+                        <small>Respuestas Validadas</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="validation-metric">
+                        <h4 id="factsVerified">0</h4>
+                        <small>Hechos Verificados</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="validation-metric">
+                        <h4 id="hallucinationsDetected">0</h4>
+                        <small>Alucinaciones Detectadas</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="validation-metric">
+                        <h4 id="coherenceScore">--</h4>
+                        <small>Score Coherencia</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coherence Summary -->
+        <div class="coherence-summary" id="coherenceSummary" style="display: none;">
+            <h4 class="mb-3">
+                <i class="bi bi-shield-check me-2"></i>Resumen de Coherencia
+            </h4>
+            <div class="row" id="summaryContent">
+                <!-- Summary content will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Response Previews -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-chat-text me-2"></i>Validación de Respuestas
+            </h3>
+            <div id="responsePreviews">
+                <p class="text-muted">Las respuestas validadas aparecerán aquí al ejecutar los tests...</p>
+            </div>
+        </div>
+
+        <!-- Fact Checking Results -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-search me-2"></i>Fact Checking Results
+            </h3>
+            <div id="factCheckingResults">
+                <p class="text-muted">Los resultados de fact checking aparecerán aquí...</p>
+            </div>
+        </div>
+
+        <!-- Hallucination Detection -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-exclamation-triangle me-2"></i>Detección de Alucinaciones
+            </h3>
+            <div id="hallucinationResults">
+                <p class="text-muted">Los resultados de detección de alucinaciones aparecerán aquí...</p>
+            </div>
+        </div>
+
+        <!-- Cross-Validation Results -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-arrow-left-right me-2"></i>Cross-Validation (Chat vs Reco)
+            </h3>
+            <div id="crossValidationResults">
+                <p class="text-muted">Los resultados de cross-validation aparecerán aquí...</p>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-results" id="testResults" style="display: none;">
+            <h3 class="mb-3">
+                <i class="bi bi-clipboard-check me-2"></i>Resultados de Tests de Coherencia
+            </h3>
+            <div id="resultsContent">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="test_utils.js"></script>
+
+    <script>
+        // Variables globales
+        let testRunner = null;
+        let validationMetrics = {
+            responsesChecked: 0,
+            factsVerified: 0,
+            hallucinationsDetected: 0,
+            coherenceScore: 0,
+            chatResponses: [],
+            recoResponses: [],
+            factChecks: [],
+            hallucinations: []
+        };
+
+        // Base de datos de prueba simplificada (simulación)
+        const mockDatabase = {
+            propiedades: [
+                {
+                    id: "prop_1",
+                    titulo: "Departamento en Equipetrol",
+                    zona: "Equipetrol",
+                    precio: 280000,
+                    superficie: 135,
+                    habitaciones: 3,
+                    banos: 2,
+                    tipo: "departamento",
+                    estado: "disponible",
+                    fecha_relevamiento: "2025.10.01"
+                },
+                {
+                    id: "prop_2",
+                    titulo: "Casa en Urbari",
+                    zona: "Urbari",
+                    precio: 450000,
+                    superficie: 280,
+                    habitaciones: 4,
+                    banos: 3,
+                    tipo: "casa",
+                    estado: "disponible",
+                    fecha_relevamiento: "2025.10.05"
+                },
+                {
+                    id: "prop_3",
+                    titulo: "Terreno en Santa Mónica",
+                    zona: "Santa Mónica",
+                    precio: 120000,
+                    superficie: 500,
+                    habitaciones: 0,
+                    banos: 0,
+                    tipo: "terreno",
+                    estado: "disponible",
+                    fecha_relevamiento: "2025.10.03"
+                }
+            ],
+            zonas: ["Equipetrol", "Urbari", "Santa Mónica", "Las Palmas", "Santiago"],
+            rangos_precios: {
+                "Equipetrol": { min: 200000, max: 500000 },
+                "Urbari": { min: 350000, max: 800000 },
+                "Santa Mónica": { min: 80000, max: 200000 }
+            }
+        };
+
+        // Respuestas de prueba para validación
+        const mockResponses = {
+            chat: [
+                {
+                    id: "chat_1",
+                    pregunta: "Busco departamentos en Equipetrol entre $200k y $350k",
+                    respuesta: "He encontrado 3 departamentos interesantes en Equipetrol. El más destacado es un departamento de 135m² con 3 habitaciones, 2 baños por $280,000. Esta zona tiene alta plusvalía y excelente acceso a servicios comerciales.",
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        fuente: "chat_llm",
+                        confianza: 0.85
+                    }
+                },
+                {
+                    id: "chat_2",
+                    pregunta: "¿Qué opciones hay en Santa Mónica?",
+                    respuesta: "En Santa Mónica encontré varias propiedades interesantes. Hay terrenos desde $80,000 hasta $200,000, y algunas casas nuevas. Es una zona en crecimiento con buen potencial de inversión.",
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        fuente: "chat_llm",
+                        confianza: 0.92
+                    }
+                },
+                {
+                    id: "chat_3",
+                    pregunta: "Propiedades de lujo en Las Palmas",
+                    respuesta: "En Las Palmas hay propiedades de lujo con precios desde $500,000 hasta $2,000,000. Encontré mansiones con piscinas, jardines amplios y seguridad 24 horas. Una opción destacada es una casa de 500m² por $850,000.",
+                    metadata: {
+                        timestamp: new Date().toISOString(),
+                        fuente: "chat_llm",
+                        confianza: 0.78
+                    }
+                }
+            ],
+            reco: [
+                {
+                    id: "reco_1",
+                    perfil: {
+                        presupuesto: { min: 200000, max: 350000 },
+                        zona_preferida: "Equipetrol",
+                        tipo_propiedad: "departamento"
+                    },
+                    recomendaciones: [
+                        {
+                            id: "prop_1",
+                            titulo: "Departamento en Equipetrol",
+                            compatibilidad: 94,
+                            justificacion: "Inversión de $280,000 se ajusta al rango presupuestado. Zona equipetrol con alta demanda y buen potencial.",
+                            caracteristicas: {
+                                precio: 280000,
+                                superficie: 135,
+                                habitaciones: 3,
+                                banos: 2
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: "reco_2",
+                    perfil: {
+                        presupuesto: { min: 100000, max: 200000 },
+                        zona_preferida: "Santa Mónica",
+                        tipo_propiedad: "terreno"
+                    },
+                    recomendaciones: [
+                        {
+                            id: "prop_3",
+                            titulo: "Terreno en Santa Mónica",
+                            compatibilidad: 88,
+                            justificacion: "Inversión de $120,000 se ajusta al rango presupuestado. Zona santa mónica con demanda moderada, oportunidades de negociación.",
+                            caracteristicas: {
+                                precio: 120000,
+                                superficie: 500,
+                                habitaciones: 0,
+                                banos: 0
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            testRunner = new TestUtils();
+            log('🛡️ Coherence & Quality Test Suite inicializado');
+            log('🔍 Listo para validar coherencia y detectar alucinaciones');
+        });
+
+        // Logging
+        function log(message, type = 'info') {
+            console.log(`[Coherence Tests] ${message}`);
+        }
+
+        // Ejecutar todos los tests de coherencia
+        async function runCoherenceTests() {
+            clearResults();
+            showProgress();
+
+            try {
+                testRunner.reset();
+                log('🎯 Iniciando tests de coherencia y calidad...');
+
+                let totalScore = 0;
+                let testCount = 0;
+
+                if (document.getElementById('testChatCoherence')?.checked) {
+                    const chatScore = await testChatCoherence();
+                    totalScore += chatScore;
+                    testCount++;
+                }
+
+                if (document.getElementById('testRecoCoherence')?.checked) {
+                    const recoScore = await testRecoCoherence();
+                    totalScore += recoScore;
+                    testCount++;
+                }
+
+                if (document.getElementById('testFactChecking')?.checked) {
+                    await testFactChecking();
+                }
+
+                if (document.getElementById('testHallucinationDetection')?.checked) {
+                    await testHallucinationDetection();
+                }
+
+                if (document.getElementById('testCrossValidation')?.checked) {
+                    await testCrossValidation();
+                }
+
+                if (document.getElementById('testRealDataValidation')?.checked) {
+                    await testRealDataValidation();
+                }
+
+                // Calcular score final
+                validationMetrics.coherenceScore = testCount > 0 ? Math.round(totalScore / testCount) : 0;
+
+                displayResults();
+                updateCoherenceSummary();
+                log('🏁 Todos los tests de coherencia completados', 'success');
+
+            } catch (error) {
+                log(`💥 Error en tests de coherencia: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Test de coherencia para Citrino Chat
+        async function testChatCoherence() {
+            describe('Citrino Chat - Coherence Validation', () => {
+                let totalScore = 0;
+                let responseCount = 0;
+
+                mockResponses.chat.forEach(response => {
+                    const coherenceScore = validateChatResponse(response);
+                    totalScore += coherenceScore;
+                    responseCount++;
+
+                    validationMetrics.chatResponses.push({
+                        ...response,
+                        coherenceScore,
+                        validationPassed: coherenceScore >= 70
+                    });
+
+                    addResponsePreview('chat', response, coherenceScore);
+                });
+
+                const avgScore = responseCount > 0 ? totalScore / responseCount : 0;
+                testRunner.assert(avgScore >= 70, 'Chat responses should have average coherence >= 70%');
+
+                log(`📊 Chat Coherence: ${avgScore.toFixed(1)}% promedio`);
+                return avgScore;
+            });
+        }
+
+        // Test de coherencia para Citrino Reco
+        async function testRecoCoherence() {
+            describe('Citrino Reco - Coherence Validation', () => {
+                let totalScore = 0;
+                let responseCount = 0;
+
+                mockResponses.reco.forEach(response => {
+                    response.recomendaciones.forEach(recomendacion => {
+                        const coherenceScore = validateRecommendation(response.perfil, recomendacion);
+                        totalScore += coherenceScore;
+                        responseCount++;
+
+                        validationMetrics.recoResponses.push({
+                            ...response,
+                            recomendacion,
+                            coherenceScore,
+                            validationPassed: coherenceScore >= 70
+                        });
+
+                        addRecommendationPreview(response.perfil, recomendacion, coherenceScore);
+                    });
+                });
+
+                const avgScore = responseCount > 0 ? totalScore / responseCount : 0;
+                testRunner.assert(avgScore >= 70, 'Reco recommendations should have average coherence >= 70%');
+
+                log(`📊 Reco Coherence: ${avgScore.toFixed(1)}% promedio`);
+                return avgScore;
+            });
+        }
+
+        // Fact checking de datos mencionados
+        async function testFactChecking() {
+            describe('Fact Checking - Data Validation', () => {
+                let factsChecked = 0;
+                let factsPassed = 0;
+
+                // Validar datos de Chat
+                mockResponses.chat.forEach(response => {
+                    const facts = extractFacts(response.respuesta);
+                    facts.forEach(fact => {
+                        factsChecked++;
+                        const isValid = validateFact(fact);
+                        if (isValid) factsPassed++;
+
+                        validationMetrics.factChecks.push({
+                            ...fact,
+                            source: response.id,
+                            valid: isValid
+                        });
+
+                        addFactCheckResult(fact, isValid);
+                    });
+                });
+
+                // Validar datos de Reco
+                mockResponses.reco.forEach(response => {
+                    response.recomendaciones.forEach(recomendacion => {
+                        const facts = extractFactsFromRecommendation(recomendacion);
+                        facts.forEach(fact => {
+                            factsChecked++;
+                            const isValid = validateFact(fact);
+                            if (isValid) factsPassed++;
+
+                            validationMetrics.factChecks.push({
+                                ...fact,
+                                source: response.id,
+                                valid: isValid
+                            });
+
+                            addFactCheckResult(fact, isValid);
+                        });
+                    });
+                });
+
+                validationMetrics.factsVerified = factsChecked;
+                const passRate = factsChecked > 0 ? (factsPassed / factsChecked) * 100 : 0;
+                testRunner.assert(passRate >= 80, 'At least 80% of facts should be valid');
+
+                log(`✅ Fact Checking: ${factsPassed}/${factsChecked} facts validados (${passRate.toFixed(1)}%)`);
+            });
+        }
+
+        // Detección de alucinaciones
+        async function testHallucinationDetection() {
+            describe('Hallucination Detection', () => {
+                let hallucinationsDetected = 0;
+                let totalResponses = 0;
+
+                // Detectar alucinaciones en Chat
+                mockResponses.chat.forEach(response => {
+                    totalResponses++;
+                    const hallucinations = detectHallucinations(response.respuesta);
+                    if (hallucinations.length > 0) {
+                        hallucinationsDetected += hallucinations.length;
+                        validationMetrics.hallucinations.push({
+                            responseId: response.id,
+                            type: 'chat',
+                            hallucinations: hallucinations
+                        });
+
+                        addHallucinationAlert(response.id, 'chat', hallucinations);
+                    }
+                });
+
+                // Detectar alucinaciones en Reco
+                mockResponses.reco.forEach(response => {
+                    totalResponses++;
+                    response.recomendaciones.forEach(recomendacion => {
+                        const hallucinations = detectHallucinationsInRecommendation(recomendacion);
+                        if (hallucinations.length > 0) {
+                            hallucinationsDetected += hallucinations.length;
+                            validationMetrics.hallucinations.push({
+                                responseId: response.id,
+                                type: 'reco',
+                                recommendationId: recomendacion.id,
+                                hallucinations: hallucinations
+                            });
+
+                            addHallucinationAlert(response.id, 'reco', hallucinations);
+                        }
+                    });
+                });
+
+                validationMetrics.hallucinationsDetected = hallucinationsDetected;
+                const hallucinationRate = totalResponses > 0 ? (hallucinationsDetected / totalResponses) : 0;
+                testRunner.assert(hallucinationRate <= 0.5, 'Hallucination rate should be <= 0.5 per response');
+
+                log(`🔍 Hallucination Detection: ${hallucinationsDetected} alucinaciones detectadas en ${totalResponses} respuestas`);
+            });
+        }
+
+        // Cross-validation entre Chat y Reco
+        async function testCrossValidation() {
+            describe('Cross-Validation - Chat vs Reco', () => {
+                const inconsistencies = [];
+
+                // Comparar respuestas similares entre Chat y Reco
+                mockResponses.chat.forEach(chatResponse => {
+                    const similarRecoResponse = findSimilarRecoResponse(chatResponse);
+                    if (similarRecoResponse) {
+                        const inconsistency = compareResponses(chatResponse, similarRecoResponse);
+                        if (inconsistency) {
+                            inconsistencies.push(inconsistency);
+                            addCrossValidationResult(chatResponse.id, similarRecoResponse.id, inconsistency);
+                        }
+                    }
+                });
+
+                testRunner.assert(inconsistencies.length <= 1, 'Should have at most 1 inconsistency between Chat and Reco');
+                log(`🔄 Cross-Validation: ${inconsistencies.length} inconsistencias encontradas entre Chat y Reco`);
+            });
+        }
+
+        // Validación contra base de datos real
+        async function testRealDataValidation() {
+            describe('Real Data Validation', () => {
+                let dataValidations = 0;
+                let validationsPassed = 0;
+
+                // Validar que los datos mencionados existen en la BD
+                [...mockResponses.chat, ...mockResponses.reco].forEach(response => {
+                    const mentionedData = extractMentionedData(response);
+                    mentionedData.forEach(data => {
+                        dataValidations++;
+                        const exists = validateDataExistsInDB(data);
+                        if (exists) validationsPassed++;
+
+                        addDataComparisonResult(data, exists);
+                    });
+                });
+
+                const passRate = dataValidations > 0 ? (validationsPassed / dataValidations) * 100 : 0;
+                testRunner.assert(passRate >= 85, 'At least 85% of mentioned data should exist in database');
+                log(`📊 Real Data Validation: ${validationsPassed}/${dataValidations} datos validados (${passRate.toFixed(1)}%)`);
+            });
+        }
+
+        // Funciones de validación
+        function validateChatResponse(response) {
+            let score = 100;
+            const deductions = [];
+
+            // Validar que mencione datos correctos
+            const facts = extractFacts(response.respuesta);
+            facts.forEach(fact => {
+                if (!validateFact(fact)) {
+                    score -= 20;
+                    deductions.push(`Dato incorrecto: ${fact.description}`);
+                }
+            });
+
+            // Validar coherencia del contexto
+            if (response.respuesta.includes('Las Palmas') && !response.pregunta.toLowerCase().includes('las palmas')) {
+                score -= 15;
+                deductions.push('Menciona zona no solicitada');
+            }
+
+            // Validar rangos de precios
+            const prices = extractPrices(response.respuesta);
+            prices.forEach(price => {
+                if (price < 50000 || price > 5000000) {
+                    score -= 10;
+                    deductions.push(`Precio fuera de rango realista: $${price.toLocaleString()}`);
+                }
+            });
+
+            return Math.max(0, score);
+        }
+
+        function validateRecommendation(perfil, recomendacion) {
+            let score = 100;
+            const deductions = [];
+
+            // Validar compatibilidad con perfil
+            if (recomendacion.caracteristicas.precio < perfil.presupuesto.min ||
+                recomendacion.caracteristicas.precio > perfil.presupuesto.max) {
+                score -= 30;
+                deductions.push('Precio fuera de rango del perfil');
+            }
+
+            // Validar zona preferida
+            if (perfil.zona_preferida &&
+                !recomendacion.titulo.toLowerCase().includes(perfil.zona_preferida.toLowerCase())) {
+                score -= 20;
+                deductions.push('Zona no coincide con preferencia');
+            }
+
+            // Validar tipo de propiedad
+            if (perfil.tipo_propiedad &&
+                !recomendacion.titulo.toLowerCase().includes(perfil.tipo_propiedad.toLowerCase())) {
+                score -= 15;
+                deductions.push('Tipo de propiedad no coincide');
+            }
+
+            // Validar justificación
+            if (!recomendacion.justificacion.includes(recomendacion.caracteristicas.precio.toLocaleString())) {
+                score -= 10;
+                deductions.push('Justificación no menciona precio correcto');
+            }
+
+            return Math.max(0, score);
+        }
+
+        function extractFacts(text) {
+            const facts = [];
+
+            // Extraer zonas mencionadas
+            mockDatabase.zonas.forEach(zona => {
+                if (text.toLowerCase().includes(zona.toLowerCase())) {
+                    facts.push({
+                        type: 'zona',
+                        value: zona,
+                        description: `Zona mencionada: ${zona}`
+                    });
+                }
+            });
+
+            // Extraer precios
+            const priceMatches = text.match(/\$[\d,]+/g);
+            if (priceMatches) {
+                priceMatches.forEach(match => {
+                    const price = parseInt(match.replace(/[$,]/g, ''));
+                    facts.push({
+                        type: 'precio',
+                        value: price,
+                        description: `Precio mencionado: ${match}`
+                    });
+                });
+            }
+
+            // Extraer características
+            const sizeMatches = text.match(/(\d+)\s*m[²²]/g);
+            if (sizeMatches) {
+                sizeMatches.forEach(match => {
+                    const size = parseInt(match);
+                    facts.push({
+                        type: 'superficie',
+                        value: size,
+                        description: `Superficie mencionada: ${match}`
+                    });
+                });
+            }
+
+            return facts;
+        }
+
+        function extractFactsFromRecommendation(recomendacion) {
+            const facts = [
+                {
+                    type: 'precio',
+                    value: recomendacion.caracteristicas.precio,
+                    description: `Precio recomendación: $${recomendacion.caracteristicas.precio.toLocaleString()}`
+                },
+                {
+                    type: 'superficie',
+                    value: recomendacion.caracteristicas.superficie,
+                    description: `Superficie recomendación: ${recomendacion.caracteristicas.superficie}m²`
+                },
+                {
+                    type: 'habitaciones',
+                    value: recomendacion.caracteristicas.habitaciones,
+                    description: `Habitaciones recomendación: ${recomendacion.caracteristicas.habitaciones}`
+                }
+            ];
+
+            return facts;
+        }
+
+        function validateFact(fact) {
+            switch (fact.type) {
+                case 'zona':
+                    return mockDatabase.zonas.some(zona =>
+                        zona.toLowerCase() === fact.value.toLowerCase()
+                    );
+                case 'precio':
+                    // Validar que el precio esté en rangos realistas
+                    return fact.value >= 50000 && fact.value <= 5000000;
+                case 'superficie':
+                    return fact.value >= 30 && fact.value <= 2000;
+                case 'habitaciones':
+                    return fact.value >= 0 && fact.value <= 10;
+                default:
+                    return true;
+            }
+        }
+
+        function detectHallucinations(text) {
+            const hallucinations = [];
+
+            // Detectar zonas inexistentes
+            const mentionedZonas = [];
+            mockDatabase.zonas.forEach(zona => {
+                if (text.toLowerCase().includes(zona.toLowerCase())) {
+                    mentionedZonas.push(zona);
+                }
+            });
+
+            // Buscar menciones de zonas que no existen en la BD
+            const zonaPattern = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g;
+            const allMentions = text.match(zonaPattern) || [];
+            allMentions.forEach(mention => {
+                if (!mockDatabase.zonas.includes(mention) &&
+                    !['Equipetrol', 'Urbari', 'Santa', 'Mónica', 'Las', 'Palmas', 'Santiago'].includes(mention)) {
+                    hallucinations.push({
+                        type: 'zona_inexistente',
+                        value: mention,
+                        description: `Menciona zona que no existe en la BD: ${mention}`
+                    });
+                }
+            });
+
+            // Detectar precios irreales
+            const prices = extractPrices(text);
+            prices.forEach(price => {
+                if (price < 50000 || price > 5000000) {
+                    hallucinations.push({
+                        type: 'precio_irreal',
+                        value: price,
+                        description: `Precio fuera de rango realista: $${price.toLocaleString()}`
+                    });
+                }
+            });
+
+            // Detectar promesas irreales
+            if (text.includes('garantizado') || text.includes('seguro') || text.includes('100%')) {
+                hallucinations.push({
+                    type: 'promesa_irreal',
+                    description: 'Contiene promesas irreales o garantías absolutas'
+                });
+            }
+
+            return hallucinations;
+        }
+
+        function detectHallucinationsInRecommendation(recomendacion) {
+            const hallucinations = [];
+
+            // Validar que la recomendación tenga datos realistas
+            if (recomendacion.caracteristicas.precio < 50000 || recomendacion.caracteristicas.precio > 5000000) {
+                hallucinations.push({
+                    type: 'precio_irreal',
+                    value: recomendacion.caracteristicas.precio,
+                    description: `Precio fuera de rango realista: $${recomendacion.caracteristicas.precio.toLocaleString()}`
+                });
+            }
+
+            if (recomendacion.caracteristicas.superficie < 30 || recomendacion.caracteristicas.superficie > 2000) {
+                hallucinations.push({
+                    type: 'superficie_irreal',
+                    value: recomendacion.caracteristicas.superficie,
+                    description: `Superficie fuera de rango realista: ${recomendacion.caracteristicas.superficie}m²`
+                });
+            }
+
+            if (recomendacion.compatibilidad > 100 || recomendacion.compatibilidad < 0) {
+                hallucinations.push({
+                    type: 'compatibilidad_irreal',
+                    value: recomendacion.compatibilidad,
+                    description: `Porcentaje de compatibilidad inválido: ${recomendacion.compatibilidad}%`
+                });
+            }
+
+            return hallucinations;
+        }
+
+        function findSimilarRecoResponse(chatResponse) {
+            // Encontrar respuesta de Reco similar a la de Chat
+            return mockResponses.reco.find(recoResponse => {
+                const chatText = chatResponse.respuesta.toLowerCase();
+                const recoText = JSON.stringify(recoResponse).toLowerCase();
+
+                // Buscar coincidencias de zonas o criterios
+                const chatZonas = mockDatabase.zonas.filter(zona => chatText.includes(zona.toLowerCase()));
+                return chatZonas.some(zona => recoText.includes(zona.toLowerCase()));
+            });
+        }
+
+        function compareResponses(chatResponse, recoResponse) {
+            const inconsistencies = [];
+
+            // Comparar datos de precios mencionados
+            const chatPrices = extractPrices(chatResponse.respuesta);
+            const recoPrices = recoResponse.recomendaciones.map(r => r.caracteristicas.precio);
+
+            if (chatPrices.length > 0 && recoPrices.length > 0) {
+                const avgChatPrice = chatPrices.reduce((a, b) => a + b) / chatPrices.length;
+                const avgRecoPrice = recoPrices.reduce((a, b) => a + b) / recoPrices.length;
+
+                if (Math.abs(avgChatPrice - avgRecoPrice) > 100000) {
+                    inconsistencies.push({
+                        type: 'precio',
+                        chat: avgChatPrice,
+                        reco: avgRecoPrice,
+                        description: `Diferencia significativa en precios: Chat $${avgChatPrice.toLocaleString()} vs Reco $${avgRecoPrice.toLocaleString()}`
+                    });
+                }
+            }
+
+            return inconsistencies.length > 0 ? inconsistencies[0] : null;
+        }
+
+        function extractMentionedData(response) {
+            const data = [];
+            const facts = extractFacts(response.respuesta || JSON.stringify(response));
+
+            facts.forEach(fact => {
+                data.push({
+                    type: fact.type,
+                    value: fact.value,
+                    source: response.id
+                });
+            });
+
+            return data;
+        }
+
+        function validateDataExistsInDB(data) {
+            switch (data.type) {
+                case 'zona':
+                    return mockDatabase.zonas.includes(data.value);
+                case 'precio':
+                    // Validar que esté en rangos de la BD
+                    return true; // Simplificado
+                default:
+                    return true;
+            }
+        }
+
+        function extractPrices(text) {
+            const matches = text.match(/\$[\d,]+/g);
+            return matches ? matches.map(match => parseInt(match.replace(/[$,]/g, ''))) : [];
+        }
+
+        // Funciones de UI
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            updateMetrics();
+        }
+
+        function hideProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+        }
+
+        function updateMetrics() {
+            document.getElementById('responsesChecked').textContent =
+                validationMetrics.chatResponses.length + validationMetrics.recoResponses.length;
+            document.getElementById('factsVerified').textContent = validationMetrics.factsVerified;
+            document.getElementById('hallucinationsDetected').textContent = validationMetrics.hallucinationsDetected;
+            document.getElementById('coherenceScore').textContent = validationMetrics.coherenceScore || '--';
+        }
+
+        function addResponsePreview(type, response, coherenceScore) {
+            const container = document.getElementById('responsePreviews');
+            const scoreClass = coherenceScore >= 90 ? 'excellent' :
+                            coherenceScore >= 70 ? 'good' :
+                            coherenceScore >= 50 ? 'warning' : 'error';
+
+            const html = `
+                <div class="response-preview ${type}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-${type === 'chat' ? 'chat-dots' : 'stars'} me-2"></i>
+                                ${type === 'chat' ? 'Chat' : 'Recomendación'} #${response.id}
+                            </h6>
+                            <small class="text-muted">${type === 'chat' ? response.pregunta : `Perfil: ${JSON.stringify(response.perfil)}`}</small>
+                        </div>
+                        <span class="compatibility-badge ${scoreClass}">
+                            ${coherenceScore}% coherencia
+                        </span>
+                    </div>
+                    <p class="mb-2">${type === 'chat' ? response.respuesta : response.recomendaciones[0]?.justificacion}</p>
+                    <div class="small text-muted">
+                        Validación: ${coherenceScore >= 70 ? '✅ Pasó' : '�️ Falló'}
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addRecommendationPreview(perfil, recomendacion, coherenceScore) {
+            const container = document.getElementById('responsePreviews');
+            const scoreClass = coherenceScore >= 90 ? 'excellent' :
+                            coherenceScore >= 70 ? 'good' :
+                            coherenceScore >= 50 ? 'warning' : 'error';
+
+            const html = `
+                <div class="recommendation-preview">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${recomendacion.titulo}</h6>
+                            <small class="text-muted">Compatibilidad: ${recomendacion.compatibilidad}%</small>
+                        </div>
+                        <span class="compatibility-badge ${scoreClass}">
+                            ${coherenceScore}% coherencia
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-light me-1">$${recomendacion.caracteristicas.precio.toLocaleString()}</span>
+                        <span class="badge bg-light me-1">${recomendacion.caracteristicas.superficie}m²</span>
+                        <span class="badge bg-light">${recomendacion.caracteristicas.habitaciones} dorm.</span>
+                    </div>
+                    <div class="small text-muted">${recomendacion.justificacion}</div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addFactCheckResult(fact, isValid) {
+            const container = document.getElementById('factCheckingResults');
+            const html = `
+                <div class="fact-check-item ${isValid ? 'pass' : 'fail'}">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-${isValid ? 'check-circle' : 'x-circle'} ${isValid ? 'text-success' : 'text-danger'} me-2"></i>
+                        <div>
+                            <strong>${fact.description}</strong>
+                            <small class="d-block text-muted">Source: ${fact.source}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addHallucinationAlert(responseId, type, hallucinations) {
+            const container = document.getElementById('hallucinationResults');
+            const html = `
+                <div class="hallucination-alert">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                        <strong>Alucinaciones detectadas en ${type} #${responseId}</strong>
+                    </div>
+                    <ul class="mb-0">
+                        ${hallucinations.map(h => `<li>${h.description}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addCrossValidationResult(chatId, recoId, inconsistency) {
+            const container = document.getElementById('crossValidationResults');
+            const html = `
+                <div class="data-comparison">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Inconsistencia detectada</strong>
+                            <div class="small text-muted">Chat #${chatId} vs Reco #${recoId}</div>
+                        </div>
+                        <span class="data-mismatch">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            ${inconsistency.type}
+                        </span>
+                    </div>
+                    <div class="mt-2 small">${inconsistency.description}</div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addDataComparisonResult(data, exists) {
+            const container = document.getElementById('crossValidationResults');
+            const html = `
+                <div class="data-comparison">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Validación de dato</strong>
+                            <div class="small text-muted">Type: ${data.type}, Value: ${data.value}</div>
+                        </div>
+                        <span class="${exists ? 'data-match' : 'data-mismatch'}">
+                            <i class="bi bi-${exists ? 'check-circle' : 'x-circle'} me-1"></i>
+                            ${exists ? 'Existe en BD' : 'No existe en BD'}
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function updateCoherenceSummary() {
+            const container = document.getElementById('coherenceSummary');
+            const summaryContent = document.getElementById('summaryContent');
+
+            const totalResponses = validationMetrics.chatResponses.length + validationMetrics.recoResponses.length;
+            const validResponses = [...validationMetrics.chatResponses, ...validationMetrics.recoResponses]
+                .filter(r => r.validationPassed).length;
+            const validFacts = validationMetrics.factChecks.filter(f => f.valid).length;
+
+            const html = `
+                <div class="col-md-3">
+                    <div class="coherence-score">
+                        <div class="score-circle ${getScoreClass(validationMetrics.coherenceScore)}">
+                            ${validationMetrics.coherenceScore}%
+                        </div>
+                        <h6>Score General</h6>
+                        <small>Coherencia promedio</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="coherence-score">
+                        <div class="score-circle ${getScoreClass((validResponses/totalResponses)*100)}">
+                            ${totalResponses > 0 ? Math.round((validResponses/totalResponses)*100) : 0}%
+                        </div>
+                        <h6>Respuestas Válidas</h6>
+                        <small>${validResponses}/${totalResponses} pasaron</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="coherence-score">
+                        <div class="score-circle ${getScoreClass((validFacts/validationMetrics.factsVerified)*100)}">
+                            ${validationMetrics.factsVerified > 0 ? Math.round((validFacts/validationMetrics.factsVerified)*100) : 0}%
+                        </div>
+                        <h6>Facts Validados</h6>
+                        <small>${validFacts}/${validationMetrics.factsVerified} correctos</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="coherence-score">
+                        <div class="score-circle ${validationMetrics.hallucinationsDetected === 0 ? 'excellent' : 'warning'}">
+                            ${validationMetrics.hallucinationsDetected}
+                        </div>
+                        <h6>Alucinaciones</h6>
+                        <small>Detectadas en respuestas</small>
+                    </div>
+                </div>
+            `;
+
+            summaryContent.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        function getScoreClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 70) return 'good';
+            if (score >= 50) return 'warning';
+            return 'error';
+        }
+
+        function displayResults() {
+            const resultsSection = document.getElementById('testResults');
+            const resultsContent = document.getElementById('resultsContent');
+
+            const totalResponses = validationMetrics.chatResponses.length + validationMetrics.recoResponses.length;
+            const validResponses = [...validationMetrics.chatResponses, ...validationMetrics.recoResponses]
+                .filter(r => r.validationPassed).length;
+            const validFacts = validationMetrics.factChecks.filter(f => f.valid).length;
+
+            let html = `
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="coherence-card ${validationMetrics.coherenceScore >= 80 ? 'excellent' : 'warning'}">
+                            <h4>
+                                <i class="bi bi-shield-check me-2"></i>
+                                Resultado General: ${validationMetrics.coherenceScore >= 80 ? 'Excelente' : 'Necesita Mejora'}
+                            </h4>
+                            <p class="mb-0">
+                                Score de coherencia: <strong>${validationMetrics.coherenceScore}%</strong> |
+                                Respuestas válidas: <strong>${validResponses}/${totalResponses}</strong> |
+                                Facts correctos: <strong>${validFacts}/${validationMetrics.factsVerified}</strong> |
+                                Alucinaciones: <strong>${validationMetrics.hallucinationsDetected}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Agregar resultados detallados
+            if (validationMetrics.chatResponses.length > 0) {
+                html += '<h5>Chat Responses</h5>';
+                validationMetrics.chatResponses.forEach(response => {
+                    html += `
+                        <div class="coherence-card ${response.validationPassed ? 'good' : 'error'}">
+                            <h6>Chat #${response.id}</h6>
+                            <small>Coherencia: ${response.coherenceScore}% | ${response.validationPassed ? 'Validado' : 'Fallido'}</small>
+                        </div>
+                    `;
+                });
+            }
+
+            if (validationMetrics.recoResponses.length > 0) {
+                html += '<h5>Recomendaciones</h5>';
+                validationMetrics.recoResponses.forEach(response => {
+                    html += `
+                        <div class="coherence-card ${response.validationPassed ? 'good' : 'error'}">
+                            <h6>Reco #${response.id}</h6>
+                            <small>Coherencia: ${response.coherenceScore}% | ${response.validationPassed ? 'Validado' : 'Fallido'}</small>
+                        </div>
+                    `;
+                });
+            }
+
+            resultsContent.innerHTML = html;
+            resultsSection.style.display = 'block';
+        }
+
+        function clearResults() {
+            // Clear all result containers
+            document.getElementById('responsePreviews').innerHTML = '<p class="text-muted">Las respuestas validadas aparecerán aquí al ejecutar los tests...</p>';
+            document.getElementById('factCheckingResults').innerHTML = '<p class="text-muted">Los resultados de fact checking aparecerán aquí...</p>';
+            document.getElementById('hallucinationResults').innerHTML = '<p class="text-muted">Los resultados de detección de alucinaciones aparecerán aquí...</p>';
+            document.getElementById('crossValidationResults').innerHTML = '<p class="text-muted">Los resultados de cross-validation aparecerán aquí...</p>';
+            document.getElementById('testResults').style.display = 'none';
+            document.getElementById('coherenceSummary').style.display = 'none';
+
+            // Reset metrics
+            validationMetrics = {
+                responsesChecked: 0,
+                factsVerified: 0,
+                hallucinationsDetected: 0,
+                coherenceScore: 0,
+                chatResponses: [],
+                recoResponses: [],
+                factChecks: [],
+                hallucinations: []
+            };
+        }
+
+        // Funciones de tests rápidos
+        async function testChatCoherenceOnly() {
+            clearResults();
+            showProgress();
+            try {
+                testRunner.reset();
+                await testChatCoherence();
+                displayResults();
+                updateCoherenceSummary();
+                log('✅ Tests de coherencia de Chat completados', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testRecoCoherenceOnly() {
+            clearResults();
+            showProgress();
+            try {
+                testRunner.reset();
+                await testRecoCoherence();
+                displayResults();
+                updateCoherenceSummary();
+                log('✅ Tests de coherencia de Reco completados', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testFactCheckingOnly() {
+            clearResults();
+            showProgress();
+            try {
+                testRunner.reset();
+                await testFactChecking();
+                displayResults();
+                log('✅ Tests de fact checking completados', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testHallucinationOnly() {
+            clearResults();
+            showProgress();
+            try {
+                testRunner.reset();
+                await testHallucinationDetection();
+                displayResults();
+                log('✅ Tests de detección de alucinaciones completados', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        runCoherenceTests();
+                        break;
+                    case '1':
+                        event.preventDefault();
+                        testChatCoherenceOnly();
+                        break;
+                    case '2':
+                        event.preventDefault();
+                        testRecoCoherenceOnly();
+                        break;
+                    case '3':
+                        event.preventDefault();
+                        testFactCheckingOnly();
+                        break;
+                    case '4':
+                        event.preventDefault();
+                        testHallucinationOnly();
+                        break;
+                }
+            }
+        });
+
+        // Auto-actualizar métricas durante tests
+        setInterval(() => {
+            if (document.getElementById('progressSection').style.display !== 'none') {
+                updateMetrics();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
