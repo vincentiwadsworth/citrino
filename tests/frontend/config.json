@@ -1,0 +1,131 @@
+{
+  "name": "Citrino Frontend Test Suite",
+  "version": "1.0.0",
+  "description": "Suite de testing automatizado para interfaces HTML del sistema Citrino",
+  "testEnvironment": "browser",
+  "testRunner": "test_runner.html",
+  "testTimeout": 10000,
+  "reportFormat": ["html", "json"],
+  "suites": {
+    "utils": {
+      "name": "Utils Tests",
+      "description": "Tests para utilidades de testing",
+      "enabled": true,
+      "timeout": 5000
+    },
+    "reco": {
+      "name": "Citrino Reco Tests",
+      "description": "Tests para formulario y recomendaciones de Citrino Reco",
+      "enabled": true,
+      "timeout": 15000,
+      "dependencies": ["../citrino-reco.html"],
+      "mockAPI": true
+    },
+    "chat": {
+      "name": "Citrino Chat Tests",
+      "description": "Tests para interface de chat de Citrino",
+      "enabled": true,
+      "timeout": 15000,
+      "dependencies": ["../chat.html"],
+      "mockAPI": true
+    },
+    "integration": {
+      "name": "Integration Tests",
+      "description": "Tests de integración, cross-browser y performance",
+      "enabled": true,
+      "timeout": 30000,
+      "browsers": ["chrome", "firefox", "safari"],
+      "performanceThresholds": {
+        "pageLoadTime": 3000,
+        "firstContentfulPaint": 1500,
+        "largestContentfulPaint": 2500
+      }
+    }
+  },
+  "mockData": {
+    "api": {
+      "baseURL": "http://localhost:5001/api",
+      "endpoints": {
+        "health": {
+          "method": "GET",
+          "response": {
+            "status": "ok",
+            "timestamp": "2025-10-09T00:00:00Z",
+            "properties_count": 1583
+          }
+        },
+        "recommendations": {
+          "method": "POST",
+          "response": {
+            "success": true,
+            "recommendations": [
+              {
+                "id": "test_prop_1",
+                "nombre": "Propiedad Test 1",
+                "precio": 200000,
+                "zona": "Equipetrol",
+                "compatibilidad": 95,
+                "justificacion": "Test property justification"
+              }
+            ]
+          }
+        },
+        "chat": {
+          "method": "POST",
+          "response": {
+            "success": true,
+            "response": "Test response from LLM",
+            "recommendations": []
+          }
+        }
+      }
+    },
+    "profiles": [
+      {
+        "nombreCliente": "Test User",
+        "presupuesto_min": 100000,
+        "presupuesto_max": 300000,
+        "zona_preferida": "Equipetrol",
+        "tipo_propiedad": "departamento",
+        "adultos": 2,
+        "ninos": [8, 12]
+      }
+    ]
+  },
+  "accessibility": {
+    "wcagLevel": "AA",
+    "checks": [
+      "keyboard_navigation",
+      "aria_labels",
+      "color_contrast",
+      "focus_management",
+      "screen_reader"
+    ]
+  },
+  "performance": {
+    "budgets": {
+      "scriptSize": 250000,
+      "cssSize": 50000,
+      "imageSize": 500000,
+      "totalSize": 1000000
+    },
+    "metrics": [
+      "firstContentfulPaint",
+      "largestContentfulPaint",
+      "cumulativeLayoutShift",
+      "firstInputDelay"
+    ]
+  },
+  "browserCompatibility": {
+    "chrome": ">=90",
+    "firefox": ">=88",
+    "safari": ">=14",
+    "edge": ">=90"
+  },
+  "reporting": {
+    "outputDir": "./reports",
+    "includeScreenshots": true,
+    "includeConsoleLogs": true,
+    "includeNetworkLogs": false
+  }
+}

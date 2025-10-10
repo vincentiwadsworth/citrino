@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citrino Frontend Test Runner</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        .test-runner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-controls {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .test-suite-result {
+            border-left: 4px solid #dee2e6;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .test-suite-result.passed {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .test-suite-result.failed {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        .test-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .test-item:last-child {
+            border-bottom: none;
+        }
+
+        .test-status {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+
+        .performance-metric {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .performance-metric h3 {
+            margin: 0;
+            color: #1976d2;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="test-runner">
+        <!-- Header -->
+        <div class="test-controls">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="bi bi-cpu me-2"></i>
+                        Citrino Frontend Test Runner
+                    </h1>
+                    <p class="mb-0">
+                        Suite de testing automatizado para interfaces HTML del sistema Citrino
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="runAllTests()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar Todos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Selection -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-check2-square me-2"></i>Seleccionar Tests
+            </h3>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testUtils" checked>
+                        <label class="form-check-label" for="testUtils">
+                            <strong>Utils Tests</strong> - Utilidades de testing
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testReco" checked>
+                        <label class="form-check-label" for="testReco">
+                            <strong>Citrino Reco Tests</strong> - Formulario y recomendaciones
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testChat" checked>
+                        <label class="form-check-label" for="testChat">
+                            <strong>Citrino Chat Tests</strong> - Interface de chat
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testIntegration" checked>
+                        <label class="form-check-label" for="testIntegration">
+                            <strong>Integration Tests</strong> - Cross-browser y performance
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-primary me-2" onclick="runSelectedTests()">
+                    <i class="bi bi-play-circle me-2"></i>Ejecutar Seleccionados
+                </button>
+                <button class="btn btn-outline-secondary me-2" onclick="clearResults()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Limpiar Resultados
+                </button>
+                <button class="btn btn-outline-success" onclick="exportResults()">
+                    <i class="bi bi-download me-2"></i>Exportar Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Ejecutando tests...</span>
+            </div>
+            <p class="mt-3">Ejecutando tests, por favor espera...</p>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="test-section" id="performanceSection" style="display: none;">
+            <h3 class="mb-4">
+                <i class="bi bi-speedometer2 me-2"></i>Métricas de Performance
+            </h3>
+            <div class="row" id="performanceMetrics">
+                <!-- Las métricas se insertarán aquí -->
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div class="test-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">
+                    <i class="bi bi-terminal me-2"></i>Consola de Salida
+                </h3>
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearConsole()">
+                    <i class="bi bi-x-lg me-1"></i>Limpiar
+                </button>
+            </div>
+            <div class="console-output" id="consoleOutput">
+                Listo para ejecutar tests...
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section" id="resultsSection" style="display: none;">
+            <h3 class="mb-4">
+                <i class="bi bi-clipboard-check me-2"></i>Resultados de Tests
+            </h3>
+            <div id="testResults">
+                <!-- Los resultados se insertarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="test_utils.js"></script>
+
+    <script>
+        // Variables globales
+        let testRunner = null;
+        let currentResults = [];
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            testRunner = new TestUtils();
+            logToConsole('🚀 Citrino Frontend Test Runner inicializado');
+            logToConsole('💡 Selecciona los tests que deseas ejecutar y haz clic en "Ejecutar Seleccionados"');
+        });
+
+        // Logging a consola
+        function logToConsole(message, type = 'info') {
+            const console = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+
+            console.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Limpiar consola
+        function clearConsole() {
+            document.getElementById('consoleOutput').textContent = 'Consola limpiada...\n';
+        }
+
+        // Mostrar/ocultar loading
+        function toggleLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            if (show) {
+                spinner.classList.add('show');
+            } else {
+                spinner.classList.remove('show');
+            }
+        }
+
+        // Obtener tests seleccionados
+        function getSelectedTests() {
+            const selected = [];
+
+            if (document.getElementById('testUtils').checked) {
+                selected.push('utils');
+            }
+            if (document.getElementById('testReco').checked) {
+                selected.push('reco');
+            }
+            if (document.getElementById('testChat').checked) {
+                selected.push('chat');
+            }
+            if (document.getElementById('testIntegration').checked) {
+                selected.push('integration');
+            }
+
+            return selected;
+        }
+
+        // Ejecutar todos los tests
+        async function runAllTests() {
+            document.getElementById('testUtils').checked = true;
+            document.getElementById('testReco').checked = true;
+            document.getElementById('testChat').checked = true;
+            document.getElementById('testIntegration').checked = true;
+
+            await runSelectedTests();
+        }
+
+        // Ejecutar tests seleccionados
+        async function runSelectedTests() {
+            const selectedTests = getSelectedTests();
+
+            if (selectedTests.length === 0) {
+                alert('Por favor selecciona al menos un test para ejecutar');
+                return;
+            }
+
+            clearResults();
+            toggleLoading(true);
+            logToConsole(`🎯 Iniciando ejecución de ${selectedTests.length} suites de tests...`);
+
+            try {
+                // Resetear el test runner
+                testRunner.reset();
+
+                // Ejecutar cada suite seleccionada
+                for (const testSuite of selectedTests) {
+                    logToConsole(`📋 Ejecutando suite: ${testSuite}`);
+
+                    try {
+                        await loadAndRunTestSuite(testSuite);
+                        logToConsole(`✅ Suite ${testSuite} completada`, 'success');
+                    } catch (error) {
+                        logToConsole(`❌ Error en suite ${testSuite}: ${error.message}`, 'error');
+                    }
+                }
+
+                // Mostrar resultados
+                displayResults();
+                logToConsole('🏁 Todos los tests completados', 'success');
+
+            } catch (error) {
+                logToConsole(`💥 Error general: ${error.message}`, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Cargar y ejecutar una suite específica
+        async function loadAndRunTestSuite(suiteName) {
+            const startTime = Date.now();
+
+            switch (suiteName) {
+                case 'utils':
+                    await runUtilsTests();
+                    break;
+                case 'reco':
+                    await runRecoTests();
+                    break;
+                case 'chat':
+                    await runChatTests();
+                    break;
+                case 'integration':
+                    await runIntegrationTests();
+                    break;
+                default:
+                    throw new Error(`Suite de test desconocida: ${suiteName}`);
+            }
+
+            const duration = Date.now() - startTime;
+            logToConsole(`⏱️ Suite ${suiteName} completada en ${duration}ms`);
+        }
+
+        // Tests de utilidades (simulados por ahora)
+        async function runUtilsTests() {
+            describe('Utils Tests', () => {
+                it('should create TestUtils instance', () => {
+                    const utils = new TestUtils();
+                    testRunner.assert(utils instanceof TestUtils, 'Should be TestUtils instance');
+                });
+
+                it('should perform basic assertions', () => {
+                    testRunner.assertEqual(2 + 2, 4, 'Math should work');
+                    testRunner.assertContains('hello world', 'world', 'Should contain substring');
+                    testRunner.assertLength([1, 2, 3], 3, 'Should have correct length');
+                });
+
+                it('should handle DOM element assertions', () => {
+                    testRunner.assertElementExists('body', 'Body element should exist');
+                    testRunner.assertElementVisible('.test-runner', 'Test runner should be visible');
+                });
+            });
+        }
+
+        // Tests para Citrino Reco (placeholder)
+        async function runRecoTests() {
+            logToConsole('🔄 Citrino Reco tests - Implementación pendiente');
+        }
+
+        // Tests para Citrino Chat (placeholder)
+        async function runChatTests() {
+            logToConsole('🔄 Citrino Chat tests - Implementación pendiente');
+        }
+
+        // Tests de integración (placeholder)
+        async function runIntegrationTests() {
+            logToConsole('🔄 Integration tests - Implementación pendiente');
+        }
+
+        // Mostrar resultados
+        function displayResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('testResults');
+
+            if (testRunner.testResults.length === 0) {
+                resultsSection.style.display = 'none';
+                return;
+            }
+
+            resultsSection.style.display = 'block';
+
+            const totalSuites = testRunner.testResults.length;
+            const totalTests = testRunner.testResults.reduce((sum, suite) => sum + suite.total, 0);
+            const totalPassed = testRunner.testResults.reduce((sum, suite) => sum + suite.passed, 0);
+            const totalFailed = testRunner.testResults.reduce((sum, suite) => sum + suite.failed, 0);
+            const totalDuration = testRunner.testResults.reduce((sum, suite) => sum + suite.duration, 0);
+
+            // Generar HTML de resultados
+            let resultsHTML = `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="performance-metric">
+                            <h3>${totalPassed}</h3>
+                            <p class="mb-0">Tests Pasados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="performance-metric">
+                            <h3>${totalFailed}</h3>
+                            <p class="mb-0">Tests Fallidos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="performance-metric">
+                            <h3>${totalTests}</h3>
+                            <p class="mb-0">Total Tests</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="performance-metric">
+                            <h3>${totalDuration}ms</h3>
+                            <p class="mb-0">Duración Total</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Agregar resultados de cada suite
+            testRunner.testResults.forEach(suite => {
+                const statusClass = suite.failed === 0 ? 'passed' : 'failed';
+                const statusIcon = suite.failed === 0 ? '✅' : '❌';
+
+                resultsHTML += `
+                    <div class="test-suite-result ${statusClass}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">${statusIcon} ${suite.name}</h5>
+                            <span class="badge bg-${suite.failed === 0 ? 'success' : 'danger'}">
+                                ${suite.passed}/${suite.total} passed
+                            </span>
+                        </div>
+                        <small class="text-muted">Duración: ${suite.duration}ms</small>
+
+                        <div class="mt-3">
+                            ${suite.tests.map(test => `
+                                <div class="test-item">
+                                    <span class="test-status ${test.status === 'passed' ? 'text-success' : 'text-danger'}">
+                                        ${test.status === 'passed' ? '✅' : '❌'}
+                                    </span>
+                                    <strong>${test.name}</strong>
+                                    <span class="text-muted ms-2">(${test.duration || 0}ms)</span>
+                                    ${test.error ? `<div class="text-danger small mt-1">${test.error}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = resultsHTML;
+
+            // Actualizar métricas de performance
+            updatePerformanceMetrics();
+        }
+
+        // Actualizar métricas de performance
+        function updatePerformanceMetrics() {
+            const metricsSection = document.getElementById('performanceSection');
+            const metricsContainer = document.getElementById('performanceMetrics');
+
+            if (testRunner.testResults.length === 0) {
+                metricsSection.style.display = 'none';
+                return;
+            }
+
+            metricsSection.style.display = 'block';
+
+            // Métricas del navegador
+            const navigation = performance.getEntriesByType('navigation')[0];
+            const pageLoadTime = Math.round(navigation.loadEventEnd - navigation.fetchStart);
+
+            metricsContainer.innerHTML = `
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h3>${pageLoadTime}ms</h3>
+                        <p class="mb-0">Tiempo de Carga</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h3>${navigator.hardwareConcurrency || 'N/A'}</h3>
+                        <p class="mb-0">CPU Cores</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="performance-metric">
+                        <h3>${Math.round(performance.memory?.usedJSHeapSize / 1048576) || 'N/A'}MB</h3>
+                        <p class="mb-0">Memoria Usada</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Limpiar resultados
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('performanceSection').style.display = 'none';
+            clearConsole();
+            if (testRunner) {
+                testRunner.reset();
+            }
+        }
+
+        // Exportar resultados
+        function exportResults() {
+            if (!testRunner || testRunner.testResults.length === 0) {
+                alert('No hay resultados para exportar. Ejecuta algunos tests primero.');
+                return;
+            }
+
+            try {
+                const results = testRunner.exportResults();
+                logToConsole('📊 Resultados exportados exitosamente', 'success');
+            } catch (error) {
+                logToConsole(`❌ Error exportando resultados: ${error.message}`, 'error');
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        runAllTests();
+                        break;
+                    case 'l':
+                        event.preventDefault();
+                        clearResults();
+                        break;
+                    case 'e':
+                        event.preventDefault();
+                        exportResults();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
