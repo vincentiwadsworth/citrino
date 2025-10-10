@@ -45,6 +45,7 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 - Barra de input siempre visible en la parte inferior sin scroll
 - Limpieza automática de historial al cargar página (mejor privacidad)
 - Botones de limpiar/exportar más discretos con tooltips
+- Eliminación de botones de sugerencias rápidas para interfaz más limpia
 - Layout optimizado para mejor experiencia de usuario
 - Responsive design mejorado para móviles
 
