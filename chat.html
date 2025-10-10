@@ -522,17 +522,6 @@
             <p class="text-muted mb-4">
                 Conversa libremente con el inventario relevado, la guía urbana y el censo inmobiliario con sistema Multi-LLM (Z.AI/OpenRouter) que garantiza análisis continuo.
             </p>
-            <div class="quick-suggestions justify-content-center mb-4">
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Resume las oportunidades de inversión en Equipetrol y qué servicios urbanos justifican su valorización')">
-                    Relaciona datos urbanos
-                </div>
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Cruza el censo inmobiliario con el inventario para detectar activos con potencial de renta corta')">
-                    Cruce con censo
-                </div>
-                <div class="suggestion-chip" onclick="useQuickSuggestion('Dime qué barrios tienen correlación entre precio y proximidad a universidades privadas')">
-                    Correlaciones precio vs servicios
-                </div>
-            </div>
             <button class="btn btn-primary btn-lg" onclick="startChat()">
                 <i class="bi bi-chat-dots me-2"></i>Comenzar a chatear
             </button>
@@ -626,20 +615,6 @@
 
                 <!-- Chat Input -->
                 <div class="chat-input-container">
-                    <div class="quick-suggestions" id="quickSuggestions">
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Compara el inventario de Equipetrol con la guía urbana y dime qué servicios impulsan la demanda corporativa')">
-                            Perfil Equipetrol
-                        </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('¿Qué barrios muestran mejor relación entre rentas proyectadas y proximidad a hospitales?')">
-                            Rentas vs salud
-                        </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Dame propiedades con garaje doble y parque cercano, ordenadas por compatibilidad')">
-                            Filtro avanzado
-                        </div>
-                        <div class="suggestion-chip" onclick="useQuickSuggestion('Genera preguntas sugeridas para un prospecto interesado en plusvalía en la zona norte')">
-                            Prompt sugerido
-                        </div>
-                    </div>
                     <div class="chat-input-group">
                         <textarea
                             class="form-control chat-input"
