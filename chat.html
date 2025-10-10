@@ -781,12 +781,14 @@
                     const extractedProfile = result.data.profile;
                     const recommendations = result.data.recommendations || [];
                     const llmUsed = result.data.llmUsed;
+                    const errorDetails = result.data.errorDetails;
 
                     // Mostrar respuesta del asistente
                     const responseMessage = {
                         type: 'assistant',
                         content: result.data.response || 'He procesado tu mensaje.',
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        errorDetails: errorDetails
                     };
                     addMessage(responseMessage);
 
@@ -843,13 +845,19 @@
                 const result = await window.citrinoAPI.processChatWithLLM(message);
 
                 if (result.success) {
+                    // Log información de debug si hay detalles de error
+                    if (result.error_details) {
+                        console.log('LLM Debug Info:', result.error_details);
+                    }
+
                     return {
                         success: true,
                         data: {
                             profile: result.profile,
                             response: result.response,
                             recommendations: result.recommendations,
-                            llmUsed: result.llmUsed
+                            llmUsed: result.llmUsed,
+                            errorDetails: result.error_details
                         }
                     };
                 } else {
@@ -858,16 +866,31 @@
             } catch (error) {
                 console.warn('Error con API, usando análisis local:', error);
 
+                // Extraer detalles de error de la respuesta si están disponibles
+                let errorDetails = null;
+                try {
+                    const errorResponse = JSON.parse(error.message);
+                    if (errorResponse.error_details) {
+                        errorDetails = errorResponse.error_details;
+                    }
+                } catch (parseError) {
+                    // Error no es JSON estructurado, continuar con análisis local
+                }
+
                 // Fallback: Análisis simple del mensaje para extraer información
                 const profile = extractProfileFromMessage(message);
+
+                // Generar mensaje contextual basado en el tipo de error
+                const contextualMessage = generateErrorMessage(errorDetails, message);
 
                 if (profile) {
                     return {
                         success: true,
                         data: {
                             profile: profile,
-                            response: 'He analizado tu solicitud con sistema local. El sistema Multi-LLM (Z.AI/OpenRouter) no está disponible temporalmente.',
-                            llmUsed: false
+                            response: contextualMessage,
+                            llmUsed: false,
+                            errorDetails: errorDetails
                         }
                     };
                 } else {
@@ -875,7 +898,8 @@
                         success: true,
                         data: {
                             response: generateContextualResponse(message),
-                            llmUsed: false
+                            llmUsed: false,
+                            errorDetails: errorDetails
                         }
                     };
                 }
@@ -985,6 +1009,60 @@
             return hasInfo ? profile : null;
         }
 
+        // Generar mensaje de error contextual
+        function generateErrorMessage(errorDetails, originalMessage) {
+            if (!errorDetails) {
+                return 'He analizado tu solicitud con sistema local. El sistema Multi-LLM (Z.AI/OpenRouter) no está disponible temporalmente.';
+            }
+
+            const tipo = errorDetails.tipo;
+
+            // Mensajes contextuales según tipo de error
+            const mensajes = {
+                'rate_limit': 'Sistema LLM con limite de velocidad temporal. Usando analisis local inteligente. El sistema se recuperara automaticamente en breve.',
+                'server_error': 'Servicios LLM con mantenimiento temporal. Usando analisis local avanzado. Reintentara automaticamente en el proximo mensaje.',
+                'auth_error': 'Configuracion LLM requiere actualizacion. Usando analisis local. Contacta al administrador para resolver.',
+                'connection_error': 'Problemas de conectividad con servicios LLM. Usando analisis local. Verifica tu conexion a internet.',
+                'all_providers_failed': 'Sistema Multi-LLM temporalmente no disponible. Usando analisis local. Todos los proveedores reportan problemas.',
+                'config_incompleta': 'Configuracion LLM incompleta. Usando analisis local basico. Para mejores resultados, configura las API keys.',
+                'modulo_no_disponible': 'Modulo LLM no disponible. Usando analisis local. Verificar dependencias del sistema.',
+                'error_general': 'Error en procesamiento avanzado. Usando analisis local. Revisar logs del servidor para mas detalles.'
+            };
+
+            const mensajeBase = mensajes[tipo] || 'Sistema Multi-LLM temporalmente no disponible. Usando analisis local.';
+
+            // Agregar información de debug si está en modo desarrollador
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                const debugInfo = generarInfoDebug(errorDetails);
+                if (debugInfo) {
+                    return `${mensajeBase}\n\n[DEBUG] ${debugInfo}`;
+                }
+            }
+
+            return mensajeBase;
+        }
+
+        // Generar información de debug para desarrolladores
+        function generarInfoDebug(errorDetails) {
+            if (!errorDetails) return null;
+
+            const partes = [];
+
+            if (errorDetails.providers_intentados && errorDetails.providers_intentados.length > 0) {
+                partes.push(`Providers intentados: ${errorDetails.providers_intentados.join(', ')}`);
+            }
+
+            if (errorDetails.codigos_http && errorDetails.codigos_http.length > 0) {
+                partes.push(`Codigos HTTP: ${errorDetails.codigos_http.join(', ')}`);
+            }
+
+            if (errorDetails.recomendacion) {
+                partes.push(`Recomendacion: ${errorDetails.recomendacion}`);
+            }
+
+            return partes.join(' | ');
+        }
+
         // Generar respuesta contextual
         function generateContextualResponse(message) {
             const lowerMessage = message.toLowerCase();
@@ -1054,12 +1132,18 @@
                     ${message.type === 'assistant' ? formatAssistantMessage(message.content) : escapeHtml(message.content)}
                     ${message.profile ? createProfileSummary(message.profile) : ''}
                     ${message.showRecommendationButton ? createRecommendationButton() : ''}
+                    ${message.errorDetails ? createErrorDebugInfo(message.errorDetails) : ''}
                 </div>
                 <div class="message-time">${formatTime(message.timestamp)}</div>
             `;
 
             messagesContainer.appendChild(messageElement);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Mostrar notificación de debug si hay información de error
+            if (message.errorDetails && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                showDebugToast(message.errorDetails);
+            }
 
             // Guardar en historial
             chatHistory.push(message);
@@ -1109,6 +1193,41 @@
                     </button>
                 </div>
             `;
+        }
+
+        // Crear información de debug para errores
+        function createErrorDebugInfo(errorDetails) {
+            if (!errorDetails || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+                return '';
+            }
+
+            const debugInfo = generarInfoDebug(errorDetails);
+            if (!debugInfo) return '';
+
+            return `
+                <div class="mt-2 p-2 bg-light border rounded small text-muted">
+                    <strong>Debug Info:</strong> ${debugInfo}
+                </div>
+            `;
+        }
+
+        // Mostrar toast de debug para desarrolladores
+        function showDebugToast(errorDetails) {
+            if (!errorDetails) return;
+
+            const tipo = errorDetails.tipo || 'unknown';
+            const providers = errorDetails.providers_intentados || [];
+            const codigos = errorDetails.codigos_http || [];
+
+            let toastMessage = `LLM Error: ${tipo}`;
+            if (providers.length > 0) {
+                toastMessage += ` | Providers: ${providers.join(', ')}`;
+            }
+            if (codigos.length > 0) {
+                toastMessage += ` | HTTP: ${codigos.join(', ')}`;
+            }
+
+            showToast(toastMessage, 'warning');
         }
 
         // Mostrar recomendaciones

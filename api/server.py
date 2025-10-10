@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify
 import json
 import sys
 import os
+from datetime import datetime
 from flask_cors import CORS
 
 # Agregar los directorios src y scripts al path
@@ -774,11 +775,15 @@ def process_chat_message():
         perfil_extraido = None
         respuesta_llm = None
         recomendaciones = []
+        llm_usado = False
+        provider_usado = None
+        fallback_activado = False
+        error_details = None
 
         try:
             from llm_integration import LLMIntegration, LLMConfig
 
-            # Inicializar LLM con z.ai
+            # Inicializar LLM con configuración principal (Z.AI)
             llm_config = LLMConfig(
                 provider=os.getenv('LLM_PROVIDER', 'zai'),
                 api_key=os.getenv('ZAI_API_KEY'),
@@ -787,78 +792,127 @@ def process_chat_message():
 
             llm = LLMIntegration(llm_config)
 
-            # Validar configuración
+            # Validar configuración básica
             if llm.validar_configuracion():
-                # Parsear perfil desde el mensaje
-                perfil_extraido = llm.parsear_perfil_desde_texto(mensaje)
+                # Usar el método con fallback automático
+                prompt = llm._build_prompt(mensaje)
 
-                # Generar recomendaciones si se extrajo un perfil válido
-                if perfil_extraido and perfil_extraido.get('presupuesto', {}).get('max'):
-                    # Adaptar perfil para el motor de recomendaciones
-                    perfil_motor = {
-                        'id': 'chat_profile',
-                        'presupuesto': perfil_extraido.get('presupuesto', {}),
-                        'composicion_familiar': perfil_extraido.get('composicion_familiar', {}),
-                        'preferencias': perfil_extraido.get('preferencias', {}),
-                        'necesidades': perfil_extraido.get('necesidades', [])
-                    }
+                try:
+                    # Intentar consulta con fallback automático
+                    resultado_llm = llm.consultar_con_fallback(prompt, use_fallback=True)
 
-                    # Generar recomendaciones con motor mejorado
-                    resultados = motor_mejorado.generar_recomendaciones(
-                        perfil_motor,
-                        limite=6,
-                        umbral_minimo=0.3
-                    )
+                    if resultado_llm:
+                        respuesta_llm_raw = resultado_llm['respuesta']
+                        provider_usado = resultado_llm['provider_usado']
+                        fallback_activado = resultado_llm['fallback_activado']
+                        llm_usado = True
 
-                    # Formatear recomendaciones
-                    for rec in resultados:
-                        prop = rec['propiedad']
-                        caract = prop.get('caracteristicas_principales', {})
-                        if not caract:
-                            caract = {
-                                'precio': prop.get('precio', 0),
-                                'superficie_m2': prop.get('superficie', 0),
-                                'habitaciones': prop.get('habitaciones', 0),
-                                'banos_completos': prop.get('banos', 0)
+                        # Parsear el perfil desde la respuesta
+                        perfil_extraido = llm._parse_llm_response(respuesta_llm_raw)
+
+                        # Generar recomendaciones si se extrajo un perfil válido
+                        if perfil_extraido and perfil_extraido.get('presupuesto', {}).get('max'):
+                            # Adaptar perfil para el motor de recomendaciones
+                            perfil_motor = {
+                                'id': 'chat_profile',
+                                'presupuesto': perfil_extraido.get('presupuesto', {}),
+                                'composicion_familiar': perfil_extraido.get('composicion_familiar', {}),
+                                'preferencias': perfil_extraido.get('preferencias', {}),
+                                'necesidades': perfil_extraido.get('necesidades', [])
                             }
 
-                        ubicacion = prop.get('ubicacion', {})
-                        if not ubicacion:
-                            ubicacion = {
-                                'zona': prop.get('zona', ''),
-                                'direccion': prop.get('direccion', '')
-                            }
+                            # Generar recomendaciones con motor mejorado
+                            resultados = motor_mejorado.generar_recomendaciones(
+                                perfil_motor,
+                                limite=6,
+                                umbral_minimo=0.3
+                            )
 
-                        recomendaciones.append({
-                            'id': prop.get('id', ''),
-                            'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
-                            'precio': caract.get('precio', 0),
-                            'superficie_m2': caract.get('superficie_m2', 0),
-                            'habitaciones': caract.get('habitaciones', 0),
-                            'banos': caract.get('banos_completos', 0),
-                            'zona': ubicacion.get('zona', ''),
-                            'compatibilidad': round(rec['compatibilidad'], 1),
-                            'justificacion': rec.get('justificacion', ''),
-                            'servicios_cercanos': rec.get('servicios_cercanos', '')
-                        })
+                            # Formatear recomendaciones
+                            for rec in resultados:
+                                prop = rec['propiedad']
+                                caract = prop.get('caracteristicas_principales', {})
+                                if not caract:
+                                    caract = {
+                                        'precio': prop.get('precio', 0),
+                                        'superficie_m2': prop.get('superficie', 0),
+                                        'habitaciones': prop.get('habitaciones', 0),
+                                        'banos_completos': prop.get('banos', 0)
+                                    }
 
-                    respuesta_llm = f"He analizado tu solicitud y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
-                else:
-                    respuesta_llm = "He entendido tu mensaje. ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+                                ubicacion = prop.get('ubicacion', {})
+                                if not ubicacion:
+                                    ubicacion = {
+                                        'zona': prop.get('zona', ''),
+                                        'direccion': prop.get('direccion', '')
+                                    }
+
+                                recomendaciones.append({
+                                    'id': prop.get('id', ''),
+                                    'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
+                                    'precio': caract.get('precio', 0),
+                                    'superficie_m2': caract.get('superficie_m2', 0),
+                                    'habitaciones': caract.get('habitaciones', 0),
+                                    'banos': caract.get('banos_completos', 0),
+                                    'zona': ubicacion.get('zona', ''),
+                                    'compatibilidad': round(rec['compatibilidad'], 1),
+                                    'justificacion': rec.get('justificacion', ''),
+                                    'servicios_cercanos': rec.get('servicios_cercanos', '')
+                                })
+
+                            if fallback_activado:
+                                respuesta_llm = f"He analizado tu solicitud con sistema Multi-LLM ({provider_usado}) y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
+                            else:
+                                respuesta_llm = f"He analizado tu solicitud y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
+                        else:
+                            if fallback_activado:
+                                respuesta_llm = f"He entendido tu mensaje usando sistema Multi-LLM ({provider_usado}). ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+                            else:
+                                respuesta_llm = "He entendido tu mensaje. ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+
+                except Exception as llm_error:
+                    # Error específico en LLM - capturar detalles para debug
+                    error_details = analizar_error_llm(str(llm_error))
+                    print(f"[LLM ERROR] {error_details}")
+
+                    # Usar análisis básico como fallback
+                    perfil_extraido = extraer_perfil_basico(mensaje)
+                    respuesta_llm = generar_mensaje_error_llm(error_details)
 
             else:
                 # LLM no configurado, usar análisis básico
+                error_details = {
+                    'tipo': 'config_incompleta',
+                    'mensaje': 'API keys no configuradas',
+                    'providers_intentados': [],
+                    'errores': [],
+                    'recomendacion': 'Configurar ZAI_API_KEY y OPENROUTER_API_KEY en .env'
+                }
                 perfil_extraido = extraer_perfil_basico(mensaje)
                 respuesta_llm = "Procesé tu mensaje con análisis básico. Para mejores resultados, configura la integración con Z.AI."
 
-        except ImportError:
+        except ImportError as e:
             # Módulo LLM no disponible
+            error_details = {
+                'tipo': 'modulo_no_disponible',
+                'mensaje': f'Error importando llm_integration: {str(e)}',
+                'providers_intentados': [],
+                'errores': [],
+                'recomendacion': 'Verificar instalación de dependencias'
+            }
             perfil_extraido = extraer_perfil_basico(mensaje)
             respuesta_llm = "Sistema básico activo. Configura Z.AI para análisis avanzado."
 
         except Exception as e:
-            # Error en procesamiento LLM, usar fallback
-            print(f"Error procesando con LLM: {e}")
+            # Error general en procesamiento
+            error_details = {
+                'tipo': 'error_general',
+                'mensaje': str(e),
+                'providers_intentados': [],
+                'errores': [],
+                'recomendacion': 'Revisar logs del servidor para más detalles'
+            }
+            print(f"Error procesando mensaje de chat: {e}")
             perfil_extraido = extraer_perfil_basico(mensaje)
             respuesta_llm = "Hubo un problema con el análisis avanzado. Procesé tu mensaje con el sistema básico."
 
@@ -867,7 +921,10 @@ def process_chat_message():
             'perfil': perfil_extraido,
             'recomendaciones': recomendaciones,
             'respuesta': respuesta_llm,
-            'llm_usado': bool(os.getenv('ZAI_API_KEY'))
+            'llm_usado': llm_usado,
+            'provider_usado': provider_usado,
+            'fallback_activado': fallback_activado,
+            'error_details': error_details
         })
 
     except Exception as e:
@@ -875,6 +932,109 @@ def process_chat_message():
             'success': False,
             'error': str(e)
         }), 400
+
+def analizar_error_llm(error_msg: str) -> dict:
+    """
+    Analiza un error de LLM y devuelve información estructurada para debugging.
+
+    Args:
+        error_msg: Mensaje de error crudo
+
+    Returns:
+        Dict con detalles del error clasificado
+    """
+    import re
+
+    # Extraer providers mencionados en el error
+    providers_mencionados = []
+    if 'zai' in error_msg.lower():
+        providers_mencionados.append('zai')
+    if 'openrouter' in error_msg.lower():
+        providers_mencionados.append('openrouter')
+    if 'openai' in error_msg.lower():
+        providers_mencionados.append('openai')
+
+    # Si no se mencionan providers específicos, asumir todos
+    if not providers_mencionados:
+        providers_mencionados = ['zai', 'openrouter']
+
+    # Clasificar tipo de error
+    error_lower = error_msg.lower()
+    tipo_error = 'unknown_error'
+
+    # Priorizar "todos los providers fallaron" sobre códigos específicos
+    if 'todos los providers fallaron' in error_lower:
+        tipo_error = 'all_providers_failed'
+    elif '429' in error_msg or 'too many requests' in error_lower or 'rate limit' in error_lower:
+        tipo_error = 'rate_limit'
+    elif any(code in error_msg for code in ['500', '502', '503', '504']):
+        tipo_error = 'server_error'
+    elif any(code in error_msg for code in ['401', '403']) or 'unauthorized' in error_lower or 'forbidden' in error_lower:
+        tipo_error = 'auth_error'
+    elif 'connection' in error_lower or 'timeout' in error_lower or 'network' in error_lower:
+        tipo_error = 'connection_error'
+
+    # Extraer códigos HTTP si existen
+    http_codes = re.findall(r'(\d{3})', error_msg)
+    http_codes = [int(code) for code in http_codes if 400 <= int(code) < 600]
+
+    # Generar recomendación basada en el tipo de error
+    recomendaciones = {
+        'rate_limit': 'Esperar unos minutos antes de reintentar. El sistema se recuperará automáticamente.',
+        'server_error': 'Error temporal en los servidores. Reintentar en breve.',
+        'auth_error': 'Revisar configuración de API keys en el servidor.',
+        'connection_error': 'Verificar conectividad a internet y configuración de red.',
+        'all_providers_failed': 'Todos los proveedores LLM están temporalmente no disponibles.',
+        'unknown_error': 'Error desconocido. Revisar logs del servidor para más detalles.'
+    }
+
+    return {
+        'tipo': tipo_error,
+        'mensaje': error_msg,
+        'providers_intentados': providers_mencionados,
+        'codigos_http': http_codes,
+        'errores': [{
+            'provider': providers_mencionados[0] if providers_mencionados else 'unknown',
+            'error': error_msg,
+            'tipo': tipo_error,
+            'timestamp': datetime.now().isoformat()
+        }],
+        'recomendacion': recomendaciones.get(tipo_error, 'Contactar al administrador del sistema.'),
+        'timestamp': datetime.now().isoformat()
+    }
+
+def generar_mensaje_error_llm(error_details: dict) -> str:
+    """
+    Genera un mensaje contextual para el usuario basado en los detalles del error.
+
+    Args:
+        error_details: Detalles del error analizado
+
+    Returns:
+        Mensaje amigable para el usuario
+    """
+    tipo = error_details.get('tipo', 'unknown_error')
+
+    mensajes_base = {
+        'rate_limit': 'Sistema LLM con limite de velocidad temporal. Usando analisis local inteligente.',
+        'server_error': 'Servicios LLM con mantenimiento temporal. Usando analisis local avanzado.',
+        'auth_error': 'Configuracion LLM requiere actualizacion. Usando analisis local.',
+        'connection_error': 'Problemas de conectividad con servicios LLM. Usando analisis local.',
+        'all_providers_failed': 'Sistema Multi-LLM temporalmente no disponible. Usando analisis local.',
+        'config_incompleta': 'Configuracion LLM incompleta. Usando analisis local basico.',
+        'modulo_no_disponible': 'Modulo LLM no disponible. Usando analisis local.',
+        'error_general': 'Error en procesamiento avanzado. Usando analisis local.'
+    }
+
+    mensaje = mensajes_base.get(tipo, 'Sistema Multi-LLM temporalmente no disponible. Usando analisis local.')
+
+    # Agregar información adicional si es útil para el usuario
+    if tipo == 'rate_limit':
+        mensaje += ' El sistema se recuperara automaticamente en breve.'
+    elif tipo in ['server_error', 'connection_error']:
+        mensaje += ' Reintentara automaticamente en el proximo mensaje.'
+
+    return mensaje
 
 def extraer_perfil_basico(mensaje):
     """Extrae información básica del mensaje usando reglas simples"""
@@ -887,15 +1047,19 @@ def extraer_perfil_basico(mensaje):
     presupuesto_max = None
 
     # Buscar números en el mensaje
-    numeros = re.findall(r'\b(\d+(?:,\d+)?)\s*(?:k|mil|usd|dolares)?', mensaje_lower)
+    numeros = re.findall(r'\b(\d+(?:\.\d+)?)\s*[kK]?\b', mensaje)
     if numeros:
-        valores = [float(n.replace(',', '')) for n in numeros]
-        # Convertir a valores completos si son pequeños
-        valores = [v * 1000 if v < 1000 else v for v in valores]
+        # Convertir a números y asumir que son miles si tienen 'k' o son < 1000
+        valores = []
+        for num in numeros:
+            valor = float(num)
+            if valor < 1000:
+                valor *= 1000  # asumir miles
+            valores.append(valor)
 
-        if len(valores) >= 1:
-            presupuesto_min = min(valores) * 0.8
-            presupuesto_max = max(valores) * 1.2
+        if valores:
+            presupuesto_min = min(valores) * 0.8  # 20% menos como mínimo
+            presupuesto_max = max(valores) * 1.2  # 20% más como máximo
 
     # Extraer zona
     zonas = ['equipetrol', 'santa mónica', 'urbari', 'los olivos', 'zona norte', 'zona sur', 'centro']
@@ -925,11 +1089,11 @@ def extraer_perfil_basico(mensaje):
             'max': presupuesto_max,
             'tipo': 'compra'
         },
+        'necesidades': [],
         'preferencias': {
             'ubicacion': zona_preferida,
             'tipo_propiedad': tipo_propiedad
-        },
-        'necesidades': []
+        }
     }
 
 if __name__ == '__main__':
