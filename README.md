@@ -24,6 +24,7 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 | **API Backend** | ✅ **COMPLETO** | REST API con análisis de inversión y filtro de monedas |
 | **Motor de Recomendación** | ✅ **COMPLETO** | Ponderación multifactor y distancias Haversine implementadas en `src/` |
 | **Asistente Virtual** | ✅ **COMPLETO** | Chat para recopilar criterios y consultar resultados desde la API |
+| **Sistema de Errores LLM** | ✅ **COMPLETO** | Reporte detallado de errores con clasificación automática y debug |
 | **ETL Optimizado** | ✅ **MEJORADO** | Sistema híbrido Regex+LLM con fallback automático |
 | **Datos de Mercado** | ✅ **ACTUALIZADO** | Propiedades de relevamiento actualizadas con nuevos archivos Excel |
 
@@ -39,6 +40,13 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 | **Fallover LLM** | 99.9% | Z.AI → OpenRouter automático |
 
 ### 🆕 Novedades Recientes
+
+**🚨 Sistema de Reporte Detallado de Errores LLM** *(Octubre 2025)*
+- Reporte específico cuando Z.AI/OpenRouter no están disponibles
+- Clasificación automática de errores (rate limit, server error, auth error, etc.)
+- Mensajes contextuales para usuarios según tipo de problema
+- Información de debug completa para desarrolladores
+- Notificaciones toast con detalles técnicos en modo desarrollo
 
 **🔧 ETL Optimizado y Fallback LLM Corregido** *(Octubre 2025)*
 - Sistema de fallback automático corregido (99.9% disponibilidad)
@@ -123,6 +131,28 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 - 🤖 **10% requiere LLM** (casos complejos)
 - 💰 **70-80% reducción de tokens** vs. LLM puro
 - 🔄 **Fallback automático** Z.AI → OpenRouter (99.9% uptime)
+- 🚨 **Reporte detallado de errores** con clasificación automática y debug
+
+### Sistema de Reporte de Errores Avanzado
+
+**Diagnóstico Inteligente de Problemas LLM:**
+- **Clasificación automática** de errores (rate limit, server error, auth error, etc.)
+- **Mensajes contextuales** para usuarios según tipo de problema
+- **Información de debug completa** para desarrolladores en modo localhost
+- **Notificaciones toast** con detalles técnicos (providers, códigos HTTP)
+- **Recomendaciones automáticas** de resolución
+
+**Ejemplos de Mensajes Contextuales:**
+```javascript
+// Rate limit detectado
+"Sistema LLM con limite de velocidad temporal. Usando analisis local inteligente."
+
+// Error de servidor
+"Servicios LLM con mantenimiento temporal. Usando analisis local avanzado."
+
+// Problema de configuración
+"Configuracion LLM requiere actualizacion. Usando analisis local."
+```
 
 [📖 Ver arquitectura técnica completa →](docs/ARQUITECTURA_TECNICA.md)
 
@@ -222,6 +252,7 @@ python -m http.server 8080  # UI en http://localhost:8080
 | Documento | Descripción |
 |-----------|-------------|
 | [**Sistema Híbrido Extracción**](docs/SISTEMA_HIBRIDO_EXTRACCION.md) | Cómo funciona el sistema Regex + LLM |
+| [**Sistema de Errores LLM**](docs/SISTEMA_ERRORES_LLM.md) | Reporte detallado y clasificación de errores |
 | [**Arquitectura Técnica**](docs/ARQUITECTURA_TECNICA.md) | Diagramas, stack, patrones de diseño |
 | [**Guía de Desarrollo**](docs/GUIA_DESARROLLO.md) | Setup, comandos, testing, deployment |
 | [**CLAUDE.md**](CLAUDE.md) | Guía para trabajar con IA en este proyecto |
@@ -240,6 +271,7 @@ Citrino tiene un plan de evolución claro enfocado en:
 ✅ **Completado - Gestión automatizada de planillas Excel** - Procesamiento recursivo de subcarpetas implementado
 ✅ **Completado - Sistema fallback LLM corregido** - 99.9% disponibilidad alcanzada
 ✅ **Completado - Filtro de monedas USD/BOB** - Soporte para mercado bimonetario boliviano
+✅ **Completado - Sistema de reporte detallado de errores LLM** - Clasificación automática y debug avanzado
 
 🔄 **En Progreso - Mejora de calidad de datos** - Sistema híbrido optimizado 90% extracción
 📅 **Próximos - Geocodificación avanzada** - Reducir propiedades sin zona de 50% → <15%
