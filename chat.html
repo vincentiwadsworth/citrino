@@ -21,9 +21,10 @@
         .chat-container {
             max-width: 900px;
             margin: 0 auto;
-            height: calc(100vh - 200px);
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .chat-header {
@@ -38,15 +39,22 @@
             background: white;
             overflow-y: auto;
             padding: 2rem;
+            padding-bottom: 140px; /* Espacio para barra de input */
             min-height: 400px;
-            max-height: 600px;
         }
 
         .chat-input-container {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            max-width: calc(100vw - 2rem);
             background: white;
-            border-radius: 0 0 20px 20px;
+            border-radius: 20px 20px 0 0;
             padding: 1.5rem;
             box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
         }
 
         .message {
@@ -339,13 +347,56 @@
                 margin: 0.5rem;
                 padding: 1.5rem;
             }
-            
+
             .welcome-card h3 {
                 font-size: 1.5rem;
             }
-            
+
             .message-bubble {
                 max-width: 85%;
+            }
+        }
+
+        /* Botones discretos en header */
+        .btn-link {
+            border: none;
+            text-decoration: none;
+            color: #6c757d;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-link:hover {
+            color: #495057;
+            background-color: rgba(108, 117, 125, 0.1);
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .btn-link:focus {
+            box-shadow: none;
+            outline: none;
+        }
+
+        /* Responsive para barra de input sticky */
+        @media (max-width: 920px) {
+            .chat-input-container {
+                width: calc(100vw - 2rem);
+            }
+
+            .chat-messages {
+                padding-bottom: 120px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-input-container {
+                width: calc(100vw - 1rem);
+                border-radius: 15px 15px 0 0;
+            }
+
+            .chat-messages {
+                padding-bottom: 100px;
             }
         }
 
@@ -544,12 +595,16 @@
                             </div>
                         </div>
                         <div class="col-auto">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="clearChat()">
-                                <i class="bi bi-trash me-1"></i>Limpiar chat
-                            </button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="exportChat()">
-                                <i class="bi bi-download me-1"></i>Exportar
-                            </button>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-link text-muted btn-sm px-2 py-1" onclick="clearChat()"
+                                        title="Limpiar chat" data-bs-toggle="tooltip">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-link text-muted btn-sm px-2 py-1" onclick="exportChat()"
+                                        title="Exportar chat" data-bs-toggle="tooltip">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -688,10 +743,14 @@
                 }
             });
 
-            // Ocultar welcome overlay si ya hay historial
-            if (chatHistory.length > 0) {
-                document.getElementById('welcomeOverlay').style.display = 'none';
-            }
+            // Inicializar tooltips de Bootstrap
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Siempre mostrar welcome overlay (historial se limpia automáticamente)
+            // Esto asegura una experiencia limpia en cada visita
         }
 
         // Inicializar reconocimiento de voz
@@ -1384,35 +1443,18 @@ function buildChatRecommendationCard(property) {
             }
         }
 
-        // Cargar historial del chat
+        // Cargar historial del chat (limpia automáticamente)
         function loadChatHistory() {
             try {
-                const saved = localStorage.getItem('citrino_chat_history');
-                if (saved) {
-                    chatHistory = JSON.parse(saved);
+                // Limpiar automáticamente cualquier historial previo al cargar
+                localStorage.removeItem('citrino_chat_history');
+                chatHistory = [];
+                currentProfile = null;
 
-                    // Restaurar mensajes en la interfaz
-                    const messagesContainer = document.getElementById('chatMessages');
-                    chatHistory.forEach(message => {
-                        const messageElement = document.createElement('div');
-                        messageElement.className = `message ${message.type}`;
-                        messageElement.innerHTML = `
-                            <div class="message-bubble">
-                                ${message.type === 'assistant' ? formatAssistantMessage(message.content) : escapeHtml(message.content)}
-                                ${message.profile ? createProfileSummary(message.profile) : ''}
-                                ${message.showRecommendationButton ? createRecommendationButton() : ''}
-                            </div>
-                            <div class="message-time">${formatTime(message.timestamp)}</div>
-                        `;
-                        messagesContainer.appendChild(messageElement);
-                    });
-
-                    if (chatHistory.length > 0) {
-                        document.getElementById('welcomeOverlay').style.display = 'none';
-                    }
-                }
+                // Siempre mostrar welcome overlay (no restaurar historial)
+                // Esto asegura una experiencia limpia en cada visita
             } catch (error) {
-                console.error('Error al cargar historial del chat:', error);
+                console.error('Error al inicializar chat:', error);
             }
         }
 
