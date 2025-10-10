@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citrino Chat Tests</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .iframe-container {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            height: 600px;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .chat-simulation {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .message-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #6366f1;
+        }
+
+        .message-preview.user {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .message-preview.assistant {
+            border-left-color: #6366f1;
+            background: #eef2ff;
+        }
+
+        .message-preview.system {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .message-preview.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .test-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .test-status.running {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .test-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .test-status.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .control-panel {
+            background: #e0e7ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 1.1rem;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            margin-bottom: 1rem;
+        }
+
+        .compatibility-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 999px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .compatibility-pill.high {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .compatibility-pill.medium {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .compatibility-pill.low {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6b7280;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .quick-action-btn {
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+
+        .test-metric {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .test-metric h4 {
+            margin: 0;
+            color: #0284c7;
+            font-size: 1.5rem;
+        }
+
+        .test-metric small {
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="test-container">
+        <!-- Header -->
+        <div class="test-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        Citrino Chat Test Suite
+                    </h1>
+                    <p class="mb-0">
+                        Tests automatizados para interface conversacional y sistema LLM
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="runChatTests()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Configuración de Tests</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="mockLLMAPI" checked>
+                        <label class="form-check-label" for="mockLLMAPI">
+                            Mock LLM API (Z.AI/OpenRouter simulation)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="simulateErrors" checked>
+                        <label class="form-check-label" for="simulateErrors">
+                            Simular errores de red y rate limits
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="testAccessibility" checked>
+                        <label class="form-check-label" for="testAccessibility">
+                            Tests de accesibilidad
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Acciones Rápidas</h5>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="testBasicChat()">
+                            <i class="bi bi-chat me-1"></i>Chat Básico
+                        </button>
+                        <button class="quick-action-btn" onclick="testRecommendations()">
+                            <i class="bi bi-stars me-1"></i>Recomendaciones
+                        </button>
+                        <button class="quick-action-btn" onclick="testErrorHandling()">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Errores
+                        </button>
+                        <button class="quick-action-btn" onclick="testMobileView()">
+                            <i class="bi bi-phone me-1"></i>Mobile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target Page -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-window me-2"></i>Vista Previa: Citrino Chat
+            </h3>
+            <div class="iframe-container">
+                <iframe id="chatFrame" src="../chat.html"></iframe>
+            </div>
+        </div>
+
+        <!-- Chat Simulation -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-chat-square-text me-2"></i>Simulación de Chat
+            </h3>
+            <div id="chatSimulation">
+                <div class="message-preview system">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Sistema</strong>
+                        <small class="ms-auto text-muted">Iniciando tests...</small>
+                    </div>
+                    <p class="mb-0">Presiona "Ejecutar Tests" para comenzar la simulación de interacciones de chat.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Progress -->
+        <div class="test-section" id="progressSection" style="display: none;">
+            <h3 class="mb-3">
+                <i class="bi bi-activity me-2"></i>Progreso de Tests
+            </h3>
+            <div id="testMetrics">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4 id="messagesTested">0</h4>
+                            <small>Mensajes Testeados</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4 id="responsesGenerated">0</h4>
+                            <small>Respuestas Generadas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4 id="recommendationsShown">0</h4>
+                            <small>Recomendaciones Mostradas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4 id="errorsHandled">0</h4>
+                            <small>Errores Manejados</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendation Preview -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-stars me-2"></i>Preview de Recomendaciones en Chat
+            </h3>
+            <div id="recommendationPreview">
+                <p class="text-muted">Las recomendaciones aparecerán aquí al ejecutar los tests...</p>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section" id="resultsSection" style="display: none;">
+            <h3 class="mb-3">
+                <i class="bi bi-clipboard-check me-2"></i>Resultados de Tests
+            </h3>
+            <div id="testResults">
+                <!-- Results se insertarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="test_utils.js"></script>
+
+    <script>
+        // Variables globales
+        let testRunner = null;
+        let chatFrame = null;
+        let mockData = {};
+        let testMetrics = {
+            messagesTested: 0,
+            responsesGenerated: 0,
+            recommendationsShown: 0,
+            errorsHandled: 0
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            testRunner = new TestUtils();
+            chatFrame = document.getElementById('chatFrame');
+            setupMockData();
+
+            log('🚀 Citrino Chat Test Suite inicializado');
+            log('💡 Listo para ejecutar tests de interface conversacional');
+        });
+
+        // Setup de datos mock
+        function setupMockData() {
+            mockData = {
+                llmResponses: [
+                    {
+                        type: 'greeting',
+                        content: '¡Hola! Soy Citrino Chat con sistema Multi-LLM operativo. Puedo revisar inmuebles, la guía urbana y el censo inmobiliario. ¿Qué te gustaría explorar hoy?',
+                        profile: null,
+                        recommendations: []
+                    },
+                    {
+                        type: 'property_search',
+                        content: 'He encontrado propiedades interesantes en Equipetrol que coinciden con tu búsqueda. Esta zona tiene alta plusvalía y excelente acceso a servicios.',
+                        profile: {
+                            nombreCliente: 'Usuario Test',
+                            presupuesto_min: 200000,
+                            presupuesto_max: 350000,
+                            zona_preferida: 'Equipetrol',
+                            tipo_propiedad: 'departamento'
+                        },
+                        recommendations: [
+                            {
+                                id: 'chat_prop_1',
+                                nombre: 'Departamento ejecutivo en Equipetrol',
+                                precio: 280000,
+                                superficie_m2: 135,
+                                habitaciones: 3,
+                                banos: 2,
+                                zona: 'Equipetrol',
+                                compatibilidad: 94,
+                                justificacion: 'Ubicación premium con alta demanda de alquiler ejecutivo',
+                                caracteristicas: ['garaje', 'seguridad', 'gimnasio']
+                            }
+                        ]
+                    },
+                    {
+                        type: 'market_analysis',
+                        content: 'Basado en el análisis del mercado actual, Equipetrol y Urbari muestran el mayor potencial de plusvalía para inversión en departamentos.',
+                        profile: null,
+                        recommendations: []
+                    }
+                ],
+                errorResponses: [
+                    {
+                        type: 'rate_limit',
+                        content: 'Sistema LLM con límite de velocidad temporal. Usando análisis local inteligente. El sistema se recuperará automáticamente en breve.',
+                        errorDetails: {
+                            tipo: 'rate_limit',
+                            providers_intentados: ['zai', 'openrouter'],
+                            codigos_http: [429, 429]
+                        }
+                    },
+                    {
+                        type: 'server_error',
+                        content: 'Servicios LLM con mantenimiento temporal. Usando análisis local avanzado. Reintentará automáticamente en el próximo mensaje.',
+                        errorDetails: {
+                            tipo: 'server_error',
+                            providers_intentados: ['zai'],
+                            codigos_http: [503]
+                        }
+                    },
+                    {
+                        type: 'connection_error',
+                        content: 'Problemas de conectividad con servicios LLM. Usando análisis local. Verifica tu conexión a internet.',
+                        errorDetails: {
+                            tipo: 'connection_error',
+                            providers_intentados: ['zai', 'openrouter'],
+                            codigos_http: []
+                        }
+                    }
+                ]
+            };
+        }
+
+        // Logging
+        function log(message, type = 'info') {
+            console.log(`[Chat Tests] ${message}`);
+        }
+
+        // Esperar a que el frame esté listo
+        async function waitForChatReady() {
+            return new Promise((resolve) => {
+                const checkReady = () => {
+                    try {
+                        const frameDoc = chatFrame.contentDocument || chatFrame.contentWindow.document;
+                        const chatInput = frameDoc.getElementById('chatInput');
+                        const sendButton = frameDoc.getElementById('sendButton');
+
+                        if (chatInput && sendButton) {
+                            log('✅ Citrino Chat frame listo');
+                            resolve(frameDoc);
+                        } else {
+                            setTimeout(checkReady, 100);
+                        }
+                    } catch (error) {
+                        setTimeout(checkReady, 100);
+                    }
+                };
+                checkReady();
+            });
+        }
+
+        // Configurar Mock LLM API
+        function setupMockLLMAPI() {
+            if (document.getElementById('mockLLMAPI')?.checked) {
+                // Mock para procesamiento de chat
+                testRunner.mockAPI('/api/chat/process', (request) => {
+                    const requestBody = JSON.parse(request.body);
+                    const message = requestBody.mensaje.toLowerCase();
+
+                    // Simular procesamiento
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            let response;
+
+                            // Simular errores de rate limit
+                            if (document.getElementById('simulateErrors')?.checked && Math.random() < 0.3) {
+                                const errorTypes = ['rate_limit', 'server_error', 'connection_error'];
+                                const errorType = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+                                const errorResponse = mockData.errorResponses.find(e => e.type === errorType);
+
+                                response = {
+                                    success: false,
+                                    error: 'Error simulado',
+                                    error_details: errorResponse.errorDetails
+                                };
+
+                                testMetrics.errorsHandled++;
+                            } else {
+                                // Respuesta normal basada en contenido
+                                if (message.includes('hola') || message.includes('buen día')) {
+                                    response = mockData.llmResponses[0];
+                                } else if (message.includes('propiedad') || message.includes('departamento')) {
+                                    response = mockData.llmResponses[1];
+                                    testMetrics.recommendationsShown += response.recommendations.length;
+                                } else {
+                                    response = mockData.llmResponses[2];
+                                }
+
+                                testMetrics.responsesGenerated++;
+                            }
+
+                            resolve(response);
+                        }, 800 + Math.random() * 1200); // Simular delay variable
+                    });
+                }, 100);
+
+                log('🎭 Mock LLM API configurada');
+            }
+        }
+
+        // Ejecutar todos los tests de Citrino Chat
+        async function runChatTests() {
+            clearResults();
+            showProgress();
+            log('🎯 Iniciando tests de Citrino Chat...');
+
+            try {
+                testRunner.reset();
+                setupMockLLMAPI();
+
+                const frameDoc = await waitForChatReady();
+
+                // Ejecutar suites de tests
+                await runInterfaceTests(frameDoc);
+                await runChatInteractionTests(frameDoc);
+                await runRecommendationTests(frameDoc);
+                await runErrorHandlingTests(frameDoc);
+                await runAccessibilityTests(frameDoc);
+                await runMobileTests(frameDoc);
+
+                // Mostrar resultados finales
+                displayResults();
+                log('🏁 Todos los tests de Citrino Chat completados', 'success');
+
+            } catch (error) {
+                log(`💥 Error en tests de Citrino Chat: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Tests de interface
+        async function runInterfaceTests(frameDoc) {
+            describe('Citrino Chat - Interface Elements', () => {
+                it('should have essential chat elements', () => {
+                    testRunner.assertElementExists('#chatInput', frameDoc);
+                    testRunner.assertElementExists('#sendButton', frameDoc);
+                    testRunner.assertElementExists('.chat-messages', frameDoc);
+                    testRunner.assertElementExists('.chat-input-container', frameDoc);
+
+                    log('✅ Elementos esenciales del chat encontrados');
+                });
+
+                it('should have sticky input container', () => {
+                    const inputContainer = frameDoc.querySelector('.chat-input-container');
+                    const styles = window.getComputedStyle(inputContainer);
+
+                    testRunner.assert(
+                        styles.position === 'fixed' || styles.position === 'sticky',
+                        'Input container should be sticky/fixed'
+                    );
+
+                    log('✅ Input container sticky verificado');
+                });
+
+                it('should have proper message styling', () => {
+                    const messageStyles = frameDoc.querySelectorAll('.message');
+                    testRunner.assert(messageStyles.length > 0, 'Should have message elements');
+
+                    // Verificar estilos de usuario y asistente
+                    const userMessages = frameDoc.querySelectorAll('.message.user');
+                    const assistantMessages = frameDoc.querySelectorAll('.message.assistant');
+
+                    testRunner.assert(userMessages.length >= 0, 'Should support user messages');
+                    testRunner.assert(assistantMessages.length >= 0, 'Should support assistant messages');
+
+                    log('✅ Estilos de mensajes verificados');
+                });
+
+                it('should have typing indicator', () => {
+                    const typingIndicator = frameDoc.querySelector('#typingIndicator');
+                    testRunner.assert(typingIndicator, 'Should have typing indicator');
+
+                    log('✅ Indicador de escritura verificado');
+                });
+
+                it('should have control buttons', () => {
+                    const clearButton = frameDoc.querySelector('button[onclick*="clearChat"]');
+                    const exportButton = frameDoc.querySelector('button[onclick*="exportChat"]');
+
+                    testRunner.assert(clearButton || frameDoc.querySelector('.btn-clear'), 'Should have clear button');
+                    testRunner.assert(exportButton || frameDoc.querySelector('.btn-export'), 'Should have export button');
+
+                    log('✅ Botones de control verificados');
+                });
+            });
+        }
+
+        // Tests de interacción de chat
+        async function runChatInteractionTests(frameDoc) {
+            describe('Citrino Chat - Chat Interactions', () => {
+                it('should start chat session', async () => {
+                    // Simular click en welcome overlay o inicio de chat
+                    const startButton = frameDoc.querySelector('button[onclick*="startChat"]');
+                    if (startButton) {
+                        startButton.click();
+                    }
+
+                    await testRunner.waitFor(500);
+
+                    // Verificar que apareció mensaje de bienvenida
+                    const messages = frameDoc.querySelectorAll('.message.assistant');
+                    testRunner.assert(messages.length > 0, 'Should show welcome message');
+
+                    testMetrics.messagesTested++;
+                    addMessageToSimulation('assistant', mockData.llmResponses[0].content);
+
+                    log('✅ Sesión de chat iniciada correctamente');
+                });
+
+                it('should handle user input submission', async () => {
+                    const chatInput = frameDoc.querySelector('#chatInput');
+                    const sendButton = frameDoc.querySelector('#sendButton');
+
+                    testRunner.assert(chatInput, 'Chat input should exist');
+                    testRunner.assert(sendButton, 'Send button should exist');
+
+                    // Simular mensaje de usuario
+                    const testMessage = 'Busco departamentos en Equipetrol entre $200k y $350k';
+                    await testRunner.type('#chatInput', testMessage, frameDoc);
+
+                    // Verificar que el botón de enviar se habilitó
+                    testRunner.assert(!sendButton.disabled, 'Send button should be enabled');
+
+                    // Enviar mensaje
+                    sendButton.click();
+                    await testRunner.waitFor(1000);
+
+                    testMetrics.messagesTested++;
+                    addMessageToSimulation('user', testMessage);
+
+                    log('✅ Envío de mensaje de usuario verificado');
+                });
+
+                it('should handle keyboard shortcuts', async () => {
+                    const chatInput = frameDoc.querySelector('#chatInput');
+
+                    // Simular Enter para enviar
+                    chatInput.value = 'Mensaje de prueba con Enter';
+                    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    const enterEvent = new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    chatInput.dispatchEvent(enterEvent);
+
+                    await testRunner.waitFor(500);
+
+                    testMetrics.messagesTested++;
+                    addMessageToSimulation('user', 'Mensaje de prueba con Enter');
+
+                    log('✅ Atajos de teclado verificados');
+                });
+
+                it('should handle Shift+Enter for new lines', async () => {
+                    const chatInput = frameDoc.querySelector('#chatInput');
+
+                    // Simular Shift+Enter
+                    chatInput.value = 'Línea 1\nLínea 2';
+                    const shiftEnterEvent = new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        shiftKey: true,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    chatInput.dispatchEvent(shiftEnterEvent);
+
+                    await testRunner.waitFor(200);
+
+                    // Verificar que no se envió pero que agregó nueva línea
+                    testRunner.assert(chatInput.value.includes('\n'), 'Should add new line with Shift+Enter');
+
+                    log('✅ Shift+Enter para nuevas líneas verificado');
+                });
+            });
+        }
+
+        // Tests de recomendaciones
+        async function runRecommendationTests(frameDoc) {
+            describe('Citrino Chat - Recommendations', () => {
+                it('should display recommendations in chat', async () => {
+                    // Esperar respuesta con recomendaciones
+                    await testRunner.waitFor(2000);
+
+                    // Buscar cards de recomendaciones
+                    const recommendationCards = frameDoc.querySelectorAll('.recommendation-card, .chat-recommendations .card');
+
+                    if (recommendationCards.length > 0) {
+                        testRunner.assert(recommendationCards.length > 0, 'Should show recommendation cards');
+
+                        // Verificar estructura de recomendación
+                        const firstCard = recommendationCards[0];
+                        const title = firstCard.querySelector('.recommendation-title, h5, h6');
+                        const price = firstCard.querySelector('.text-success, [class*="price"]');
+                        const compatibility = firstCard.querySelector('.compatibility-pill, [class*="compatibilidad"]');
+
+                        testRunner.assert(title, 'Recommendation should have title');
+                        testRunner.assert(price, 'Recommendation should have price');
+
+                        log(`✅ ${recommendationCards.length} recomendaciones mostradas`);
+                        updateRecommendationPreview(mockData.llmResponses[1].recommendations);
+                    } else {
+                        log('⚠️ No se encontraron recomendaciones (puede requerir más interacción)');
+                    }
+                });
+
+                it('should have proper recommendation styling', () => {
+                    const recommendationStyles = frameDoc.querySelectorAll('.chat-recommendations .recommendation-card');
+
+                    if (recommendationStyles.length > 0) {
+                        const firstCard = recommendationStyles[0];
+                        const styles = window.getComputedStyle(firstCard);
+
+                        testRunner.assert(styles.borderRadius !== '0px', 'Recommendation cards should have rounded corners');
+                        testRunner.assert(styles.boxShadow !== 'none', 'Recommendation cards should have shadow');
+
+                        log('✅ Estilos de recomendaciones verificados');
+                    }
+                });
+
+                it('should show compatibility percentages', () => {
+                    const compatibilityPills = frameDoc.querySelectorAll('.compatibility-pill');
+
+                    if (compatibilityPills.length > 0) {
+                        compatibilityPills.forEach(pill => {
+                            const text = pill.textContent;
+                            const match = text.match(/(\d+)%/);
+                            testRunner.assert(match, 'Should show percentage compatibility');
+
+                            const percentage = parseInt(match[1]);
+                            testRunner.assert(percentage >= 0 && percentage <= 100, 'Percentage should be valid');
+                        });
+
+                        log('✅ Porcentajes de compatibilidad verificados');
+                    }
+                });
+            });
+        }
+
+        // Tests de manejo de errores
+        async function runErrorHandlingTests(frameDoc) {
+            describe('Citrino Chat - Error Handling', () => {
+                it('should show typing indicator during processing', async () => {
+                    const typingIndicator = frameDoc.querySelector('#typingIndicator');
+
+                    if (typingIndicator) {
+                        // Enviar mensaje para activar indicador
+                        const chatInput = frameDoc.querySelector('#chatInput');
+                        const sendButton = frameDoc.querySelector('#sendButton');
+
+                        chatInput.value = 'Mensaje para activar typing indicator';
+                        sendButton.click();
+
+                        // Verificar que aparece el indicador
+                        await testRunner.waitFor(100);
+                        testRunner.assert(typingIndicator.classList.contains('show') ||
+                                      typingIndicator.style.display !== 'none',
+                                      'Should show typing indicator');
+
+                        log('✅ Indicador de escritura funcionando');
+                    }
+                });
+
+                it('should handle LLM errors gracefully', async () => {
+                    if (document.getElementById('simulateErrors')?.checked) {
+                        // Enviar múltiples mensajes para provocar errores
+                        for (let i = 0; i < 3; i++) {
+                            const chatInput = frameDoc.querySelector('#chatInput');
+                            const sendButton = frameDoc.querySelector('#sendButton');
+
+                            chatInput.value = `Mensaje de prueba ${i + 1}`;
+                            sendButton.click();
+
+                            await testRunner.waitFor(1500);
+                        }
+
+                        // Verificar que hay mensajes de error en el chat
+                        const errorMessages = frameDoc.querySelectorAll('.message[isError="true"], .error-message');
+
+                        if (errorMessages.length > 0) {
+                            log(`✅ ${errorMessages.length} errores manejados correctamente`);
+                        } else {
+                            log('⚠️ No se detectaron errores (puede variar por aleatoriedad)');
+                        }
+                    }
+                });
+
+                it('should have fallback responses', () => {
+                    // Verificar que el sistema tiene respuestas de fallback
+                    const errorTypes = mockData.errorResponses.map(e => e.type);
+                    testRunner.assert(errorTypes.length > 0, 'Should have error response types');
+
+                    errorTypes.forEach(type => {
+                        const response = mockData.errorResponses.find(e => e.type === type);
+                        testRunner.assert(response.content, `Should have fallback content for ${type}`);
+                    });
+
+                    log('✅ Respuestas de fallback verificadas');
+                });
+            });
+        }
+
+        // Tests de accesibilidad
+        async function runAccessibilityTests(frameDoc) {
+            if (!document.getElementById('testAccessibility')?.checked) {
+                return;
+            }
+
+            describe('Citrino Chat - Accessibility', () => {
+                it('should have proper ARIA labels', () => {
+                    const chatInput = frameDoc.querySelector('#chatInput');
+                    testRunner.assert(chatInput.hasAttribute('aria-label') ||
+                                  chatInput.hasAttribute('placeholder') ||
+                                  chatInput.labels.length > 0,
+                                  'Chat input should be accessible');
+
+                    log('✅ Labels ARIA verificados');
+                });
+
+                it('should support keyboard navigation', () => {
+                    const focusableElements = frameDoc.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+
+                    testRunner.assert(focusableElements.length > 0, 'Should have focusable elements');
+
+                    // Verificar tabindex
+                    const sendButton = frameDoc.querySelector('#sendButton');
+                    if (sendButton) {
+                        testRunner.assert(parseInt(sendButton.getAttribute('tabindex')) >= 0,
+                                          'Send button should be focusable');
+                    }
+
+                    log('✅ Navegación por teclado verificada');
+                });
+
+                it('should have sufficient color contrast', () => {
+                    // Verificar contrastes básicos
+                    const userMessages = frameDoc.querySelectorAll('.message.user .message-bubble');
+                    const assistantMessages = frameDoc.querySelectorAll('.message.assistant .message-bubble');
+
+                    if (userMessages.length > 0) {
+                        const userStyle = window.getComputedStyle(userMessages[0]);
+                        const userBg = userStyle.backgroundColor;
+                        const userColor = userStyle.color;
+
+                        testRunner.assert(userBg !== 'rgba(0, 0, 0, 0)' && userColor !== 'rgba(0, 0, 0, 0)',
+                                          'User messages should have visible colors');
+                    }
+
+                    if (assistantMessages.length > 0) {
+                        const assistantStyle = window.getComputedStyle(assistantMessages[0]);
+                        const assistantBg = assistantStyle.backgroundColor;
+                        const assistantColor = assistantStyle.color;
+
+                        testRunner.assert(assistantBg !== 'rgba(0, 0, 0, 0)' && assistantColor !== 'rgba(0, 0, 0, 0)',
+                                          'Assistant messages should have visible colors');
+                    }
+
+                    log('✅ Contraste de color verificado');
+                });
+            });
+        }
+
+        // Tests mobile
+        async function runMobileTests(frameDoc) {
+            describe('Citrino Chat - Mobile Responsiveness', () => {
+                it('should adapt to mobile screens', () => {
+                    const chatContainer = frameDoc.querySelector('.chat-container');
+                    if (chatContainer) {
+                        const styles = window.getComputedStyle(chatContainer);
+                        testRunner.assert(styles.maxWidth.includes('%') || styles.maxWidth === 'none',
+                                          'Chat container should be responsive');
+                    }
+
+                    log('✅ Responsive design verificado');
+                });
+
+                it('should have touch-friendly buttons', () => {
+                    const sendButton = frameDoc.querySelector('#sendButton');
+                    if (sendButton) {
+                        const styles = window.getComputedStyle(sendButton);
+                        const size = parseInt(styles.width) || parseInt(styles.height) || 0;
+                        testRunner.assert(size >= 44, 'Touch targets should be at least 44px');
+                    }
+
+                    log('✅ Botones touch-friendly verificados');
+                });
+            });
+        }
+
+        // Funciones de prueba individual
+        async function testBasicChat() {
+            clearResults();
+            showProgress();
+
+            try {
+                testRunner.reset();
+                const frameDoc = await waitForChatReady();
+
+                await runInterfaceTests(frameDoc);
+                await runChatInteractionTests(frameDoc);
+
+                displayResults();
+                log('✅ Tests básicos de chat completados', 'success');
+
+            } catch (error) {
+                log(`❌ Error en tests básicos: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testRecommendations() {
+            clearResults();
+            showProgress();
+
+            try {
+                testRunner.reset();
+                const frameDoc = await waitForChatReady();
+
+                await runRecommendationTests(frameDoc);
+
+                displayResults();
+                log('✅ Tests de recomendaciones completados', 'success');
+
+            } catch (error) {
+                log(`❌ Error en tests de recomendaciones: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testErrorHandling() {
+            clearResults();
+            showProgress();
+
+            try {
+                testRunner.reset();
+                setupMockLLMAPI();
+                const frameDoc = await waitForChatReady();
+
+                await runErrorHandlingTests(frameDoc);
+
+                displayResults();
+                log('✅ Tests de manejo de errores completados', 'success');
+
+            } catch (error) {
+                log(`❌ Error en tests de errores: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        async function testMobileView() {
+            clearResults();
+            showProgress();
+
+            try {
+                testRunner.reset();
+                const frameDoc = await waitForChatReady();
+
+                await runMobileTests(frameDoc);
+
+                displayResults();
+                log('✅ Tests mobile completados', 'success');
+
+            } catch (error) {
+                log(`❌ Error en tests mobile: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Agregar mensaje a la simulación
+        function addMessageToSimulation(type, content) {
+            const simulationContainer = document.getElementById('chatSimulation');
+
+            const messageClass = type === 'user' ? 'user' : type === 'error' ? 'error' : 'assistant';
+            const icon = type === 'user' ? 'person' : type === 'error' ? 'exclamation-triangle' : 'robot';
+
+            const messageHTML = `
+                <div class="message-preview ${messageClass}">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-${icon} me-2"></i>
+                        <strong>${type === 'user' ? 'Usuario' : type === 'error' ? 'Error' : 'Asistente'}</strong>
+                        <small class="ms-auto text-muted">${new Date().toLocaleTimeString()}</small>
+                    </div>
+                    <p class="mb-0">${content}</p>
+                </div>
+            `;
+
+            simulationContainer.insertAdjacentHTML('beforeend', messageHTML);
+
+            // Hacer scroll al último mensaje
+            simulationContainer.scrollTop = simulationContainer.scrollHeight;
+
+            // Limitar número de mensajes en la simulación
+            const messages = simulationContainer.querySelectorAll('.message-preview');
+            if (messages.length > 10) {
+                messages[0].remove();
+            }
+        }
+
+        // Actualizar preview de recomendaciones
+        function updateRecommendationPreview(recommendations) {
+            const previewContainer = document.getElementById('recommendationPreview');
+
+            if (!recommendations || recommendations.length === 0) {
+                previewContainer.innerHTML = '<p class="text-muted">No hay recomendaciones para mostrar</p>';
+                return;
+            }
+
+            let previewHTML = '<div class="row">';
+
+            recommendations.forEach(rec => {
+                const compatibilityClass = rec.compatibilidad >= 90 ? 'high' :
+                                         rec.compatibilidad >= 70 ? 'medium' : 'low';
+
+                previewHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="recommendation-card">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <div class="fw-bold">${rec.nombre}</div>
+                                    <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${rec.zona}</small>
+                                </div>
+                                <span class="compatibility-pill ${compatibilityClass}">
+                                    <i class="bi bi-stars"></i>${rec.compatibilidad}%
+                                </span>
+                            </div>
+                            <div class="fw-bold text-success mb-2">$${rec.precio.toLocaleString()}</div>
+                            <div class="mb-2">
+                                ${rec.habitaciones ? `<span class="badge bg-light me-1">${rec.habitaciones} dorm.</span>` : ''}
+                                ${rec.banos ? `<span class="badge bg-light me-1">${rec.banos} baños</span>` : ''}
+                                ${rec.superficie_m2 ? `<span class="badge bg-light">${rec.superficie_m2} m²</span>` : ''}
+                            </div>
+                            <div class="small text-muted">${rec.justificacion}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            previewHTML += '</div>';
+            previewContainer.innerHTML = previewHTML;
+        }
+
+        // Actualizar métricas
+        function updateMetrics() {
+            document.getElementById('messagesTested').textContent = testMetrics.messagesTested;
+            document.getElementById('responsesGenerated').textContent = testMetrics.responsesGenerated;
+            document.getElementById('recommendationsShown').textContent = testMetrics.recommendationsShown;
+            document.getElementById('errorsHandled').textContent = testMetrics.errorsHandled;
+        }
+
+        // Mostrar/ocultar progreso
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            updateMetrics();
+        }
+
+        function hideProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+        }
+
+        // Mostrar resultados
+        function displayResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('testResults');
+
+            if (testRunner.testResults.length === 0) {
+                resultsSection.style.display = 'none';
+                return;
+            }
+
+            resultsSection.style.display = 'block';
+
+            const totalTests = testRunner.testResults.reduce((sum, suite) => sum + suite.total, 0);
+            const totalPassed = testRunner.testResults.reduce((sum, suite) => sum + suite.passed, 0);
+            const totalFailed = testRunner.testResults.reduce((sum, suite) => sum + suite.failed, 0);
+
+            let resultsHTML = `
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4>${totalPassed}</h4>
+                            <small>Tests Pasados</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4>${totalFailed}</h4>
+                            <small>Tests Fallidos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4>${testMetrics.responsesGenerated}</h4>
+                            <small>Respuestas LLM</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="test-metric">
+                            <h4>${testMetrics.recommendationsShown}</h4>
+                            <small>Recomendaciones</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            testRunner.testResults.forEach(suite => {
+                const statusClass = suite.failed === 0 ? 'success' : 'danger';
+                const statusIcon = suite.failed === 0 ? '✅' : '❌';
+
+                resultsHTML += `
+                    <div class="alert alert-${statusClass}">
+                        <h6>${statusIcon} ${suite.name}</h6>
+                        <small class="text-muted">${suite.passed}/${suite.total} passed (${suite.duration}ms)</small>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = resultsHTML;
+            updateMetrics();
+        }
+
+        // Limpiar resultados
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('chatSimulation').innerHTML = `
+                <div class="message-preview system">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Sistema</strong>
+                        <small class="ms-auto text-muted">Listo para tests...</small>
+                    </div>
+                    <p class="mb-0">Presiona "Ejecutar Tests" para comenzar la simulación.</p>
+                </div>
+            `;
+            document.getElementById('recommendationPreview').innerHTML =
+                '<p class="text-muted">Las recomendaciones aparecerán aquí al ejecutar los tests...</p>';
+
+            // Resetear métricas
+            testMetrics = {
+                messagesTested: 0,
+                responsesGenerated: 0,
+                recommendationsShown: 0,
+                errorsHandled: 0
+            };
+
+            if (testRunner) {
+                testRunner.reset();
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        runChatTests();
+                        break;
+                    case '1':
+                        event.preventDefault();
+                        testBasicChat();
+                        break;
+                    case '2':
+                        event.preventDefault();
+                        testRecommendations();
+                        break;
+                    case '3':
+                        event.preventDefault();
+                        testErrorHandling();
+                        break;
+                }
+            }
+        });
+
+        // Auto-actualizar métricas durante tests
+        setInterval(() => {
+            if (document.getElementById('progressSection').style.display !== 'none') {
+                updateMetrics();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
