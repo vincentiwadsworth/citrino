@@ -41,6 +41,13 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 
 ### 🆕 Novedades Recientes
 
+**🎨 Mejoras UI/UX en Citrino Chat** *(Octubre 2025)*
+- Barra de input siempre visible en la parte inferior sin scroll
+- Limpieza automática de historial al cargar página (mejor privacidad)
+- Botones de limpiar/exportar más discretos con tooltips
+- Layout optimizado para mejor experiencia de usuario
+- Responsive design mejorado para móviles
+
 **🚨 Sistema de Reporte Detallado de Errores LLM** *(Octubre 2025)*
 - Reporte específico cuando Z.AI/OpenRouter no están disponibles
 - Clasificación automática de errores (rate limit, server error, auth error, etc.)
@@ -91,6 +98,9 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
   - Filtrado por moneda (USD/BOB) con estadísticas de oferta
   - Badges de moneda en perfiles guardados
 - **Citrino Chat** permite "chatear con la información" sin restricciones temáticas
+- **Barra de input siempre visible** sin necesidad de scroll
+- **Historial limpio** en cada sesión (mejor privacidad)
+- **Controles discretos** con tooltips para mejor UX
 - **Extracción automática de criterios** desde conversaciones y formularios
 - **Arquitectura preparada** con sistema LLM redundante y alta disponibilidad
 
@@ -272,6 +282,7 @@ Citrino tiene un plan de evolución claro enfocado en:
 ✅ **Completado - Sistema fallback LLM corregido** - 99.9% disponibilidad alcanzada
 ✅ **Completado - Filtro de monedas USD/BOB** - Soporte para mercado bimonetario boliviano
 ✅ **Completado - Sistema de reporte detallado de errores LLM** - Clasificación automática y debug avanzado
+✅ **Completado - Mejoras UI/UX en Citrino Chat** - Barra de input sticky, historial limpio, controles discretos
 
 🔄 **En Progreso - Mejora de calidad de datos** - Sistema híbrido optimizado 90% extracción
 📅 **Próximos - Geocodificación avanzada** - Reducir propiedades sin zona de 50% → <15%
