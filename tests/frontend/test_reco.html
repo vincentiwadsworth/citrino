@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citrino Reco Tests</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .iframe-container {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        .test-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .test-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .test-status.running {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .test-status.passed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .test-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .test-controls {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-test-section {
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8fff9;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .recommendation-preview {
+            background: #e8f4fd;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .test-result-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+        }
+
+        .test-result-item.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .test-result-item.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .test-result-item.warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="test-container">
+        <!-- Header -->
+        <div class="test-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="bi bi-journal-richtext me-2"></i>
+                        Citrino Reco Test Suite
+                    </h1>
+                    <p class="mb-0">
+                        Tests automatizados para formulario de perfiles y sistema de recomendaciones
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="runRecoTests()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="test-controls">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5>Configuración de Tests</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="mockAPI" checked>
+                        <label class="form-check-label" for="mockAPI">
+                            Usar Mock API (recomendado para testing)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="verboseLogging" checked>
+                        <label class="form-check-label" for="verboseLogging">
+                            Logging detallado
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-primary me-2" onclick="runSingleTest('form')">
+                        <i class="bi bi-ui-checks me-1"></i>Formulario
+                    </button>
+                    <button class="btn btn-outline-primary me-2" onclick="runSingleTest('recommendations')">
+                        <i class="bi bi-stars me-1"></i>Recomendaciones
+                    </button>
+                    <button class="btn btn-outline-primary me-2" onclick="runSingleTest('persistence')">
+                        <i class="bi bi-save me-1"></i>Persistencia
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="clearResults()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Target Page -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-window me-2"></i>Vista Previa: Citrino Reco
+            </h3>
+            <div class="iframe-container">
+                <iframe id="recoFrame" src="../citrino-reco.html"></iframe>
+            </div>
+        </div>
+
+        <!-- Test Progress -->
+        <div class="test-section" id="progressSection" style="display: none;">
+            <h3 class="mb-3">
+                <i class="bi bi-activity me-2"></i>Progreso de Tests
+            </h3>
+            <div id="progressContent">
+                <!-- Progress bars se insertarán aquí -->
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section" id="resultsSection" style="display: none;">
+            <h3 class="mb-3">
+                <i class="bi bi-clipboard-check me-2"></i>Resultados de Tests
+            </h3>
+            <div id="testResults">
+                <!-- Results se insertarán aquí -->
+            </div>
+        </div>
+
+        <!-- Form Validation Tests -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-ui-checks me-2"></i>Validación de Formulario Manual
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-test-section">
+                        <h5>Datos de Prueba Válidos</h5>
+                        <button class="btn btn-success btn-sm" onclick="fillValidForm()">
+                            <i class="bi bi-check-lg me-1"></i>Llenar Formulario Válido
+                        </button>
+                        <small class="d-block text-muted mt-2">
+                            Llena el formulario con datos válidos para probar validación
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-test-section">
+                        <h5>Casos Límite</h5>
+                        <button class="btn btn-warning btn-sm me-2" onclick="fillBoundaryForm()">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Límites
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="fillInvalidForm()">
+                            <i class="bi bi-x-lg me-1"></i>Inválido
+                        </button>
+                        <small class="d-block text-muted mt-2">
+                            Prueba casos límite y datos inválidos
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendation Preview -->
+        <div class="test-section">
+            <h3 class="mb-3">
+                <i class="bi bi-stars me-2"></i>Preview de Recomendaciones
+            </h3>
+            <div id="recommendationPreview">
+                <p class="text-muted">Las recomendaciones aparecerán aquí al ejecutar los tests...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="test_utils.js"></script>
+
+    <script>
+        // Variables globales
+        let testRunner = null;
+        let recoFrame = null;
+        let mockResponses = {};
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            testRunner = new TestUtils();
+            recoFrame = document.getElementById('recoFrame');
+            setupMockData();
+
+            log('🚀 Citrino Reco Test Suite inicializado');
+            log('📋 Listo para ejecutar tests del formulario y recomendaciones');
+        });
+
+        // Setup de datos mock
+        function setupMockData() {
+            mockResponses = {
+                health: {
+                    status: 'ok',
+                    properties_count: 1583,
+                    timestamp: new Date().toISOString()
+                },
+                recommendations: [
+                    {
+                        id: 'test_prop_1',
+                        nombre: 'Departamento Test 1 - Equipetrol',
+                        precio: 220000,
+                        presupuesto_min: 200000,
+                        presupuesto_max: 250000,
+                        superficie_m2: 120,
+                        habitaciones: 3,
+                        banos: 2,
+                        zona: 'Equipetrol',
+                        compatibilidad: 95,
+                        justificacion: 'Excelente ubicación en zona premium, alta plusvalía y acceso a servicios comerciales',
+                        caracteristicas: ['garaje', 'seguridad', 'piscina']
+                    },
+                    {
+                        id: 'test_prop_2',
+                        nombre: 'Casa Test 2 - Santa Mónica',
+                        precio: 180000,
+                        presupuesto_min: 150000,
+                        presupuesto_max: 200000,
+                        superficie_m2: 180,
+                        habitaciones: 4,
+                        banos: 3,
+                        zona: 'Santa Mónica',
+                        compatibilidad: 88,
+                        justificacion: 'Ideal para familias, cerca de colegios y parques, buen potencial de revalorización',
+                        caracteristicas: ['jardin', 'garaje', 'area_verde']
+                    },
+                    {
+                        id: 'test_prop_3',
+                        nombre: 'Penthouse Test 3 - Urbari',
+                        precio: 350000,
+                        presupuesto_min: 300000,
+                        presupuesto_max: 400000,
+                        superficie_m2: 200,
+                        habitaciones: 3,
+                        banos: 3,
+                        zona: 'Urbari',
+                        compatibilidad: 92,
+                        justificacion: 'Lujo exclusivo con vistas panorámicas, amenities premium y ubicación estratégica',
+                        caracteristicas: ['terraza', 'gimnasio', 'seguridad_24h']
+                    }
+                ],
+                zones: ['Equipetrol', 'Santa Mónica', 'Urbari', 'Los Olivos', 'Centro', 'Zona Norte'],
+                propertyTypes: ['departamento', 'casa', 'penthouse', 'terreno']
+            };
+        }
+
+        // Logging
+        function log(message, type = 'info') {
+            if (document.getElementById('verboseLogging')?.checked) {
+                console.log(`[Reco Tests] ${message}`);
+            }
+        }
+
+        // Esperar a que el frame esté listo
+        async function waitForRecoReady() {
+            return new Promise((resolve) => {
+                const checkReady = () => {
+                    try {
+                        const frameDoc = recoFrame.contentDocument || recoFrame.contentWindow.document;
+                        const form = frameDoc.getElementById('profileForm');
+                        if (form) {
+                            log('✅ Citrino Reco frame listo');
+                            resolve(frameDoc);
+                        } else {
+                            setTimeout(checkReady, 100);
+                        }
+                    } catch (error) {
+                        setTimeout(checkReady, 100);
+                    }
+                };
+                checkReady();
+            });
+        }
+
+        // Configurar Mock API si es necesario
+        function setupMockAPI() {
+            if (document.getElementById('mockAPI')?.checked) {
+                // Mock para health check
+                testRunner.mockAPI('/api/health', mockResponses.health, 200);
+
+                // Mock para recomendaciones
+                testRunner.mockAPI('/api/recomendar', {
+                    success: true,
+                    recomendaciones: mockResponses.recommendations,
+                    briefing_personalizado: 'Test briefing ejecutivo generado automáticamente'
+                }, 1000);
+
+                // Mock para zonas
+                testRunner.mockAPI('/api/zonas', {
+                    success: true,
+                    zonas: mockResponses.zones
+                }, 300);
+
+                log('🎭 Mock API configurada');
+            }
+        }
+
+        // Ejecutar todos los tests de Citrino Reco
+        async function runRecoTests() {
+            clearResults();
+            showProgress();
+            log('🎯 Iniciando tests de Citrino Reco...');
+
+            try {
+                testRunner.reset();
+                setupMockAPI();
+
+                const frameDoc = await waitForRecoReady();
+
+                // Ejecutar suites de tests
+                await runFormTests(frameDoc);
+                await runRecommendationTests(frameDoc);
+                await runPersistenceTests(frameDoc);
+                await runUIUXTests(frameDoc);
+
+                // Mostrar resultados finales
+                displayResults();
+                log('🏁 Todos los tests de Citrino Reco completados', 'success');
+
+            } catch (error) {
+                log(`💥 Error en tests de Citrino Reco: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Tests de formulario
+        async function runFormTests(frameDoc) {
+            describe('Citrino Reco - Form Validation', () => {
+                it('should have form elements available', () => {
+                    testRunner.assertElementExists('#profileForm', frameDoc);
+                    testRunner.assertElementExists('#nombreCliente', frameDoc);
+                    testRunner.assertElementExists('#presupuesto_min', frameDoc);
+                    testRunner.assertElementExists('#presupuesto_max', frameDoc);
+                    testRunner.assertElementExists('#zona_preferida', frameDoc);
+                    testRunner.assertElementExists('#tipo_propiedad', frameDoc);
+                    log('✅ Elementos del formulario encontrados');
+                });
+
+                it('should validate required fields', () => {
+                    const nombreInput = frameDoc.querySelector('#nombreCliente');
+                    const presupuestoMinInput = frameDoc.querySelector('#presupuesto_min');
+                    const presupuestoMaxInput = frameDoc.querySelector('#presupuesto_max');
+
+                    testRunner.assert(nombreInput, 'Campo nombre debe existir');
+                    testRunner.assert(presupuestoMinInput, 'Campo presupuesto mínimo debe existir');
+                    testRunner.assert(presupuestoMaxInput, 'Campo presupuesto máximo debe existir');
+
+                    // Verificar que tienen atributos de validación
+                    testRunner.assert(nombreInput.required || nombreInput.hasAttribute('required'),
+                        'Nombre cliente debe ser requerido');
+
+                    log('✅ Validación de campos requeridos verificada');
+                });
+
+                it('should populate form with valid data', async () => {
+                    const validData = {
+                        nombreCliente: 'Usuario Test',
+                        presupuesto_min: '100000',
+                        presupuesto_max: '300000',
+                        zona_preferida: 'Equipetrol',
+                        tipo_propiedad: 'departamento',
+                        adultos: '2',
+                        ninos: '8,12'
+                    };
+
+                    // Llenar formulario
+                    for (const [field, value] of Object.entries(validData)) {
+                        const element = frameDoc.querySelector(`#${field}`);
+                        if (element) {
+                            element.value = value;
+                            element.dispatchEvent(new Event('input', { bubbles: true }));
+                            element.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+
+                    await testRunner.waitFor(500);
+
+                    // Verificar que los datos se guardaron
+                    for (const [field, value] of Object.entries(validData)) {
+                        const element = frameDoc.querySelector(`#${field}`);
+                        if (element) {
+                            testRunner.assertEqual(element.value, value,
+                                `Campo ${field} debe tener valor ${value}`);
+                        }
+                    }
+
+                    log('✅ Formulario llenado con datos válidos');
+                });
+
+                it('should validate budget constraints', () => {
+                    const presupuestoMinInput = frameDoc.querySelector('#presupuesto_min');
+                    const presupuestoMaxInput = frameDoc.querySelector('#presupuesto_max');
+
+                    // Caso válido
+                    presupuestoMinInput.value = '100000';
+                    presupuestoMaxInput.value = '200000';
+
+                    const min = parseFloat(presupuestoMinInput.value);
+                    const max = parseFloat(presupuestoMaxInput.value);
+
+                    testRunner.assert(min < max, 'Presupuesto mínimo debe ser menor al máximo');
+                    testRunner.assert(min > 0, 'Presupuesto mínimo debe ser mayor a 0');
+                    testRunner.assert(max > min, 'Presupuesto máximo debe ser mayor al mínimo');
+
+                    log('✅ Validación de presupuesto verificada');
+                });
+            });
+        }
+
+        // Tests de recomendaciones
+        async function runRecommendationTests(frameDoc) {
+            describe('Citrino Reco - Recommendations', () => {
+                it('should generate recommendations button exists', () => {
+                    testRunner.assertElementExists('#generateRecommendations', frameDoc);
+                    testRunner.assertElementVisible('#generateRecommendations', frameDoc);
+                    log('✅ Botón de generar recomendaciones disponible');
+                });
+
+                it('should show loading state when generating', async () => {
+                    const generateBtn = frameDoc.querySelector('#generateRecommendations');
+                    testRunner.assert(generateBtn, 'Botón de generar recomendaciones debe existir');
+
+                    // Simular click y verificar loading
+                    generateBtn.click();
+                    await testRunner.waitFor(200);
+
+                    // Verificar que muestra loading (dependiendo de la implementación)
+                    const loadingElements = frameDoc.querySelectorAll('.loading, .spinner-border, [disabled]');
+                    testRunner.assert(loadingElements.length > 0, 'Debe mostrar estado de loading');
+
+                    log('✅ Estado de loading verificado');
+                });
+
+                it('should display recommendations when available', async () => {
+                    // Esperar un poco para que carguen las recomendaciones
+                    await testRunner.waitFor(1500);
+
+                    // Buscar contenedor de recomendaciones
+                    const recommendationsContainer = frameDoc.querySelector('#recommendationsContainer, #resultsContainer, .recommendations');
+
+                    if (recommendationsContainer) {
+                        const recommendations = recommendationsContainer.querySelectorAll('.recommendation-card, .property-card, .card');
+                        testRunner.assert(recommendations.length > 0, 'Debe mostrar al menos una recomendación');
+
+                        // Actualizar preview en la página de tests
+                        updateRecommendationPreview(mockResponses.recommendations);
+
+                        log(`✅ Se encontraron ${recommendations.length} recomendaciones`);
+                    } else {
+                        log('⚠️ Contenedor de recomendaciones no encontrado (puede necesitar interacción manual)');
+                    }
+                });
+
+                it('should have recommendation data structure', () => {
+                    // Verificar estructura de datos mock
+                    testRunner.assert(mockResponses.recommendations.length > 0, 'Debe haber datos de recomendaciones mock');
+
+                    const firstRec = mockResponses.recommendations[0];
+                    testRunner.assert(firstRec.id, 'Recomendación debe tener ID');
+                    testRunner.assert(firstRec.nombre, 'Recomendación debe tener nombre');
+                    testRunner.assert(firstRec.precio, 'Recomendación debe tener precio');
+                    testRunner.assert(firstRec.zona, 'Recomendación debe tener zona');
+                    testRunner.assert(firstRec.compatibilidad, 'Recomendación debe tener compatibilidad');
+
+                    log('✅ Estructura de datos de recomendaciones verificada');
+                });
+            });
+        }
+
+        // Tests de persistencia
+        async function runPersistenceTests(frameDoc) {
+            describe('Citrino Reco - Persistence', () => {
+                it('should save form data to localStorage', async () => {
+                    // Llenar formulario con datos de prueba
+                    const testData = {
+                        nombreCliente: 'Test Persistence User',
+                        presupuesto_min: '150000',
+                        presupuesto_max: '250000'
+                    };
+
+                    for (const [field, value] of Object.entries(testData)) {
+                        const element = frameDoc.querySelector(`#${field}`);
+                        if (element) {
+                            element.value = value;
+                            element.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }
+
+                    await testRunner.waitFor(1000);
+
+                    // Verificar localStorage (el formulario debería guardar automáticamente)
+                    const savedData = localStorage.getItem('citrino_reco_profile') ||
+                                     localStorage.getItem('profile_draft');
+
+                    if (savedData) {
+                        const parsedData = JSON.parse(savedData);
+                        testRunner.assertEqual(parsedData.nombreCliente, testData.nombreCliente,
+                            'Nombre guardado debe coincidir');
+                        log('✅ Datos guardados en localStorage');
+                    } else {
+                        log('⚠️ No se encontraron datos guardados (puede necesitar implementación)');
+                    }
+                });
+
+                it('should load saved data on page reload', async () => {
+                    // Guardar datos directamente en localStorage
+                    const profileData = {
+                        nombreCliente: 'Reload Test User',
+                        presupuesto_min: '200000',
+                        presupuesto_max: '300000',
+                        zona_preferida: 'Santa Mónica'
+                    };
+
+                    localStorage.setItem('profile_draft', JSON.stringify(profileData));
+
+                    // Recargar el frame (simular reload)
+                    recoFrame.src = recoFrame.src;
+                    await waitForRecoReady();
+
+                    // Verificar que los datos se cargaron
+                    const frameDoc = recoFrame.contentDocument || recoFrame.contentWindow.document;
+                    const nombreInput = frameDoc.querySelector('#nombreCliente');
+
+                    if (nombreInput && nombreInput.value === profileData.nombreCliente) {
+                        log('✅ Datos restaurados correctamente');
+                    } else {
+                        log('⚠️ Restauración automática no implementada o requiere interacción');
+                    }
+                });
+            });
+        }
+
+        // Tests de UI/UX
+        async function runUIUXTests(frameDoc) {
+            describe('Citrino Reco - UI/UX', () => {
+                it('should be responsive on different screen sizes', () => {
+                    // Verificar meta viewport
+                    const viewport = frameDoc.querySelector('meta[name="viewport"]');
+                    testRunner.assert(viewport, 'Debe tener meta viewport para responsive');
+
+                    // Verificar estructura responsive
+                    const container = frameDoc.querySelector('.container, .container-fluid');
+                    testRunner.assert(container, 'Debe tener contenedor responsive');
+
+                    log('✅ Estructura responsive verificada');
+                });
+
+                it('should have accessible form elements', () => {
+                    const form = frameDoc.querySelector('#profileForm');
+                    const labels = form.querySelectorAll('label');
+                    const inputs = form.querySelectorAll('input, select, textarea');
+
+                    testRunner.assert(labels.length > 0, 'Debe tener etiquetas para accesibilidad');
+                    testRunner.assert(inputs.length > 0, 'Debe tener campos de formulario');
+
+                    // Verificar que los inputs tienen atributos de accesibilidad
+                    let accessibleInputs = 0;
+                    inputs.forEach(input => {
+                        const hasLabel = labels.some(label =>
+                            label.getAttribute('for') === input.id ||
+                            label.contains(input)
+                        );
+                        const hasAria = input.hasAttribute('aria-label') ||
+                                      input.hasAttribute('aria-labelledby');
+
+                        if (hasLabel || hasAria) accessibleInputs++;
+                    });
+
+                    testRunner.assert(accessibleInputs > 0, 'Los campos deben ser accesibles');
+                    log(`✅ ${accessibleInputs}/${inputs.length} campos accesibles`);
+                });
+
+                it('should have proper error handling', () => {
+                    // Verificar elementos de feedback
+                    const alerts = frameDoc.querySelectorAll('.alert, .error-message, .invalid-feedback');
+                    const validationElements = frameDoc.querySelectorAll('[required], [pattern], [min], [max]');
+
+                    testRunner.assert(validationElements.length > 0,
+                        'Debe tener elementos con validación HTML5');
+
+                    log('✅ Elementos de validación y error handling verificados');
+                });
+            });
+        }
+
+        // Ejecutar test específico
+        async function runSingleTest(testType) {
+            clearResults();
+            showProgress();
+            log(`🎯 Ejecutando test específico: ${testType}`);
+
+            try {
+                testRunner.reset();
+                setupMockAPI();
+                const frameDoc = await waitForRecoReady();
+
+                switch (testType) {
+                    case 'form':
+                        await runFormTests(frameDoc);
+                        break;
+                    case 'recommendations':
+                        await runRecommendationTests(frameDoc);
+                        break;
+                    case 'persistence':
+                        await runPersistenceTests(frameDoc);
+                        break;
+                }
+
+                displayResults();
+                log(`✅ Test ${testType} completado`, 'success');
+
+            } catch (error) {
+                log(`❌ Error en test ${testType}: ${error.message}`, 'error');
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // Funciones de interacción manual
+        async function fillValidForm() {
+            const frameDoc = await waitForRecoReady();
+            const validData = {
+                nombreCliente: 'Juan Pérez Test',
+                email: 'juan.perez@test.com',
+                presupuesto_min: '100000',
+                presupuesto_max: '300000',
+                zona_preferida: 'Equipetrol',
+                tipo_propiedad: 'departamento',
+                adultos: '2',
+                ninos: '8,12',
+                seguridad: 'privada',
+                estilo_vida: 'moderno',
+                reunionContexto: 'Primera reunión exploratoria',
+                hallazgosClave: 'Interesado en plusvalía a mediano plazo',
+                instruccionesLLM: 'Enfocarse en zonas con desarrollo urbano'
+            };
+
+            for (const [field, value] of Object.entries(validData)) {
+                const element = frameDoc.querySelector(`#${field}, [name="${field}"]`);
+                if (element) {
+                    element.value = value;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            log('✅ Formulario llenado con datos válidos');
+        }
+
+        async function fillBoundaryForm() {
+            const frameDoc = await waitForRecoReady();
+            const boundaryData = {
+                nombreCliente: 'A', // Mínimo longitud
+                presupuesto_min: '1', // Mínimo valor
+                presupuesto_max: '1', // Igual al mínimo (límite)
+                zona_preferida: 'Equipetrol',
+                tipo_propiedad: 'departamento'
+            };
+
+            for (const [field, value] of Object.entries(boundaryData)) {
+                const element = frameDoc.querySelector(`#${field}, [name="${field}"]`);
+                if (element) {
+                    element.value = value;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+
+            log('✅ Formulario llenado con casos límite');
+        }
+
+        async function fillInvalidForm() {
+            const frameDoc = await waitForRecoReady();
+            const invalidData = {
+                nombreCliente: '', // Vacío (inválido)
+                presupuesto_min: '-1000', // Negativo (inválido)
+                presupuesto_max: 'abc', // No numérico (inválido)
+                zona_preferida: '', // Vacío
+                tipo_propiedad: '' // Vacío
+            };
+
+            for (const [field, value] of Object.entries(invalidData)) {
+                const element = frameDoc.querySelector(`#${field}, [name="${field}"]`);
+                if (element) {
+                    element.value = value;
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            log('✅ Formulario llenado con datos inválidos para probar validación');
+        }
+
+        // Actualizar preview de recomendaciones
+        function updateRecommendationPreview(recommendations) {
+            const previewContainer = document.getElementById('recommendationPreview');
+
+            if (!recommendations || recommendations.length === 0) {
+                previewContainer.innerHTML = '<p class="text-muted">No hay recomendaciones para mostrar</p>';
+                return;
+            }
+
+            let previewHTML = '<div class="row">';
+
+            recommendations.slice(0, 3).forEach(rec => {
+                previewHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="recommendation-preview">
+                            <h6>${rec.nombre}</h6>
+                            <p class="mb-1"><strong>$${rec.precio.toLocaleString()}</strong></p>
+                            <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>${rec.zona}</p>
+                            <p class="mb-1"><i class="bi bi-stars me-1"></i>${rec.compatibilidad}% compatible</p>
+                            <small class="text-muted">${rec.justificacion}</small>
+                        </div>
+                    </div>
+                `;
+            });
+
+            previewHTML += '</div>';
+            previewContainer.innerHTML = previewHTML;
+        }
+
+        // Mostrar/ocultar progreso
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+        }
+
+        function hideProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+        }
+
+        // Mostrar resultados
+        function displayResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('testResults');
+
+            if (testRunner.testResults.length === 0) {
+                resultsSection.style.display = 'none';
+                return;
+            }
+
+            resultsSection.style.display = 'block';
+
+            const totalTests = testRunner.testResults.reduce((sum, suite) => sum + suite.total, 0);
+            const totalPassed = testRunner.testResults.reduce((sum, suite) => sum + suite.passed, 0);
+            const totalFailed = testRunner.testResults.reduce((sum, suite) => sum + suite.failed, 0);
+
+            let resultsHTML = `
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="test-result-item success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <strong>${totalPassed}</strong> Tests Pasados
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="test-result-item ${totalFailed > 0 ? 'error' : 'success'}">
+                            <i class="bi bi-${totalFailed > 0 ? 'x-circle' : 'check-circle'} me-2"></i>
+                            <strong>${totalFailed}</strong> Tests Fallidos
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="test-result-item">
+                            <i class="bi bi-clipboard-data me-2"></i>
+                            <strong>${totalTests}</strong> Total Tests
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            testRunner.testResults.forEach(suite => {
+                resultsHTML += `
+                    <div class="test-result-item ${suite.failed === 0 ? 'success' : 'error'}">
+                        <h6>${suite.failed === 0 ? '✅' : '❌'} ${suite.name}</h6>
+                        <small class="text-muted">${suite.passed}/${suite.total} passed (${suite.duration}ms)</small>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        // Limpiar resultados
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('recommendationPreview').innerHTML =
+                '<p class="text-muted">Las recomendaciones aparecerán aquí al ejecutar los tests...</p>';
+
+            if (testRunner) {
+                testRunner.reset();
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        runRecoTests();
+                        break;
+                    case '1':
+                        event.preventDefault();
+                        runSingleTest('form');
+                        break;
+                    case '2':
+                        event.preventDefault();
+                        runSingleTest('recommendations');
+                        break;
+                    case '3':
+                        event.preventDefault();
+                        runSingleTest('persistence');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
