@@ -322,6 +322,17 @@ describe('Mi Suite', () => {
 - [ ] Performance profiling
 - [ ] Accessibility auditing avanzado
 
+## 📚 Documentación Adicional
+
+### Guías Rápidas
+- **[QUICK_START.md](QUICK_START.md)** - Guía de inicio en 5 minutos
+- **[Reports Guide](reports/README.md)** - Documentación de reportes y métricas
+
+### Archivos de Referencia
+- **[test_utils.js](test_utils.js)** - API del framework de testing
+- **[config.json](config.json)** - Configuración completa de tests
+- **[test_runner.html](test_runner.html)** - Interface principal de testing
+
 ## 📄 Licencia
 
 Esta suite de tests sigue la misma licencia MIT que el proyecto Citrino principal.
@@ -330,14 +341,25 @@ Esta suite de tests sigue la misma licencia MIT que el proyecto Citrino principa
 
 Para preguntas o problemas:
 
-1. Revisar este README
-2. Buscar issues similares en el repositorio
-3. Crear nuevo issue con:
+1. **Revisar QUICK_START.md** para solución rápida
+2. Revisar este README principal
+3. Buscar issues similares en el repositorio
+4. Crear nuevo issue con:
    - Navegador y versión
    - Pasos para reproducir
    - Screenshots si aplica
    - Consola errors
+   - URL del test específico
+
+### 🆘 Comandos de Debug Rápido
+```javascript
+// En consola del navegador
+localStorage.clear();           // Limpiar cache
+location.reload();              // Recargar página
+localStorage.setItem('debug', 'true'); // Activar debug mode
+```
 
 ---
 
 **Desarrollado para Citrino - Sistema de Recomendación Inmobiliaria**
+**Versión 1.0.0** | **Actualizado: 9 de Octubre 2025**
