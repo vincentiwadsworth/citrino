@@ -41,6 +41,7 @@
             padding: 2rem;
             padding-bottom: 140px; /* Espacio para barra de input */
             min-height: 400px;
+            scroll-behavior: smooth;
         }
 
         .chat-input-container {
@@ -176,7 +177,7 @@
         .chat-input {
             border-radius: 50px;
             border: 2px solid #e9ecef;
-            padding-right: 120px;
+            padding-right: 70px;
             resize: none;
             transition: all 0.3s ease;
         }
@@ -196,19 +197,32 @@
             height: 50px;
             min-width: 44px;
             min-height: 44px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
             border: none;
             color: white;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .send-button:hover {
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+        }
+
+        .send-button:active {
+            transform: translateY(-50%) scale(0.95);
         }
 
         .send-button:disabled {
             background: #6c757d;
             cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .send-button i {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
         .welcome-overlay {
@@ -400,30 +414,7 @@
             }
         }
 
-        .voice-button {
-            position: absolute;
-            right: 60px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            min-height: 44px;
-            background: #6c757d;
-            border: none;
-            color: white;
-            transition: all 0.3s ease;
-        }
 
-        .voice-button:hover {
-            background: #5a6268;
-        }
-
-        .voice-button.recording {
-            background: #dc3545;
-            animation: pulse 1s infinite;
-        }
 
         .chat-recommendations {
             display: grid;
@@ -622,9 +613,6 @@
                             placeholder="Describe lo que buscas..."
                             rows="1"
                             maxlength="500"></textarea>
-                        <button class="voice-button" id="voiceButton" onclick="toggleVoiceRecording()">
-                            <i class="bi bi-mic"></i>
-                        </button>
                         <button class="send-button" id="sendButton" onclick="sendMessage()">
                             <i class="bi bi-send"></i>
                         </button>
@@ -647,8 +635,7 @@
         let chatHistory = [];
         let currentProfile = null;
         let isProcessing = false;
-        let voiceRecognition = null;
-        let isRecording = false;
+
         let chatRecommendations = [];
         const demoChatRecommendations = [
             {
@@ -692,7 +679,6 @@
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             initializeChat();
-            initializeVoiceRecognition();
             loadChatHistory();
         });
 
@@ -728,37 +714,7 @@
             // Esto asegura una experiencia limpia en cada visita
         }
 
-        // Inicializar reconocimiento de voz
-        function initializeVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                voiceRecognition = new SpeechRecognition();
 
-                voiceRecognition.continuous = false;
-                voiceRecognition.interimResults = false;
-                voiceRecognition.lang = 'es-ES';
-
-                voiceRecognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('chatInput').value = transcript;
-                    document.getElementById('chatInput').dispatchEvent(new Event('input'));
-                    stopVoiceRecording();
-                };
-
-                voiceRecognition.onerror = function(event) {
-                    console.error('Error en reconocimiento de voz:', event.error);
-                    stopVoiceRecording();
-                    showToast('Error al reconocer voz. Intenta escribir tu mensaje.', 'error');
-                };
-
-                voiceRecognition.onend = function() {
-                    stopVoiceRecording();
-                };
-            } else {
-                // Ocultar botón de voz si no es compatible
-                document.getElementById('voiceButton').style.display = 'none';
-            }
-        }
 
         // Comenzar chat
         function startChat() {
@@ -1172,7 +1128,14 @@
             `;
 
             messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Scroll suave al final después de agregar el mensaje
+            setTimeout(() => {
+                messagesContainer.scrollTo({
+                    top: messagesContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
 
             // Mostrar notificación de debug si hay información de error
             if (message.errorDetails && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
@@ -1433,47 +1396,7 @@ function buildChatRecommendationCard(property) {
             }
         }
 
-        // Toggle grabación de voz
-        function toggleVoiceRecording() {
-            if (isRecording) {
-                stopVoiceRecording();
-            } else {
-                startVoiceRecording();
-            }
-        }
 
-        // Iniciar grabación de voz
-        function startVoiceRecording() {
-            if (!voiceRecognition) {
-                showToast('Tu navegador no soporta reconocimiento de voz', 'error');
-                return;
-            }
-
-            try {
-                voiceRecognition.start();
-                isRecording = true;
-                const voiceButton = document.getElementById('voiceButton');
-                voiceButton.classList.add('recording');
-                voiceButton.innerHTML = '<i class="bi bi-stop-circle"></i>';
-                updateStatus('processing', 'Escuchando...');
-            } catch (error) {
-                console.error('Error al iniciar grabación:', error);
-                showToast('Error al iniciar grabación de voz', 'error');
-            }
-        }
-
-        // Detener grabación de voz
-        function stopVoiceRecording() {
-            if (voiceRecognition && isRecording) {
-                voiceRecognition.stop();
-            }
-
-            isRecording = false;
-            const voiceButton = document.getElementById('voiceButton');
-            voiceButton.classList.remove('recording');
-            voiceButton.innerHTML = '<i class="bi bi-mic"></i>';
-                updateStatus('online', 'En línea · listo para cruzar información');
-        }
 
         // Utilidades
         function escapeHtml(text) {
