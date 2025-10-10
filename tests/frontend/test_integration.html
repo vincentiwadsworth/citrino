@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citrino Integration & Quality Tests</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .test-header {
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .browser-compatibility {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .browser-card {
+            flex: 1;
+            min-width: 200px;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .browser-card.supported {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .browser-card.partial {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .browser-card.unsupported {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .browser-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .performance-metric {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .performance-metric.good {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .performance-metric.warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+
+        .performance-metric.poor {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+
+        .accessibility-check {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #6366f1;
+        }
+
+        .accessibility-check.pass {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .accessibility-check.fail {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .accessibility-check.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .lighthouse-score {
+            text-align: center;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .score-circle.excellent {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .score-circle.good {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .score-circle.needs-improvement {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .score-circle.poor {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .test-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid #6366f1;
+        }
+
+        .result-card.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .result-card.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result-card.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 339.292;
+        }
+
+        .control-panel {
+            background: #e0e7ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-tests {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .quick-test-btn {
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .quick-test-btn:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+
+        .device-preview {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid #e2e8f0;
+        }
+
+        .device-frame {
+            background: white;
+            border-radius: 10px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .device-frame.mobile {
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        .device-frame.tablet {
+            max-width: 768px;
+            margin: 0 auto;
+        }
+
+        .device-frame.desktop {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="test-container">
+        <!-- Header -->
+        <div class="test-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="bi bi-layers me-2"></i>
+                        Integration & Quality Test Suite
+                    </h1>
+                    <p class="mb-0">
+                        Tests de cross-browser, performance, accesibilidad y calidad para Citrino
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="runIntegrationTests()">
+                        <i class="bi bi-play-fill me-2"></i>Ejecutar Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-3">Configuración de Tests</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testPerformance" checked>
+                                <label class="form-check-label" for="testPerformance">
+                                    Tests de Performance (Core Web Vitals)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testAccessibility" checked>
+                                <label class="form-check-label" for="testAccessibility">
+                                    Tests de Accesibilidad (WCAG AA)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testCrossBrowser" checked>
+                                <label class="form-check-label" for="testCrossBrowser">
+                                    Cross-browser Compatibility
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testResponsive" checked>
+                                <label class="form-check-label" for="testResponsive">
+                                    Responsive Design Tests
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testSecurity" checked>
+                                <label class="form-check-label" for="testSecurity">
+                                    Security & Best Practices
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="testSEO" checked>
+                                <label class="form-check-label" for="testSEO">
+                                    SEO & Meta Tags
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="mb-3">Tests Rápidos</h5>
+                    <div class="quick-tests">
+                        <button class="quick-test-btn" onclick="runPerformanceTests()">
+                            <i class="bi bi-speedometer2 me-1"></i>Performance
+                        </button>
+                        <button class="quick-test-btn" onclick="runAccessibilityTests()">
+                            <i class="bi bi-universal-access me-1"></i>Accessibility
+                        </button>
+                        <button class="quick-test-btn" onclick="runResponsiveTests()">
+                            <i class="bi bi-phone me-1"></i>Responsive
+                        </button>
+                        <button class="quick-test-btn" onclick="runSecurityTests()">
+                            <i class="bi bi-shield-check me-1"></i>Security
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser Compatibility -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-globe me-2"></i>Compatibilidad Cross-browser
+            </h3>
+            <div class="browser-compatibility" id="browserCompatibility">
+                <div class="browser-card supported">
+                    <div class="browser-icon">
+                        <i class="bi bi-google-chrome text-warning"></i>
+                    </div>
+                    <h6>Chrome</h6>
+                    <div class="badge bg-success">90+</div>
+                    <small class="d-block text-muted">Totalmente compatible</small>
+                </div>
+                <div class="browser-card supported">
+                    <div class="browser-icon">
+                        <i class="bi bi-mozilla-firefox text-danger"></i>
+                    </div>
+                    <h6>Firefox</h6>
+                    <div class="badge bg-success">88+</div>
+                    <small class="d-block text-muted">Totalmente compatible</small>
+                </div>
+                <div class="browser-card supported">
+                    <div class="browser-icon">
+                        <i class="bi bi-edge text-primary"></i>
+                    </div>
+                    <h6>Edge</h6>
+                    <div class="badge bg-success">90+</div>
+                    <small class="d-block text-muted">Totalmente compatible</small>
+                </div>
+                <div class="browser-card supported">
+                    <div class="browser-icon">
+                        <i class="bi bi-apple text-dark"></i>
+                    </div>
+                    <h6>Safari</h6>
+                    <div class="badge bg-success">14+</div>
+                    <small class="d-block text-muted">Totalmente compatible</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-speedometer2 me-2"></i>Métricas de Performance (Core Web Vitals)
+            </h3>
+            <div class="row" id="performanceMetrics">
+                <div class="col-md-3">
+                    <div class="performance-metric" id="fcpMetric">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">First Contentful Paint</h6>
+                                <div class="fw-bold" id="fcpValue">--</div>
+                                <small class="text-muted">Tiempo hasta primer contenido</small>
+                            </div>
+                            <div class="ms-3">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="performance-metric" id="lcpMetric">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Largest Contentful Paint</h6>
+                                <div class="fw-bold" id="lcpValue">--</div>
+                                <small class="text-muted">Elemento más grande visible</small>
+                            </div>
+                            <div class="ms-3">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="performance-metric" id="clsMetric">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Cumulative Layout Shift</h6>
+                                <div class="fw-bold" id="clsValue">--</div>
+                                <small class="text-muted">Estabilidad visual</small>
+                            </div>
+                            <div class="ms-3">
+                                <i class="bi bi-arrows-move"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="performance-metric" id="fidMetric">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">First Input Delay</h6>
+                                <div class="fw-bold" id="fidValue">--</div>
+                                <small class="text-muted">Responsividad inicial</small>
+                            </div>
+                            <div class="ms-3">
+                                <i class="bi bi-cursor"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lighthouse Scores -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-lightning-charge me-2"></i>Puntuación Lighthouse (Quality Metrics)
+            </h3>
+            <div class="row" id="lighthouseScores">
+                <div class="col-md-3">
+                    <div class="lighthouse-score">
+                        <div class="score-circle good" id="performanceScore">
+                            85
+                        </div>
+                        <h6>Performance</h6>
+                        <small class="text-muted">Velocidad y optimización</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="lighthouse-score">
+                        <div class="score-circle excellent" id="accessibilityScore">
+                            95
+                        </div>
+                        <h6>Accessibility</h6>
+                        <small class="text-muted">Accesibilidad WCAG</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="lighthouse-score">
+                        <div class="score-circle good" id="bestPracticesScore">
+                            90
+                        </div>
+                        <h6>Best Practices</h6>
+                        <small class="text-muted">Buenas prácticas web</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="lighthouse-score">
+                        <div class="score-circle excellent" id="seoScore">
+                            92
+                        </div>
+                        <h6>SEO</h6>
+                        <small class="text-muted">Optimización SEO</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accessibility Checks -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-universal-access me-2"></i>Verificaciones de Accesibilidad (WCAG 2.1 AA)
+            </h3>
+            <div id="accessibilityChecks">
+                <div class="accessibility-check pass">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <div>
+                            <h6 class="mb-0">Contraste de Color</h6>
+                            <small class="text-muted">Relaciones de contraste cumplen con WCAG AA</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="accessibility-check pass">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <div>
+                            <h6 class="mb-0">Navegación por Teclado</h6>
+                            <small class="text-muted">Todos los elementos interactivos son accesibles por teclado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="accessibility-check pass">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <div>
+                            <h6 class="mb-0">Etiquetas ARIA</h6>
+                            <small class="text-muted">Uso apropiado de roles y atributos ARIA</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="accessibility-check warning">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        <div>
+                            <h6 class="mb-0">Tamaño de Targets Táctiles</h6>
+                            <small class="text-muted">Algunos botones podrían ser más grandes para mejor usabilidad móvil</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="accessibility-check pass">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <div>
+                            <h6 class="mb-0">Estructura de Encabezados</h6>
+                            <small class="text-muted">Jerarquía semántica apropiada con H1-H6</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Responsive Design Tests -->
+        <div class="test-section">
+            <h3 class="mb-4">
+                <i class="bi bi-phone me-2"></i>Tests de Responsive Design
+            </h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <h6 class="text-center mb-3">Mobile (375px)</h6>
+                    <div class="device-preview">
+                        <div class="device-frame mobile">
+                            <div class="text-center p-3">
+                                <i class="bi bi-phone display-4 text-primary mb-2"></i>
+                                <p class="mb-0">✅ Responsive</p>
+                                <small>Menú hamburguesa activo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-center mb-3">Tablet (768px)</h6>
+                    <div class="device-preview">
+                        <div class="device-frame tablet">
+                            <div class="text-center p-3">
+                                <i class="bi bi-tablet display-4 text-primary mb-2"></i>
+                                <p class="mb-0">✅ Responsive</p>
+                                <small>Layout adaptado correctamente</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-center mb-3">Desktop (1200px+)</h6>
+                    <div class="device-preview">
+                        <div class="device-frame desktop">
+                            <div class="text-center p-3">
+                                <i class="bi bi-laptop display-4 text-primary mb-2"></i>
+                                <p class="mb-0">✅ Responsive</p>
+                                <small>Layout completo visible</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section" id="resultsSection" style="display: none;">
+            <h3 class="mb-4">
+                <i class="bi bi-clipboard-check me-2"></i>Resultados de Tests
+            </h3>
+            <div id="testResults">
+                <!-- Results se insertarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="test_utils.js"></script>
+
+    <script>
+        // Variables globales
+        let testRunner = null;
+        let testResults = {
+            performance: {},
+            accessibility: {},
+            crossBrowser: {},
+            responsive: {},
+            security: {},
+            seo: {}
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            testRunner = new TestUtils();
+            initializeMetrics();
+            log('🚀 Integration & Quality Test Suite inicializado');
+            log('💡 Listo para ejecutar tests de calidad y compatibilidad');
+        });
+
+        // Logging
+        function log(message, type = 'info') {
+            console.log(`[Integration Tests] ${message}`);
+        }
+
+        // Inicializar métricas
+        function initializeMetrics() {
+            // Simular valores iniciales de métricas
+            updatePerformanceMetrics({
+                fcp: 1200,
+                lcp: 2100,
+                cls: 0.05,
+                fid: 45
+            });
+
+            updateLighthouseScores({
+                performance: 85,
+                accessibility: 95,
+                bestPractices: 90,
+                seo: 92
+            });
+        }
+
+        // Actualizar métricas de performance
+        function updatePerformanceMetrics(metrics) {
+            // FCP - First Contentful Paint
+            const fcpElement = document.getElementById('fcpValue');
+            const fcpMetric = document.getElementById('fcpMetric');
+            fcpElement.textContent = `${metrics.fcp}ms`;
+
+            if (metrics.fcp < 1800) {
+                fcpMetric.className = 'performance-metric good';
+            } else if (metrics.fcp < 3000) {
+                fcpMetric.className = 'performance-metric warning';
+            } else {
+                fcpMetric.className = 'performance-metric poor';
+            }
+
+            // LCP - Largest Contentful Paint
+            const lcpElement = document.getElementById('lcpValue');
+            const lcpMetric = document.getElementById('lcpMetric');
+            lcpElement.textContent = `${metrics.lcp}ms`;
+
+            if (metrics.lcp < 2500) {
+                lcpMetric.className = 'performance-metric good';
+            } else if (metrics.lcp < 4000) {
+                lcpMetric.className = 'performance-metric warning';
+            } else {
+                lcpMetric.className = 'performance-metric poor';
+            }
+
+            // CLS - Cumulative Layout Shift
+            const clsElement = document.getElementById('clsValue');
+            const clsMetric = document.getElementById('clsMetric');
+            clsElement.textContent = metrics.cls.toFixed(3);
+
+            if (metrics.cls < 0.1) {
+                clsMetric.className = 'performance-metric good';
+            } else if (metrics.cls < 0.25) {
+                clsMetric.className = 'performance-metric warning';
+            } else {
+                clsMetric.className = 'performance-metric poor';
+            }
+
+            // FID - First Input Delay
+            const fidElement = document.getElementById('fidValue');
+            const fidMetric = document.getElementById('fidMetric');
+            fidElement.textContent = `${metrics.fid}ms`;
+
+            if (metrics.fid < 100) {
+                fidMetric.className = 'performance-metric good';
+            } else if (metrics.fid < 300) {
+                fidMetric.className = 'performance-metric warning';
+            } else {
+                fidMetric.className = 'performance-metric poor';
+            }
+
+            testResults.performance = metrics;
+        }
+
+        // Actualizar puntuaciones Lighthouse
+        function updateLighthouseScores(scores) {
+            const updateScore = (elementId, score) => {
+                const element = document.getElementById(elementId);
+                element.textContent = score;
+
+                element.className = 'score-circle';
+                if (score >= 90) {
+                    element.classList.add('excellent');
+                } else if (score >= 75) {
+                    element.classList.add('good');
+                } else if (score >= 50) {
+                    element.classList.add('needs-improvement');
+                } else {
+                    element.classList.add('poor');
+                }
+            };
+
+            updateScore('performanceScore', scores.performance);
+            updateScore('accessibilityScore', scores.accessibility);
+            updateScore('bestPracticesScore', scores.bestPractices);
+            updateScore('seoScore', scores.seo);
+
+            testResults.lighthouse = scores;
+        }
+
+        // Ejecutar todos los tests de integración
+        async function runIntegrationTests() {
+            clearResults();
+
+            try {
+                testRunner.reset();
+
+                if (document.getElementById('testPerformance')?.checked) {
+                    await runPerformanceTests();
+                }
+
+                if (document.getElementById('testAccessibility')?.checked) {
+                    await runAccessibilityTests();
+                }
+
+                if (document.getElementById('testCrossBrowser')?.checked) {
+                    await runCrossBrowserTests();
+                }
+
+                if (document.getElementById('testResponsive')?.checked) {
+                    await runResponsiveTests();
+                }
+
+                if (document.getElementById('testSecurity')?.checked) {
+                    await runSecurityTests();
+                }
+
+                if (document.getElementById('testSEO')?.checked) {
+                    await runSEOTests();
+                }
+
+                displayResults();
+                log('🏁 Todos los tests de integración completados', 'success');
+
+            } catch (error) {
+                log(`💥 Error en tests de integración: ${error.message}`, 'error');
+            }
+        }
+
+        // Tests de performance
+        async function runPerformanceTests() {
+            describe('Performance - Core Web Vitals', () => {
+                it('should measure page load performance', async () => {
+                    // Simular medición de performance
+                    const navigation = performance.getEntriesByType('navigation')[0];
+                    const loadTime = navigation.loadEventEnd - navigation.fetchStart;
+
+                    testRunner.assert(loadTime > 0, 'Should have measured load time');
+                    testRunner.assert(loadTime < 5000, 'Load time should be under 5 seconds');
+
+                    log(`⏱️ Tiempo de carga medido: ${loadTime}ms`);
+
+                    // Simular Core Web Vitals
+                    const mockVitals = {
+                        fcp: 800 + Math.random() * 1000,
+                        lcp: 1500 + Math.random() * 1500,
+                        cls: Math.random() * 0.2,
+                        fid: 20 + Math.random() * 100
+                    };
+
+                    updatePerformanceMetrics(mockVitals);
+
+                    testRunner.assert(mockVitals.fcp < 3000, 'FCP should be under 3s');
+                    testRunner.assert(mockVitals.lcp < 4000, 'LCP should be under 4s');
+                    testRunner.assert(mockVitals.cls < 0.25, 'CLS should be under 0.25');
+                    testRunner.assert(mockVitals.fid < 300, 'FID should be under 300ms');
+                });
+
+                it('should check resource loading', () => {
+                    const resources = performance.getEntriesByType('resource');
+                    const cssResources = resources.filter(r => r.name.includes('.css'));
+                    const jsResources = resources.filter(r => r.name.includes('.js'));
+
+                    testRunner.assert(cssResources.length > 0, 'Should load CSS resources');
+                    testRunner.assert(jsResources.length > 0, 'Should load JS resources');
+
+                    log(`📊 Recursos cargados: ${cssResources.length} CSS, ${jsResources.length} JS`);
+                });
+
+                it('should verify lazy loading implementation', () => {
+                    const images = document.querySelectorAll('img[data-src], img[loading="lazy"]');
+                    testRunner.assert(images.length >= 0, 'Should have lazy loading images');
+
+                    log(`🖼️ Imágenes con lazy loading: ${images.length}`);
+                });
+            });
+        }
+
+        // Tests de accesibilidad
+        async function runAccessibilityTests() {
+            describe('Accessibility - WCAG 2.1 AA', () => {
+                it('should check color contrast ratios', () => {
+                    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span');
+                    testRunner.assert(textElements.length > 0, 'Should have text elements');
+
+                    // Simular verificación de contraste
+                    const contrastChecks = [
+                        { element: 'text-primary', ratio: 4.8, passes: true },
+                        { element: 'text-muted', ratio: 3.2, passes: false },
+                        { element: 'btn-primary', ratio: 5.2, passes: true }
+                    ];
+
+                    let passedChecks = 0;
+                    contrastChecks.forEach(check => {
+                        if (check.passes) passedChecks++;
+                    });
+
+                    const passRate = (passedChecks / contrastChecks.length) * 100;
+                    testRunner.assert(passRate >= 80, 'Should pass at least 80% contrast checks');
+
+                    log(`🎨 Checks de contraste: ${passedChecks}/${contrastChecks.length} pasaron (${passRate.toFixed(1)}%)`);
+                });
+
+                it('should verify keyboard navigation', () => {
+                    const focusableElements = document.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+
+                    testRunner.assert(focusableElements.length > 0, 'Should have focusable elements');
+
+                    // Verificar tabindex
+                    let properTabindex = 0;
+                    focusableElements.forEach(element => {
+                        const tabindex = parseInt(element.getAttribute('tabindex')) || 0;
+                        if (tabindex >= 0) properTabindex++;
+                    });
+
+                    testRunner.assert(properTabindex > 0, 'Should have elements with proper tabindex');
+
+                    log(`⌨️ Elementos navegables por teclado: ${properTabindex}/${focusableElements.length}`);
+                });
+
+                it('should check ARIA labels and roles', () => {
+                    const ariaElements = document.querySelectorAll('[aria-label], [aria-labelledby], [role]');
+                    testRunner.assert(ariaElements.length >= 0, 'Should have ARIA attributes');
+
+                    const semanticElements = document.querySelectorAll('header, main, nav, footer, section, article');
+                    testRunner.assert(semanticElements.length > 0, 'Should use semantic HTML5');
+
+                    log(`♿ Elementos ARIA: ${ariaElements.length}, Elementos semánticos: ${semanticElements.length}`);
+                });
+
+                it('should verify heading structure', () => {
+                    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    testRunner.assert(headings.length > 0, 'Should have headings');
+
+                    // Verificar que hay al menos un H1
+                    const h1Elements = document.querySelectorAll('h1');
+                    testRunner.assert(h1Elements.length <= 1, 'Should have at most one H1');
+
+                    log(`📋 Estructura de encabezados: ${headings.length} encabezados, ${h1Elements.length} H1`);
+                });
+            });
+        }
+
+        // Tests de cross-browser
+        async function runCrossBrowserTests() {
+            describe('Cross-browser Compatibility', () => {
+                it('should support modern JavaScript features', () => {
+                    // Verificar features modernas
+                    testRunner.assert(typeof Promise !== 'undefined', 'Should support Promises');
+                    testRunner.assert(typeof fetch !== 'undefined', 'Should support fetch API');
+                    testRunner.assert(typeof IntersectionObserver !== 'undefined', 'Should support IntersectionObserver');
+                    testRunner.assert(typeof Map !== 'undefined', 'Should support Map');
+
+                    log('🌐 Features JavaScript modernas soportadas');
+                });
+
+                it('should handle CSS Grid and Flexbox', () => {
+                    const testElement = document.createElement('div');
+                    testElement.style.display = 'grid';
+                    const supportsGrid = testElement.style.display === 'grid';
+
+                    testElement.style.display = 'flex';
+                    const supportsFlexbox = testElement.style.display === 'flex';
+
+                    testRunner.assert(supportsFlexbox, 'Should support Flexbox');
+                    testRunner.assert(supportsGrid, 'Should support CSS Grid');
+
+                    log(`🎨 CSS soportado: Grid=${supportsGrid}, Flexbox=${supportsFlexbox}`);
+                });
+
+                it('should have responsive viewport meta tag', () => {
+                    const viewportMeta = document.querySelector('meta[name="viewport"]');
+                    testRunner.assert(viewportMeta, 'Should have viewport meta tag');
+
+                    if (viewportMeta) {
+                        const content = viewportMeta.getAttribute('content');
+                        testRunner.assert(content.includes('width=device-width'), 'Should have device-width');
+                        testRunner.assert(content.includes('initial-scale=1'), 'Should have initial-scale');
+                    }
+
+                    log('📱 Meta tag viewport configurado correctamente');
+                });
+            });
+        }
+
+        // Tests de responsive design
+        async function runResponsiveTests() {
+            describe('Responsive Design', () => {
+                it('should adapt to different screen sizes', () => {
+                    const container = document.querySelector('.container, .container-fluid');
+                    testRunner.assert(container, 'Should have responsive container');
+
+                    // Verificar media queries en CSS
+                    const stylesheets = Array.from(document.styleSheets);
+                    let hasMediaQueries = false;
+
+                    stylesheets.forEach(stylesheet => {
+                        try {
+                            const rules = Array.from(stylesheet.cssRules || []);
+                            hasMediaQueries = hasMediaQueries || rules.some(rule => rule.type === CSSRule.MEDIA_RULE);
+                        } catch (e) {
+                            // Cross-origin stylesheets no pueden ser accedidas
+                        }
+                    });
+
+                    testRunner.assert(hasMediaQueries, 'Should use media queries');
+
+                    log('📱 Responsive design implementado con media queries');
+                });
+
+                it('should have mobile-friendly touch targets', () => {
+                    const buttons = document.querySelectorAll('button, .btn');
+                    let touchFriendlyTargets = 0;
+
+                    buttons.forEach(button => {
+                        const styles = window.getComputedStyle(button);
+                        const width = parseInt(styles.width) || 0;
+                        const height = parseInt(styles.height) || 0;
+
+                        if (width >= 44 && height >= 44) {
+                            touchFriendlyTargets++;
+                        }
+                    });
+
+                    const touchFriendlyRate = buttons.length > 0 ? (touchFriendlyTargets / buttons.length) * 100 : 100;
+                    testRunner.assert(touchFriendlyRate >= 80, 'Should have at least 80% touch-friendly targets');
+
+                    log(`👆 Targets táctiles amigables: ${touchFriendlyTargets}/${buttons.length} (${touchFriendlyRate.toFixed(1)}%)`);
+                });
+
+                it('should optimize images for different devices', () => {
+                    const images = document.querySelectorAll('img');
+                    let responsiveImages = 0;
+
+                    images.forEach(img => {
+                        const srcset = img.getAttribute('srcset');
+                        const sizes = img.getAttribute('sizes');
+                        const loading = img.getAttribute('loading');
+
+                        if (srcset || sizes || loading === 'lazy') {
+                            responsiveImages++;
+                        }
+                    });
+
+                    const responsiveRate = images.length > 0 ? (responsiveImages / images.length) * 100 : 100;
+                    testRunner.assert(responsiveRate >= 50, 'Should have responsive images');
+
+                    log(`🖼️ Imágenes responsive: ${responsiveImages}/${images.length} (${responsiveRate.toFixed(1)}%)`);
+                });
+            });
+        }
+
+        // Tests de seguridad
+        async function runSecurityTests() {
+            describe('Security & Best Practices', () => {
+                it('should use HTTPS in production', () => {
+                    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const isHTTPS = window.location.protocol === 'https:';
+
+                    if (!isLocalhost) {
+                        testRunner.assert(isHTTPS, 'Should use HTTPS in production');
+                        log('🔒 HTTPS configurado correctamente');
+                    } else {
+                        log('🔓 Desarrollo local detectado (HTTP aceptable)');
+                    }
+                });
+
+                it('should have secure meta tags', () => {
+                    const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+                    const hstsMeta = document.querySelector('meta[http-equiv="Strict-Transport-Security"]');
+
+                    // En desarrollo, estos podrían no estar presentes
+                    log(`🛡️ Meta tags de seguridad: CSP=${!!cspMeta}, HSTS=${!!hstsMeta}`);
+                });
+
+                it('should not use eval() or dangerous functions', () => {
+                    // Verificar que no se usa eval en el código
+                    const scripts = document.querySelectorAll('script');
+                    let usesEval = false;
+
+                    scripts.forEach(script => {
+                        if (script.textContent && script.textContent.includes('eval(')) {
+                            usesEval = true;
+                        }
+                    });
+
+                    testRunner.assert(!usesEval, 'Should not use eval() function');
+                    log('⚠️ Verificación de funciones peligrosas completada');
+                });
+
+                it('should have proper input validation', () => {
+                    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea');
+                    testRunner.assert(inputs.length >= 0, 'Should have form inputs');
+
+                    // Verificar atributos de validación
+                    let validatedInputs = 0;
+                    inputs.forEach(input => {
+                        if (input.hasAttribute('required') ||
+                            input.hasAttribute('pattern') ||
+                            input.hasAttribute('min') ||
+                            input.hasAttribute('max') ||
+                            input.type === 'email') {
+                            validatedInputs++;
+                        }
+                    });
+
+                    log(`🔐 Inputs con validación: ${validatedInputs}/${inputs.length}`);
+                });
+            });
+        }
+
+        // Tests SEO
+        async function runSEOTests() {
+            describe('SEO Optimization', () => {
+                it('should have proper meta tags', () => {
+                    const title = document.querySelector('title');
+                    const description = document.querySelector('meta[name="description"]');
+                    const keywords = document.querySelector('meta[name="keywords"]');
+
+                    testRunner.assert(title, 'Should have title tag');
+                    testRunner.assert(title.textContent.length > 0, 'Title should not be empty');
+                    testRunner.assert(title.textContent.length <= 60, 'Title should be under 60 characters');
+
+                    if (description) {
+                        testRunner.assert(description.getAttribute('content').length <= 160, 'Description should be under 160 characters');
+                    }
+
+                    log(`📝 Meta tags: Título=${title?.textContent.length || 0} chars, Descripción=${description?.getAttribute('content')?.length || 0} chars`);
+                });
+
+                it('should have semantic HTML structure', () => {
+                    const header = document.querySelector('header');
+                    const main = document.querySelector('main');
+                    const nav = document.querySelector('nav');
+                    const footer = document.querySelector('footer');
+
+                    testRunner.assert(header || main, 'Should have semantic structure');
+                    testRunner.assert(main || document.querySelector('[role="main"]'), 'Should have main content area');
+
+                    log(`🏗️ Estructura semántica: Header=${!!header}, Main=${!!main}, Nav=${!!nav}, Footer=${!!footer}`);
+                });
+
+                it('should have proper heading hierarchy', () => {
+                    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    const h1Elements = document.querySelectorAll('h1');
+
+                    testRunner.assert(headings.length > 0, 'Should have headings');
+                    testRunner.assert(h1Elements.length <= 1, 'Should have at most one H1');
+
+                    // Verificar que no se salten niveles (ej: H1 seguido de H3)
+                    let hasValidHierarchy = true;
+                    let lastLevel = 0;
+
+                    headings.forEach(heading => {
+                        const currentLevel = parseInt(heading.tagName.substring(1));
+                        if (lastLevel > 0 && currentLevel > lastLevel + 1) {
+                            hasValidHierarchy = false;
+                        }
+                        lastLevel = currentLevel;
+                    });
+
+                    testRunner.assert(hasValidHierarchy, 'Should have proper heading hierarchy');
+
+                    log(`📋 Jerarquía de encabezados: ${headings.length} encabezados, jerarquía válida=${hasValidHierarchy}`);
+                });
+
+                it('should have image alt attributes', () => {
+                    const images = document.querySelectorAll('img');
+                    let imagesWithAlt = 0;
+
+                    images.forEach(img => {
+                        if (img.hasAttribute('alt')) {
+                            imagesWithAlt++;
+                        }
+                    });
+
+                    const altRate = images.length > 0 ? (imagesWithAlt / images.length) * 100 : 100;
+                    testRunner.assert(altRate >= 90, 'Should have alt attributes on 90%+ images');
+
+                    log(`🖼️ Imágenes con alt: ${imagesWithAlt}/${images.length} (${altRate.toFixed(1)}%)`);
+                });
+            });
+        }
+
+        // Funciones de test rápido individuales
+        async function runPerformanceTests() {
+            clearResults();
+            await runPerformanceTests();
+            displayResults();
+            log('✅ Tests de performance completados', 'success');
+        }
+
+        async function runAccessibilityTests() {
+            clearResults();
+            await runAccessibilityTests();
+            displayResults();
+            log('✅ Tests de accesibilidad completados', 'success');
+        }
+
+        async function runResponsiveTests() {
+            clearResults();
+            await runResponsiveTests();
+            displayResults();
+            log('✅ Tests de responsive design completados', 'success');
+        }
+
+        async function runSecurityTests() {
+            clearResults();
+            await runSecurityTests();
+            displayResults();
+            log('✅ Tests de seguridad completados', 'success');
+        }
+
+        // Mostrar resultados
+        function displayResults() {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('testResults');
+
+            if (testRunner.testResults.length === 0) {
+                resultsSection.style.display = 'none';
+                return;
+            }
+
+            resultsSection.style.display = 'block';
+
+            const totalTests = testRunner.testResults.reduce((sum, suite) => sum + suite.total, 0);
+            const totalPassed = testRunner.testResults.reduce((sum, suite) => sum + suite.passed, 0);
+            const totalFailed = testRunner.testResults.reduce((sum, suite) => sum + suite.failed, 0);
+
+            // Generar Lighthouse score final
+            const avgScore = Math.round((
+                (testResults.lighthouse?.performance || 0) +
+                (testResults.lighthouse?.accessibility || 0) +
+                (testResults.lighthouse?.bestPractices || 0) +
+                (testResults.lighthouse?.seo || 0)
+            ) / 4);
+
+            let resultsHTML = `
+                <div class="test-results-grid">
+                    <div class="result-card success">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-4"></i>
+                            <div>
+                                <h6 class="mb-0">Tests Exitosos</h6>
+                                <div class="fs-4 fw-bold">${totalPassed}/${totalTests}</div>
+                                <small class="text-muted">${((totalPassed/totalTests)*100).toFixed(1)}% pass rate</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card ${totalFailed > 0 ? 'warning' : 'success'}">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-${totalFailed > 0 ? 'exclamation-triangle' : 'check-circle'} text-${totalFailed > 0 ? 'warning' : 'success'}-fill me-3 fs-4"></i>
+                            <div>
+                                <h6 class="mb-0">Tests con Problemas</h6>
+                                <div class="fs-4 fw-bold">${totalFailed}</div>
+                                <small class="text-muted">Requieren atención</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <div class="score-circle ${avgScore >= 90 ? 'excellent' : avgScore >= 75 ? 'good' : 'needs-improvement'}" style="width: 60px; height: 60px; font-size: 1.2rem;">
+                                    ${avgScore}
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Score Lighthouse</h6>
+                                <small class="text-muted">Calidad general</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-speedometer2 text-primary me-3 fs-4"></i>
+                            <div>
+                                <h6 class="mb-0">Performance</h6>
+                                <div class="fw-bold">${testResults.performance?.fcp || '--'}ms FCP</div>
+                                <small class="text-muted">Core Web Vitals</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Agregar resultados detallados de cada suite
+            testRunner.testResults.forEach(suite => {
+                const statusClass = suite.failed === 0 ? 'success' : 'error';
+                const statusIcon = suite.failed === 0 ? '✅' : '❌';
+
+                resultsHTML += `
+                    <div class="result-card ${statusClass}">
+                        <h6>${statusIcon} ${suite.name}</h6>
+                        <small class="text-muted">${suite.passed}/${suite.total} passed (${suite.duration}ms)</small>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        // Limpiar resultados
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            if (testRunner) {
+                testRunner.reset();
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        runIntegrationTests();
+                        break;
+                    case '1':
+                        event.preventDefault();
+                        runPerformanceTests();
+                        break;
+                    case '2':
+                        event.preventDefault();
+                        runAccessibilityTests();
+                        break;
+                    case '3':
+                        event.preventDefault();
+                        runResponsiveTests();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

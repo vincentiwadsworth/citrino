@@ -481,9 +481,76 @@
             logToConsole('✅ Tests de Citrino Chat completados');
         }
 
-        // Tests de integración (placeholder)
+        // Tests de integración
         async function runIntegrationTests() {
-            logToConsole('🔄 Integration tests - Implementación pendiente');
+            describe('Integration - Cross Browser & Quality', () => {
+                it('should test browser compatibility', () => {
+                    const userAgent = navigator.userAgent;
+                    const supportsModernFeatures = (
+                        typeof Promise !== 'undefined' &&
+                        typeof fetch !== 'undefined' &&
+                        typeof IntersectionObserver !== 'undefined'
+                    );
+
+                    testRunner.assert(supportsModernFeatures, 'Browser should support modern features');
+
+                    // Detectar browser
+                    const isChrome = userAgent.includes('Chrome');
+                    const isFirefox = userAgent.includes('Firefox');
+                    const isSafari = userAgent.includes('Safari') && !userAgent.includes('Chrome');
+                    const isEdge = userAgent.includes('Edge');
+
+                    logToConsole(`✅ Browser detectado: ${isChrome ? 'Chrome' : isFirefox ? 'Firefox' : isSafari ? 'Safari' : isEdge ? 'Edge' : 'Otro'}`);
+                });
+
+                it('should test performance metrics', () => {
+                    const navigation = performance.getEntriesByType('navigation')[0];
+                    const loadTime = navigation.loadEventEnd - navigation.fetchStart;
+
+                    testRunner.assert(loadTime > 0, 'Should have measured load time');
+                    testRunner.assert(loadTime < 10000, 'Load time should be reasonable');
+
+                    logToConsole(`⏱️ Performance: ${loadTime}ms load time`);
+                });
+
+                it('should test accessibility basics', () => {
+                    const focusableElements = document.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+
+                    testRunner.assert(focusableElements.length > 0, 'Should have focusable elements');
+
+                    const hasTitle = document.querySelector('title');
+                    testRunner.assert(hasTitle, 'Should have page title');
+
+                    logToConsole(`♿ Accessibility: ${focusableElements.length} focusable elements, title: ${!!hasTitle}`);
+                });
+
+                it('should test responsive design', () => {
+                    const viewportMeta = document.querySelector('meta[name="viewport"]');
+                    testRunner.assert(viewportMeta, 'Should have viewport meta tag');
+
+                    if (viewportMeta) {
+                        const content = viewportMeta.getAttribute('content');
+                        testRunner.assert(content.includes('width=device-width'), 'Should be mobile-friendly');
+                    }
+
+                    logToConsole(`📱 Responsive: ${!!viewportMeta} viewport meta tag`);
+                });
+
+                it('should test security basics', () => {
+                    const isLocalhost = window.location.hostname === 'localhost';
+                    const isHTTPS = window.location.protocol === 'https:';
+
+                    if (!isLocalhost) {
+                        testRunner.assert(isHTTPS, 'Should use HTTPS in production');
+                    }
+
+                    logToConsole(`🔒 Security: HTTPS=${isHTTPS}, Localhost=${isLocalhost}`);
+                });
+            });
+
+            logToConsole('✅ Tests de integración completados');
         }
 
         // Mostrar resultados
