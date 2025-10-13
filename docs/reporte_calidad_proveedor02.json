@@ -1,0 +1,131 @@
+{
+  "resumen_ejecutivo": {
+    "total_propiedades": 1212,
+    "con_descripcion": 1202,
+    "campos_criticos_con_problemas": 1,
+    "prioridad_mejora": "media",
+    "potencial_llm": "muy alto"
+  },
+  "calidad_por_campo": {
+    "precio": {
+      "total": 1212,
+      "con_dato": 770,
+      "sin_dato": 442,
+      "porcentaje_completitud": 63.53135313531353,
+      "severidad": "medio"
+    },
+    "zona": {
+      "total": 1212,
+      "con_dato": 1047,
+      "sin_dato": 165,
+      "porcentaje_completitud": 86.38613861386139,
+      "severidad": "bajo"
+    },
+    "superficie": {
+      "total": 1212,
+      "con_dato": 951,
+      "sin_dato": 261,
+      "porcentaje_completitud": 78.46534653465346,
+      "severidad": "medio"
+    },
+    "habitaciones": {
+      "total": 1212,
+      "con_dato": 701,
+      "sin_dato": 511,
+      "porcentaje_completitud": 57.83828382838284,
+      "severidad": "alto"
+    },
+    "banos": {
+      "total": 1212,
+      "con_dato": 733,
+      "sin_dato": 479,
+      "porcentaje_completitud": 60.47854785478548,
+      "severidad": "medio"
+    },
+    "tipo_propiedad": {
+      "total": 1212,
+      "con_dato": 1211,
+      "sin_dato": 1,
+      "porcentaje_completitud": 99.91749174917491,
+      "severidad": "bajo"
+    },
+    "direccion": {
+      "total": 1212,
+      "con_dato": 0,
+      "sin_dato": 1212,
+      "porcentaje_completitud": 0.0,
+      "severidad": "crítico"
+    },
+    "latitud": {
+      "total": 1212,
+      "con_dato": 1210,
+      "sin_dato": 2,
+      "porcentaje_completitud": 99.83498349834984,
+      "severidad": "bajo"
+    },
+    "longitud": {
+      "total": 1212,
+      "con_dato": 1208,
+      "sin_dato": 4,
+      "porcentaje_completitud": 99.66996699669967,
+      "severidad": "bajo"
+    }
+  },
+  "potencial_mejora_llm": {
+    "total_propiedades": 1212,
+    "con_descripcion": 1202,
+    "sin_descripcion": 10,
+    "campos_mejorables": {
+      "precio": {
+        "propiedades_mejorables": 432,
+        "porcentaje_mejorable": 35.64356435643564,
+        "potencial_alto": true,
+        "impacto_estimado": "muy alto"
+      },
+      "zona": {
+        "propiedades_mejorables": 155,
+        "porcentaje_mejorable": 12.788778877887788,
+        "potencial_alto": true,
+        "impacto_estimado": "muy alto"
+      },
+      "superficie": {
+        "propiedades_mejorables": 251,
+        "porcentaje_mejorable": 20.70957095709571,
+        "potencial_alto": true,
+        "impacto_estimado": "muy alto"
+      },
+      "habitaciones": {
+        "propiedades_mejorables": 501,
+        "porcentaje_mejorable": 41.336633663366335,
+        "potencial_alto": true,
+        "impacto_estimado": "muy alto"
+      },
+      "banos": {
+        "propiedades_mejorables": 469,
+        "porcentaje_mejorable": 38.696369636963695,
+        "potencial_alto": true,
+        "impacto_estimado": "muy alto"
+      },
+      "tipo_propiedad": {
+        "propiedades_mejorables": 1,
+        "porcentaje_mejorable": 0.08250825082508251,
+        "potencial_alto": false,
+        "impacto_estimado": "bajo"
+      }
+    }
+  },
+  "ejemplos_problematicos": {
+    "sin_datos_clave": [],
+    "solo_descripcion": [],
+    "datos_parciales": []
+  },
+  "recomendaciones": [
+    "Prioridad CRÍTICA: Mejorar direccion (solo 0.0% completitud)",
+    "ALTO IMPACTO: precio tiene potencial de mejorar 432 propiedades via LLM",
+    "ALTO IMPACTO: zona tiene potencial de mejorar 155 propiedades via LLM",
+    "ALTO IMPACTO: superficie tiene potencial de mejorar 251 propiedades via LLM",
+    "ALTO IMPACTO: habitaciones tiene potencial de mejorar 501 propiedades via LLM",
+    "ALTO IMPACTO: banos tiene potencial de mejorar 469 propiedades via LLM",
+    "Implementar sistema híbrido Regex + LLM para extracción masiva de datos"
+  ]
+}
