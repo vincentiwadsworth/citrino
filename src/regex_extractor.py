@@ -19,27 +19,41 @@ class RegexExtractor:
     def __init__(self):
         """Inicializa los patrones regex para extracción de datos."""
         
-        # Patrones de precio
+        # Patrones de precio (mejorados para Proveedor 02)
         self.precio_patterns = [
-            # $us 400.000.- o $us 400,000
+            # $us 400.000.- o $us 400,000 (formato boliviano común)
             r'(?:precio[:\s]+)?\$\s*us\s*[\s]*([\d,.]+)',
-            # $1,757,200 o $1.757.200
+            # $1,757,200 o $1.757.200 (formato estándar)
             r'(?:precio[:\s]+)?\$\s*([\d,.]+)',
-            # Bs. 550.- o 660 Bs o Bs 700
+            # Bs. 550.- o 660 Bs o Bs 700 (moneda boliviana)
             r'(?:precio[:\s]+)?(?:Bs\.?|bs\.?)\s*([\d,.]+)|(?:precio[:\s]+)?([\d,.]+)\s*(?:Bs\.?|bs\.?)',
+            # us$ 450000 o us$ 450.000 (formato variante)
+            r'(?:precio[:\s]+)?us\$\s*([\d,.]+)',
+            # 450.000us o 450,000 us (sin espacio)
+            r'([\d,.]+)\s*us',
+            # 500000 bs o 500.000bs (formato compacto)
+            r'([\d,.]+)\s*(?:bs|bolivianos?)',
+            # venta en 350000 (implícito que es precio)
+            r'(?:venta\s+en|precio[:\s]*|valor[:\s]*|costo[:\s]*)\s*([\d,.]+)',
         ]
         
-        # Patrones de superficie
+        # Patrones de superficie (mejorados para Proveedor 02)
         self.superficie_patterns = [
             # Superficie: 2.500 m2 o Superficie construida: 12 m
             r'superficie(?:\s+construida)?[:\s]+([\d,.]+)\s*m',
-            # 16 m2
-            r'(\d+)\s*m[²2]',
+            # 16 m2 o 16 m²
+            r'(\d+(?:[,.]\d+)?)\s*m[²2]',
             # sup. 3.5x2.5 o sup.(6.50x3.25)
             r'sup\.?\s*[\(]?([\d,.]+)\s*x\s*([\d,.]+)[\)]?',
+            # 250 mt2 o 250 m2 (formato compacto)
+            r'(\d+(?:[,.]\d+)?)\s*(?:mt2|m2|m²)',
+            # terreno de 200m2 o lote 300m2
+            r'(?:terreno|lote)\s+(?:de\s+)?(\d+(?:[,.]\d+)?)\s*m[²2]?',
+            # area construida 120m2
+            r'(?:area|área)\s+(?:construida\s+)?(\d+(?:[,.]\d+)?)\s*m[²2]?',
         ]
         
-        # Patrones de habitaciones
+        # Patrones de habitaciones (mejorados para Proveedor 02)
         self.habitaciones_patterns = [
             # 4 HABITACIONES EN ALQUILER
             r'(\d+)\s+habitacion(?:es)?',
@@ -47,32 +61,68 @@ class RegexExtractor:
             r'(\d+)\s+dormitorio(?:s)?',
             # 2 hab o 3 dorm
             r'(\d+)\s+(?:hab|dorm)(?:s|\.)?',
+            # con 3 habitaciones o cuenta con 2 dormitorios
+            r'(?:con|cuenta\s+con)\s+(\d+)\s+(?:habitaciones?|dormitorios?)',
+            # departamento de 2 ambientes (ambientes ≈ habitaciones)
+            r'(\d+)\s+ambientes?',
+            # 3 dorms o 4 habs (abreviaturas comunes)
+            r'(\d+)\s+(?:dorms|habs)',
+            # ideal para 1 persona (inferir 1 habitación)
+            r'(?:ideal|perfecto)\s+para\s+(\d+)\s+persona',
         ]
         
-        # Patrones de baños
+        # Patrones de baños (mejorados para Proveedor 02)
         self.banos_patterns = [
-            # baño privado, con Baño, 2 baños
-            r'(\d+)?\s*ba[ñn]o(?:s)?(?:\s+privado)?',
-            # bño privado (sin la ñ)
-            r'(\d+)?\s*b[añn]o(?:s)?',
+            # 2 baños o 3 baño (con número)
+            r'(\d+)\s+ba[ñn]o(?:s)?',
+            # baño privado o con baño (sin número, asumir 1)
+            r'(?:con\s+)?ba[ñn]o\s+(?:privado|social|completo)',
+            # baño completo o baño social
+            r'ba[ñn]o\s+(?:completo|social)',
+            # 1 baño o 2.5 baños (medio baño)
+            r'(\d+(?:\.5)?)\s*ba[ñn]o(?:s)?',
+            # bño o bños (sin la ñ, común en descripciones)
+            r'(\d*)\s*b[añn]o(?:s)?',
+            # con baño y shower
+            r'(?:con\s+)?ba[ñn]o\s+y\s+shower',
+            # servicio sanitario
+            r'(?:con\s+)?(?:servicio\s+)?sanitario',
         ]
         
-        # Patrones de zonas conocidas de Santa Cruz
+        # Patrones de zonas conocidas de Santa Cruz (expandido para Proveedor 02)
         self.zonas_conocidas = [
+            # Zonas principales y exclusivas
             'equipetrol', 'urubó', 'urubo', 'zona norte', 'zona sur', 'zona este', 'zona oeste',
+            'santa mónica', 'santa monica', 'los olivos', 'urbari', 'pampa de la isla',
+            'el valle', 'las brisas', 'el palmar', 'el mirador', 'santo domingo',
+            'guapay', 'sarah', 'abapo', 'bienestar', 'los lotes', 'el pedregal',
+
+            # Zonas tradicionales
             'villa 1ro de mayo', 'villa primero de mayo', 'plan 3000', 'plan tres mil',
             'el cristo', 'la recoleta', 'av. monseñor rivero', 'av. banzer', 'av. beni',
-            'radial 10', 'radial 13', 'radial 17', 'radial 19', 'radial 26', 'radial 27',
-            '2do anillo', '3er anillo', '4to anillo', '5to anillo', '6to anillo', 
-            '7mo anillo', '8vo anillo', '9no anillo', 'segundo anillo', 'tercer anillo',
-            'cuarto anillo', 'quinto anillo', 'sexto anillo', 'séptimo anillo', 
-            'octavo anillo', 'noveno anillo', 'las palmas', 'barrio equipetrol',
-            'barrio hamacas', 'santos dumont', 'av. cristobal de mendoza',
-            'av. busch', 'av. alemana', 'av. roca y coronado', 'av. paraguá',
             'zona central', 'centro', 'casco viejo', 'la ramada', 'mutualista',
             'virgen de luján', 'virgen de lujan', 'el trompillo', 'paraguá',
+
+            # Avenidas principales (como referencia de zona)
+            'av. cristobal de mendoza', 'av. busch', 'av. alemana', 'av. roca y coronado',
+            'av. paraguá', 'av. santiesteban', 'av. 6 de agosto', 'av. cañoto',
+
+            # Anillos y radiales
+            'radial 10', 'radial 13', 'radial 17', 'radial 19', 'radial 26', 'radial 27',
+            '2do anillo', '3er anillo', '4to anillo', '5to anillo', '6to anillo',
+            '7mo anillo', '8vo anillo', '9no anillo', 'segundo anillo', 'tercer anillo',
+            'cuarto anillo', 'quinto anillo', 'sexto anillo', 'séptimo anillo',
+            'octavo anillo', 'noveno anillo',
+
+            # Barrios residenciales
+            'las palmas', 'barrio equipetrol', 'barrio hamacas', 'santos dumont',
             'barrio 26 de septiembre', 'cambodromo', 'parque industrial',
-            'cataluña', 'vida citadina'
+            'cataluña', 'vida citadina', 'barrio los pinos', 'barrio jardín',
+            'barrio sucre', 'barrio libertad', 'barrio san pedro',
+
+            # Nuevos desarrollos
+            'norte villa', 'norte villa country club', 'san marcos', 'country club',
+            'club de golf', 'golf & country club', 'campestre', 'el toro'
         ]
         
         # Compilar patrones de zona (case insensitive)
@@ -190,19 +240,20 @@ class RegexExtractor:
                     continue
         return None
     
-    def extract_banos(self, texto: str) -> Optional[int]:
-        """Extrae el número de baños."""
+    def extract_banos(self, texto: str) -> Optional[float]:
+        """Extrae el número de baños (permite medio baño: 1.5)."""
         for pattern in self.banos_patterns:
             match = re.search(pattern, texto, re.IGNORECASE)
             if match:
                 if match.group(1):
                     try:
-                        return int(match.group(1))
+                        # Permite valores como 1.5 (medio baño)
+                        return float(match.group(1))
                     except ValueError:
                         continue
                 else:
                     # Si solo dice "baño privado" sin número, asumir 1
-                    return 1
+                    return 1.0
         return None
     
     def extract_zona(self, texto: str) -> Optional[str]:
