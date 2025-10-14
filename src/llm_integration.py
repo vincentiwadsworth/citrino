@@ -17,7 +17,7 @@ class LLMConfig:
     """Configuración para el servicio LLM."""
     provider: str = "zai"  # zai, openrouter, openai
     api_key: Optional[str] = None
-    model: str = "glm-4.5-air"
+    model: str = "glm-4.6"
     base_url: Optional[str] = None
     max_tokens: int = 2000
     temperature: float = 0.1
@@ -53,7 +53,7 @@ class LLMIntegration:
         """Crea configuración desde variables de entorno."""
         provider = os.getenv("LLM_PROVIDER", "zai")
         api_key = os.getenv("ZAI_API_KEY") or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-        model = os.getenv("LLM_MODEL", "glm-4.5-air")
+        model = os.getenv("LLM_MODEL", "glm-4.6")
 
         return LLMConfig(
             provider=provider,
@@ -152,8 +152,8 @@ JSON:"""
             raise ValueError(f"Error procesando respuesta: {e}")
 
     def _call_zai(self, prompt: str) -> str:
-        """Realiza llamada a la API de Z.AI (formato OpenAI)."""
-        url = "https://api.z.ai/api/paas/v4/chat/completions"
+        """Realiza llamada a la API de Z.AI (formato OpenAI Compatible)."""
+        url = "https://api.z.ai/api/coding/paas/v4/chat/completions"
 
         payload = {
             "model": self.config.model,

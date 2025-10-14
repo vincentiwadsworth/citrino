@@ -537,7 +537,7 @@ class RecommendationEngineMejorado:
         if zona_preferida and zona_preferida.strip():
             propiedades_zona = []
             for prop in propiedades_filtradas:
-                zona_prop = prop.get('ubicacion', {}).get('zona', '').lower()
+                zona_prop = prop.get('zona', '').lower() or prop.get('ubicacion', {}).get('zona', '').lower()
                 if zona_preferida in zona_prop or zona_prop in zona_preferida:
                     propiedades_zona.append(prop)
 
@@ -576,7 +576,7 @@ class RecommendationEngineMejorado:
         if tipo_preferido:
             propiedades_tipo = []
             for prop in propiedades_filtradas:
-                tipo_prop = str(prop.get('tipo', '')).strip().lower()
+                tipo_prop = str(prop.get('tipo', '')).strip().lower() or str(prop.get('tipo_propiedad', '')).strip().lower()
                 if tipo_preferido in tipo_prop:
                     propiedades_tipo.append(prop)
 
@@ -590,28 +590,23 @@ class RecommendationEngineMejorado:
         if presupuesto_min > 0 or presupuesto_max < float('inf'):
             propiedades_precio = []
             for prop in propiedades_filtradas:
-                precio = prop.get('caracteristicas_principales', {}).get('precio', 0)
-                if presupuesto_min <= precio <= presupuesto_max:
+                precio = prop.get('precio', 0)
+                if precio is not None and presupuesto_min <= precio <= presupuesto_max:
                     propiedades_precio.append(prop)
 
             if propiedades_precio:
                 propiedades_filtradas = propiedades_precio
                 print(f"Filtrado por precio ${presupuesto_min:,}-${presupuesto_max:,}: {len(propiedades_filtradas)} propiedades")
+            else:
+                print(f"ADVERTENCIA: No hay propiedades en el rango de precios ${presupuesto_min:,}-${presupuesto_max:,}")
 
-        # 5b. Filtro por moneda (USD/BOB) - Nuevo filtro para economía bimonetaria
+        # 5b. Filtro por moneda (USD/BOB) - Simplificado ya que los datos son principalmente en USD
         moneda_preferida = presupuesto.get('moneda', '')
         if moneda_preferida:
-            propiedades_moneda = []
-            for prop in propiedades_filtradas:
-                moneda_prop = prop.get('caracteristicas_principales', {}).get('moneda', 'USD')
-                if moneda_prop == moneda_preferida:
-                    propiedades_moneda.append(prop)
-
-            if propiedades_moneda:
-                propiedades_filtradas = propiedades_moneda
-                print(f"Filtrado por moneda {moneda_preferida}: {len(propiedades_filtradas)} propiedades")
-            else:
-                print(f"ADVERTENCIA: No hay propiedades en {moneda_preferida}, mostrando todas las monedas")
+            # La mayoría de los datos están en USD, solo filtramos si no es USD
+            if moneda_preferida != 'USD':
+                print(f"ADVERTENCIA: La mayoría de los datos están en USD, mostrando todas las monedas")
+            # De momento mostramos todo ya que los datos no tienen campo de moneda específico
 
         # 6. Filtro por disponibilidad reciente
         dias_maximos = preferencias.get('disponibilidad_dias', 90)  # Por defecto 90 días
@@ -664,7 +659,7 @@ class RecommendationEngineMejorado:
             zona = filtros['zona'].strip().lower()
             propiedades_filtradas = [
                 prop for prop in propiedades_filtradas
-                if zona in prop.get('ubicacion', {}).get('zona', '').lower()
+                if zona in prop.get('zona', '').lower() or zona in prop.get('ubicacion', {}).get('zona', '').lower()
             ]
 
         # Filtro por tipo
@@ -672,7 +667,7 @@ class RecommendationEngineMejorado:
             tipo = filtros['tipo_propiedad'].strip().lower()
             propiedades_filtradas = [
                 prop for prop in propiedades_filtradas
-                if tipo in str(prop.get('tipo', '')).lower()
+                if tipo in str(prop.get('tipo', '')).lower() or tipo in str(prop.get('tipo_propiedad', '')).lower()
             ]
 
         # Filtro por precio
@@ -681,21 +676,26 @@ class RecommendationEngineMejorado:
             precio_max = filtros.get('precio_max', float('inf'))
             propiedades_filtradas = [
                 prop for prop in propiedades_filtradas
-                if precio_min <= prop.get('caracteristicas_principales', {}).get('precio', 0) <= precio_max
+                if precio_min <= (prop.get('precio') or prop.get('caracteristicas_principales', {}).get('precio', 0) or 0) <= precio_max
             ]
 
         return propiedades_filtradas
 
     def _generar_justificacion_mejorada(self, perfil: Dict[str, Any], propiedad: Dict[str, Any], compatibilidad: float) -> str:
         """Genera justificación detallada para inversores basada en análisis real."""
-        caracteristicas = propiedad.get('caracteristicas_principales', {})
-        ubicacion = propiedad.get('ubicacion', {})
-        valorizacion = propiedad.get('valorizacion_sector', {})
+        ubicacion = {
+            'zona': propiedad.get('zona', ''),
+            'direccion': propiedad.get('direccion', ''),
+            'coordenadas': {
+                'lat': propiedad.get('latitud'),
+                'lng': propiedad.get('longitud')
+            } if propiedad.get('latitud') and propiedad.get('longitud') else {}
+        }
 
         presupuesto = perfil.get('presupuesto', {})
         presupuesto_min = presupuesto.get('min', 0)
         presupuesto_max = presupuesto.get('max', float('inf'))
-        precio = caracteristicas.get('precio', 0)
+        precio = propiedad.get('precio', 0)
 
         justificacion = []
 
@@ -709,14 +709,8 @@ class RecommendationEngineMejorado:
 
         # Potencial de la zona
         zona = ubicacion.get('zona', 'No especificada')
-        demanda = valorizacion.get('demanda_sector', 'No especificada')
-
-        if demanda in ['muy_alta', 'alta']:
-            justificacion.append(f"Zona {zona.lower()} con alta demanda y buen potencial.")
-        elif demanda == 'media':
-            justificacion.append(f"Zona {zona.lower()} con demanda moderada, oportunidades de negociación.")
-        else:
-            justificacion.append(f"Zona {zona.lower()} en desarrollo.")
+        # Como no tenemos datos de valorización, damos información básica
+        justificacion.append(f"Ubicada en {zona.lower()}." if zona else "Ubicación disponible.")
 
         # UV y Manzana si están disponibles
         uv = propiedad.get('unidad_vecinal', '')
@@ -733,9 +727,9 @@ class RecommendationEngineMejorado:
                 justificacion.append(f"Buen acceso a {servicios_resumen}.")
 
         # Características atractivas para inversión
-        superficie = caracteristicas.get('superficie_m2', 0)
-        habitaciones = caracteristicas.get('habitaciones', 0)
-        tipo = propiedad.get('tipo', '')
+        superficie = propiedad.get('superficie', 0)
+        habitaciones = propiedad.get('habitaciones', 0)
+        tipo = propiedad.get('tipo_propiedad', propiedad.get('tipo', 'inmueble'))
 
         if superficie >= 100:
             justificacion.append(f"Amplia superficie de {superficie}m².")
@@ -840,16 +834,18 @@ class RecommendationEngineMejorado:
     def _evaluar_precio_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
         """Evalúa el precio desde perspectiva de inversión."""
         presupuesto = perfil.get('presupuesto', {})
-        caracteristicas = propiedad.get('caracteristicas_principales', {})
 
         presupuesto_min = presupuesto.get('min', 0)
         presupuesto_max = presupuesto.get('max', float('inf'))
-        precio = caracteristicas.get('precio', 0)
+        precio = propiedad.get('precio', 0)
 
-        if not precio:
+        if precio is None or precio == 0:
             return 0.0
 
         # 1. Adecuación al rango de inversión (70%)
+        if precio is None:
+            return 0.0  # Evitar error NoneType
+
         if presupuesto_min <= precio <= presupuesto_max:
             puntuacion_precio = 0.7
         elif precio < presupuesto_min:
@@ -862,8 +858,11 @@ class RecommendationEngineMejorado:
             # Por encima del máximo
             exceso = precio - presupuesto_max
             margen = presupuesto_max - presupuesto_min
-            penalizacion = 0.7 - (exceso / margen) * 0.5
-            puntuacion_precio = max(0.1, penalizacion)
+            if margen == 0:
+                puntuacion_precio = 0.1
+            else:
+                penalizacion = 0.7 - (exceso / margen) * 0.5
+                puntuacion_precio = max(0.1, penalizacion)
 
         # 2. Potencial de negociación (30%)
         valorizacion = propiedad.get('valorizacion_sector', {})
@@ -921,14 +920,13 @@ class RecommendationEngineMejorado:
 
     def _evaluar_caracteristicas_inversion(self, perfil: Dict[str, Any], propiedad: Dict[str, Any]) -> float:
         """Evalúa características del inmueble para inversión."""
-        caracteristicas = propiedad.get('caracteristicas_principales', {})
         preferencias = perfil.get('preferencias', {})
 
         puntuacion = 0.0
 
         # 1. Tipo de propiedad preferido (40%)
         tipo_preferido = preferencias.get('tipo_propiedad', '').lower()
-        tipo_actual = propiedad.get('tipo', '').lower()
+        tipo_actual = propiedad.get('tipo_propiedad', propiedad.get('tipo', '')).lower()
 
         if tipo_preferido and tipo_preferido in tipo_actual:
             puntuacion += 0.4
@@ -942,7 +940,7 @@ class RecommendationEngineMejorado:
                 puntuacion += 0.4
 
         # 2. Superficie (30%)
-        superficie = caracteristicas.get('superficie_m2', 0)
+        superficie = propiedad.get('superficie', 0)
         if superficie >= 100:  # Superficie generosa
             puntuacion += 0.3
         elif superficie >= 60:
@@ -951,17 +949,14 @@ class RecommendationEngineMejorado:
             puntuacion += 0.1
 
         # 3. Características atractivas para inversión (30%)
-        detalles = propiedad.get('detalles_construccion', {})
-        condominio = propiedad.get('condominio', {})
-
         caracteristicas_inversion = 0
-        if detalles.get('cochera_garaje', False):
+        if propiedad.get('garajes', 0) > 0:
             caracteristicas_inversion += 1
-        if condominio.get('es_condominio_cerrado', False):
+        if propiedad.get('habitaciones', 0) >= 3:
             caracteristicas_inversion += 1
-        if detalles.get('amoblado', False):
+        if propiedad.get('banos', 0) >= 2:
             caracteristicas_inversion += 1
-        if caracteristicas.get('habitaciones', 0) >= 3:
+        if superficie >= 200:  # Propiedades grandes
             caracteristicas_inversion += 1
 
         if caracteristicas_inversion >= 3:

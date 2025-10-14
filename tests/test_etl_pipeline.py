@@ -7,8 +7,8 @@ import pytest
 import sys
 from pathlib import Path
 
-# Agregar el directorio scripts al path para importar
-sys.path.insert(0, str(Path(__file__).parent.parent / 'scripts'))
+# Agregar el directorio scripts/etl al path para importar
+sys.path.insert(0, str(Path(__file__).parent.parent / 'scripts' / 'etl'))
 
 from build_relevamiento_dataset import ProcesadorDatosRelevamiento
 

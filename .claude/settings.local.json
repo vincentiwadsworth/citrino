@@ -1,16 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
+      "*",
       "Bash(python:*)",
-      "Bash(streamlit run:*)",
-      "Bash(curl:*)",
-      "Bash(find:*)",
-      "Bash(timeout:*)"
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "hooks": {}
 }

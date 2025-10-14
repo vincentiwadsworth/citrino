@@ -49,11 +49,19 @@ def inicializar_datos():
     print("INICIANDO CITRINO API")
     print("=" * 60)
     
-    # Intentar cargar base de datos de relevamiento
+    # Intentar cargar base de datos de relevamiento (priorizar dataset integrado)
     try:
         # Usar ruta relativa al directorio del script
-        ruta = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento.json')
-        print(f"Cargando datos desde: {ruta}")
+        ruta_integrada = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento_integrado.json')
+        ruta_original = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento.json')
+
+        # Priorizar dataset integrado si existe
+        if os.path.exists(ruta_integrada):
+            ruta = ruta_integrada
+            print(f"Cargando datos integrados desde: {ruta}")
+        else:
+            ruta = ruta_original
+            print(f"Cargando datos originales desde: {ruta}")
         
         with open(ruta, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -77,7 +85,7 @@ def inicializar_datos():
     except FileNotFoundError as e:
         print(f"[ERROR] No se encontro data/base_datos_relevamiento.json")
         print(f"   Ruta buscada: {e}")
-        print("   Ejecute: python scripts/build_relevamiento_dataset.py")
+        print("   Ejecute: python scripts/etl/build_relevamiento_dataset.py")
         return False
         
     except Exception as e:
@@ -434,7 +442,7 @@ def recomendar_propiedades_mejorado():
         recomendaciones = motor_mejorado.generar_recomendaciones(
             perfil,
             limite=data.get('limite', 5),
-            umbral_minimo=data.get('umbral_minimo', 0.3)
+            umbral_minimo=data.get('umbral_minimo', 0.05)  # Reducido de 0.3 a 0.05 (5%)
         )
 
         # Formatear resultados para inversores
@@ -643,7 +651,7 @@ def recomendar_con_llm():
         recomendaciones = motor_mejorado.generar_recomendaciones(
             perfil,
             limite=data.get('limite', 6),
-            umbral_minimo=data.get('umbral_minimo', 0.3)
+            umbral_minimo=data.get('umbral_minimo', 0.05)  # Reducido de 0.3 a 0.05 (5%)
         )
         
         # Formatear recomendaciones básicas
@@ -758,9 +766,229 @@ Genera un análisis personalizado (2-3 oraciones) explicando:
             'error': str(e)
         }), 400
 
+@app.route('/api/analisis', methods=['POST'])
+def consulta_analitica():
+    """
+    Endpoint para consultas analíticas directas sobre la base de datos.
+    Responde preguntas como "cuáles son los departamentos más caros de equipetrol"
+    """
+    try:
+        data = request.get_json()
+        consulta = data.get('consulta', '')
+
+        if not consulta:
+            return jsonify({
+                'success': False,
+                'error': 'Consulta vacía'
+            }), 400
+
+        propiedades = sistema_consulta.propiedades
+
+        if not propiedades:
+            return jsonify({
+                'success': False,
+                'error': 'No hay propiedades cargadas',
+                'respuesta': 'Lo siento, no hay datos disponibles para analizar.'
+            }), 400
+
+        # Análisis básico de la consulta
+        consulta_lower = consulta.lower()
+
+        # Detectar tipo de consulta y extraer parámetros
+        respuesta = None
+        datos = None
+
+        # 1. Consultas de precios más caros/baratos por zona
+        if ('mas caros' in consulta_lower or 'más caros' in consulta_lower or 'más caro' in consulta_lower) and 'equipetrol' in consulta_lower:
+            zona_filtro = 'equipetrol'
+            datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+            if datos:
+                ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'], reverse=True)[:5]
+                respuesta = f"Los departamentos más caros de Equipetrol son:\n"
+                for i, prop in enumerate(ordenados, 1):
+                    precio = prop.get('precio', 0)
+                    if precio:
+                        respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+        elif ('mas baratos' in consulta_lower or 'más baratos' in consulta_lower or 'más barato' in consulta_lower) and 'equipetrol' in consulta_lower:
+            zona_filtro = 'equipetrol'
+            datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+            if datos:
+                ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'])[:5]
+                respuesta = f"Los departamentos más económicos de Equipetrol son:\n"
+                for i, prop in enumerate(ordenados, 1):
+                    precio = prop.get('precio', 0)
+                    if precio:
+                        respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+        # 2. Consultas de precios por zona (genérico)
+        elif ('mas caros' in consulta_lower or 'más caros' in consulta_lower) and any(zona in consulta_lower for zona in ['santa mónica', 'urbari', 'los olivos', 'zona norte', 'zona sur']):
+            zona_detectada = _detectar_zona(consulta_lower)
+            if zona_detectada:
+                datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+                if datos:
+                    ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'], reverse=True)[:5]
+                    respuesta = f"Las propiedades más caras de {zona_detectada.title()} son:\n"
+                    for i, prop in enumerate(ordenados, 1):
+                        precio = prop.get('precio', 0)
+                        if precio:
+                            respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+        # 3. Consultas de cantidad de propiedades por zona
+        elif ('cuantas' in consulta_lower or 'cuántas' in consulta_lower) and 'propiedades' in consulta_lower:
+            zona_detectada = _detectar_zona(consulta_lower)
+            if zona_detectada:
+                datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+                count = len(datos) if datos else 0
+                respuesta = f"Hay {count} propiedades disponibles en {zona_detectada.title()}."
+            else:
+                # Total de propiedades
+                respuesta = f"Hay {len(propiedades)} propiedades en total en la base de datos."
+
+        # 4. Consultas de precios promedio por zona
+        elif ('precio promedio' in consulta_lower or 'promedio' in consulta_lower) and 'equipetrol' in consulta_lower:
+            zona_filtro = 'equipetrol'
+            datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+            if datos:
+                precios = [p.get('precio', 0) for p in datos if p.get('precio')]
+                if precios:
+                    promedio = sum(precios) / len(precios)
+                    respuesta = f"El precio promedio en Equipetrol es de ${promedio:,.0f} USD."
+                else:
+                    respuesta = "No hay información de precios disponible para Equipetrol."
+            else:
+                respuesta = "No se encontraron propiedades en Equipetrol."
+
+        # 5. Consultas generales de conteo
+        elif 'cuantas' in consulta_lower or 'cuántas' in consulta_lower:
+            zona_detectada = _detectar_zona(consulta_lower)
+            tipo_detectado = _detectar_tipo_propiedad(consulta_lower)
+
+            if zona_detectada and tipo_detectado:
+                datos = [p for p in propiedades
+                        if (p.get('zona', '').lower() == zona_detectada.lower() or
+                            p.get('ubicacion', {}).get('zona', '').lower() == zona_detectada.lower()) and
+                           p.get('tipo_propiedad', '').lower() == tipo_detectado.lower()]
+                respuesta = f"Hay {len(datos)} {tipo_detectado}s en {zona_detectada.title()}."
+            elif zona_detectada:
+                datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+                count = len(datos) if datos else 0
+                respuesta = f"Hay {count} propiedades en {zona_detectada.title()}."
+            else:
+                respuesta = f"Hay {len(propiedades)} propiedades en total en la base de datos."
+
+        # 6. Consultas de disponibilidad
+        elif 'disponibles' in consulta_lower or 'en venta' in consulta_lower:
+            zona_detectada = _detectar_zona(consulta_lower)
+            tipo_detectado = _detectar_tipo_propiedad(consulta_lower)
+
+            if zona_detectada:
+                datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+                if tipo_detectado:
+                    datos = [p for p in datos if p.get('tipo_propiedad', '').lower() == tipo_detectado.lower()]
+                    respuesta = f"Hay {len(datos)} {tipo_detectado}s disponibles en {zona_detectada.title()}."
+                else:
+                    respuesta = f"Hay {len(datos)} propiedades disponibles en {zona_detectada.title()}."
+            else:
+                respuesta = f"Hay {len(propiedades)} propiedades disponibles en total."
+
+        # 7. Consulta genérica si no se detectó ningún patrón específico
+        else:
+            # Intentar extraer zona y dar información básica
+            zona_detectada = _detectar_zona(consulta_lower)
+            if zona_detectada:
+                datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+                if datos:
+                    precios = [p.get('precio', 0) for p in datos if p.get('precio')]
+                    if precios:
+                        min_precio = min(precios)
+                        max_precio = max(precios)
+                        promedio = sum(precios) / len(precios)
+                        respuesta = f"En {zona_detectada.title()} hay {len(datos)} propiedades con precios entre ${min_precio:,.0f} y ${max_precio:,.0f} USD (promedio: ${promedio:,.0f} USD)."
+                    else:
+                        respuesta = f"En {zona_detectada.title()} hay {len(datos)} propiedades disponibles, pero no hay información de precios."
+                else:
+                    respuesta = f"No se encontraron propiedades en {zona_detectada.title()}."
+            else:
+                respuesta = "Puedo ayudarte a encontrar información sobre propiedades. Puedes preguntarme por ejemplo: 'cuáles son los departamentos más caros de equipetrol', 'cuántas propiedades hay en santa mónica', o 'cuál es el precio promedio en zona norte'."
+
+        return jsonify({
+            'success': True,
+            'consulta': consulta,
+            'respuesta': respuesta,
+            'datos_encontrados': len(datos) if datos else 0,
+            'tipo_consulta': 'analitica_directa'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'respuesta': 'Lo siento, hubo un error procesando tu consulta. Por favor intenta de nuevo.'
+        }), 400
+
+def _detectar_zona(consulta: str) -> str:
+    """Detecta zonas mencionadas en la consulta"""
+    zonas = {
+        'equipetrol': 'equipetrol',
+        'santa mónica': 'santa mónica',
+        'santa monica': 'santa mónica',
+        'urbari': 'urbari',
+        'los olivos': 'los olivos',
+        'zona norte': 'zona norte',
+        'zona sur': 'zona sur',
+        'zona este': 'zona este',
+        'zona oeste': 'zona oeste',
+        'urubó': 'urubó',
+        'urubo': 'urubó',
+        'centro': 'centro',
+        'el palmar': 'el palmar',
+        'el valle': 'el valle'
+    }
+
+    for zona_key, zona_value in zonas.items():
+        if zona_key in consulta:
+            return zona_value
+    return None
+
+def _detectar_tipo_propiedad(consulta: str) -> str:
+    """Detecta tipo de propiedad mencionado en la consulta"""
+    tipos = {
+        'departamento': 'departamento',
+        'apartamento': 'departamento',
+        'casa': 'casa',
+        'penthouse': 'penthouse',
+        'terreno': 'terreno',
+        'local': 'local',
+        'oficina': 'oficina'
+    }
+
+    for tipo_key, tipo_value in tipos.items():
+        if tipo_key in consulta:
+            return tipo_value
+    return None
+
+def _get_propiedades_by_zona(propiedades: list, zona: str) -> list:
+    """Filtra propiedades por zona (coincidencia parcial e ignorando mayúsculas/minúsculas)"""
+    zona_lower = zona.lower()
+    filtradas = []
+
+    for prop in propiedades:
+        zona_prop = prop.get('zona', '').lower()
+        zona_ubic = prop.get('ubicacion', {}).get('zona', '').lower()
+
+        if zona_lower in zona_prop or zona_prop in zona_lower or zona_lower in zona_ubic or zona_ubic in zona_lower:
+            filtradas.append(prop)
+
+    return filtradas
+
 @app.route('/api/chat/process', methods=['POST'])
 def process_chat_message():
-    """Procesa mensaje de chat con z.ai y genera recomendaciones si es posible"""
+    """
+    Endpoint de chat rediseñado para responder consultas directas sobre la base de datos.
+    En lugar de extraer perfiles de usuario, responde preguntas analíticas como:
+    "cuáles son los departamentos más caros de equipetrol"
+    """
     try:
         data = request.get_json()
         mensaje = data.get('mensaje', '')
@@ -771,167 +999,404 @@ def process_chat_message():
                 'error': 'Mensaje vacío'
             }), 400
 
-        # Intentar usar LLM si está configurado
-        perfil_extraido = None
-        respuesta_llm = None
-        recomendaciones = []
-        llm_usado = False
-        provider_usado = None
-        fallback_activado = False
-        error_details = None
-
+        # Primero intentar usar el endpoint analítico para consultas directas
+        consulta_result = None
         try:
-            from llm_integration import LLMIntegration, LLMConfig
+            # Reutilizar la lógica del endpoint analítico internamente
+            consulta_result = _procesar_consulta_analitica(mensaje)
+        except Exception as e:
+            print(f"Error en consulta analítica: {e}")
+            consulta_result = None
 
-            # Inicializar LLM con configuración principal (Z.AI)
-            llm_config = LLMConfig(
-                provider=os.getenv('LLM_PROVIDER', 'zai'),
-                api_key=os.getenv('ZAI_API_KEY'),
-                model=os.getenv('LLM_MODEL', 'glm-4.5-air')
+        # Si la consulta analítica tuvo éxito, devolver esa respuesta
+        if consulta_result and consulta_result.get('success'):
+            return jsonify({
+                'success': True,
+                'tipo_respuesta': 'analitica_directa',
+                'respuesta': consulta_result.get('respuesta'),
+                'consulta_original': mensaje,
+                'datos_encontrados': consulta_result.get('datos_encontrados', 0),
+                'tipo_consulta': 'analitica_directa',
+                'recomendaciones': [],  # No hay recomendaciones en modo analítico
+                'perfil': None,          # No hay perfil extraído en modo analítico
+                'llm_usado': False,      # No se usa LLM para consultas directas
+                'sugerencias': _generar_sugerencias_relacionadas(mensaje)
+            })
+
+        # Si no es una consulta analítica clara, intentar detectar si busca recomendaciones
+        mensaje_lower = mensaje.lower()
+        es_busqueda_recomendacion = any([
+            'busco' in mensaje_lower,
+            'quiero' in mensaje_lower,
+            'necesito' in mensaje_lower,
+            'buscar' in mensaje_lower,
+            'recomendar' in mensaje_lower,
+            'presupuesto' in mensaje_lower,
+            'me gustaría' in mensaje_lower
+        ])
+
+        if es_busqueda_recomendacion:
+            # Modo de recomendaciones (mantiene lógica original)
+            return _procesar_solicitud_recomendacion(mensaje)
+        else:
+            # Respuesta por defecto para consultas no reconocidas
+            respuesta_defecto = (
+                "Puedo ayudarte a encontrar información sobre propiedades. "
+                "Puedes preguntarme por ejemplo:\n"
+                "• 'cuáles son los departamentos más caros de equipetrol'\n"
+                "• 'cuántas propiedades hay en santa mónica'\n"
+                "• 'cuál es el precio promedio en zona norte'\n"
+                "• O si buscas algo específico, dime 'busco un departamento en equipetrol hasta 200.000 usd'"
             )
 
-            llm = LLMIntegration(llm_config)
-
-            # Validar configuración básica
-            if llm.validar_configuracion():
-                # Usar el método con fallback automático
-                prompt = llm._build_prompt(mensaje)
-
-                try:
-                    # Intentar consulta con fallback automático
-                    resultado_llm = llm.consultar_con_fallback(prompt, use_fallback=True)
-
-                    if resultado_llm:
-                        respuesta_llm_raw = resultado_llm['respuesta']
-                        provider_usado = resultado_llm['provider_usado']
-                        fallback_activado = resultado_llm['fallback_activado']
-                        llm_usado = True
-
-                        # Parsear el perfil desde la respuesta
-                        perfil_extraido = llm._parse_llm_response(respuesta_llm_raw)
-
-                        # Generar recomendaciones si se extrajo un perfil válido
-                        if perfil_extraido and perfil_extraido.get('presupuesto', {}).get('max'):
-                            # Adaptar perfil para el motor de recomendaciones
-                            perfil_motor = {
-                                'id': 'chat_profile',
-                                'presupuesto': perfil_extraido.get('presupuesto', {}),
-                                'composicion_familiar': perfil_extraido.get('composicion_familiar', {}),
-                                'preferencias': perfil_extraido.get('preferencias', {}),
-                                'necesidades': perfil_extraido.get('necesidades', [])
-                            }
-
-                            # Generar recomendaciones con motor mejorado
-                            resultados = motor_mejorado.generar_recomendaciones(
-                                perfil_motor,
-                                limite=6,
-                                umbral_minimo=0.3
-                            )
-
-                            # Formatear recomendaciones
-                            for rec in resultados:
-                                prop = rec['propiedad']
-                                caract = prop.get('caracteristicas_principales', {})
-                                if not caract:
-                                    caract = {
-                                        'precio': prop.get('precio', 0),
-                                        'superficie_m2': prop.get('superficie', 0),
-                                        'habitaciones': prop.get('habitaciones', 0),
-                                        'banos_completos': prop.get('banos', 0)
-                                    }
-
-                                ubicacion = prop.get('ubicacion', {})
-                                if not ubicacion:
-                                    ubicacion = {
-                                        'zona': prop.get('zona', ''),
-                                        'direccion': prop.get('direccion', '')
-                                    }
-
-                                recomendaciones.append({
-                                    'id': prop.get('id', ''),
-                                    'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
-                                    'precio': caract.get('precio', 0),
-                                    'superficie_m2': caract.get('superficie_m2', 0),
-                                    'habitaciones': caract.get('habitaciones', 0),
-                                    'banos': caract.get('banos_completos', 0),
-                                    'zona': ubicacion.get('zona', ''),
-                                    'compatibilidad': round(rec['compatibilidad'], 1),
-                                    'justificacion': rec.get('justificacion', ''),
-                                    'servicios_cercanos': rec.get('servicios_cercanos', '')
-                                })
-
-                            if fallback_activado:
-                                respuesta_llm = f"He analizado tu solicitud con sistema Multi-LLM ({provider_usado}) y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
-                            else:
-                                respuesta_llm = f"He analizado tu solicitud y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
-                        else:
-                            if fallback_activado:
-                                respuesta_llm = f"He entendido tu mensaje usando sistema Multi-LLM ({provider_usado}). ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
-                            else:
-                                respuesta_llm = "He entendido tu mensaje. ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
-
-                except Exception as llm_error:
-                    # Error específico en LLM - capturar detalles para debug
-                    error_details = analizar_error_llm(str(llm_error))
-                    print(f"[LLM ERROR] {error_details}")
-
-                    # Usar análisis básico como fallback
-                    perfil_extraido = extraer_perfil_basico(mensaje)
-                    respuesta_llm = generar_mensaje_error_llm(error_details)
-
-            else:
-                # LLM no configurado, usar análisis básico
-                error_details = {
-                    'tipo': 'config_incompleta',
-                    'mensaje': 'API keys no configuradas',
-                    'providers_intentados': [],
-                    'errores': [],
-                    'recomendacion': 'Configurar ZAI_API_KEY y OPENROUTER_API_KEY en .env'
-                }
-                perfil_extraido = extraer_perfil_basico(mensaje)
-                respuesta_llm = "Procesé tu mensaje con análisis básico. Para mejores resultados, configura la integración con Z.AI."
-
-        except ImportError as e:
-            # Módulo LLM no disponible
-            error_details = {
-                'tipo': 'modulo_no_disponible',
-                'mensaje': f'Error importando llm_integration: {str(e)}',
-                'providers_intentados': [],
-                'errores': [],
-                'recomendacion': 'Verificar instalación de dependencias'
-            }
-            perfil_extraido = extraer_perfil_basico(mensaje)
-            respuesta_llm = "Sistema básico activo. Configura Z.AI para análisis avanzado."
-
-        except Exception as e:
-            # Error general en procesamiento
-            error_details = {
-                'tipo': 'error_general',
-                'mensaje': str(e),
-                'providers_intentados': [],
-                'errores': [],
-                'recomendacion': 'Revisar logs del servidor para más detalles'
-            }
-            print(f"Error procesando mensaje de chat: {e}")
-            perfil_extraido = extraer_perfil_basico(mensaje)
-            respuesta_llm = "Hubo un problema con el análisis avanzado. Procesé tu mensaje con el sistema básico."
-
-        return jsonify({
-            'success': True,
-            'perfil': perfil_extraido,
-            'recomendaciones': recomendaciones,
-            'respuesta': respuesta_llm,
-            'llm_usado': llm_usado,
-            'provider_usado': provider_usado,
-            'fallback_activado': fallback_activado,
-            'error_details': error_details
-        })
+            return jsonify({
+                'success': True,
+                'tipo_respuesta': 'ayuda',
+                'respuesta': respuesta_defecto,
+                'consulta_original': mensaje,
+                'sugerencias': [
+                    "cuáles son los departamentos más caros de equipetrol",
+                    "cuántas propiedades hay en santa mónica",
+                    "cuál es el precio promedio en zona norte",
+                    "busco departamento en equipetrol hasta 200000"
+                ]
+            })
 
     except Exception as e:
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': str(e),
+            'respuesta': 'Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.'
         }), 400
+
+def _procesar_consulta_analitica(consulta: str) -> dict:
+    """
+    Procesa consultas analíticas usando la misma lógica del endpoint /api/analisis
+    """
+    propiedades = sistema_consulta.propiedades
+
+    if not propiedades:
+        return {
+            'success': False,
+            'error': 'No hay propiedades cargadas',
+            'respuesta': 'Lo siento, no hay datos disponibles para analizar.'
+        }
+
+    # Análisis básico de la consulta
+    consulta_lower = consulta.lower()
+
+    # Detectar tipo de consulta y extraer parámetros
+    respuesta = None
+    datos = None
+
+    # 1. Consultas de precios más caros/baratos por zona
+    if ('mas caros' in consulta_lower or 'más caros' in consulta_lower or 'más caro' in consulta_lower) and 'equipetrol' in consulta_lower:
+        zona_filtro = 'equipetrol'
+        datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+        if datos:
+            ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'], reverse=True)[:5]
+            respuesta = f"Los departamentos más caros de Equipetrol son:\n"
+            for i, prop in enumerate(ordenados, 1):
+                precio = prop.get('precio', 0)
+                if precio:
+                    respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+    elif ('mas baratos' in consulta_lower or 'más baratos' in consulta_lower or 'más barato' in consulta_lower) and 'equipetrol' in consulta_lower:
+        zona_filtro = 'equipetrol'
+        datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+        if datos:
+            ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'])[:5]
+            respuesta = f"Los departamentos más económicos de Equipetrol son:\n"
+            for i, prop in enumerate(ordenados, 1):
+                precio = prop.get('precio', 0)
+                if precio:
+                    respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+    # 2. Consultas de precios por zona (genérico)
+    elif ('mas caros' in consulta_lower or 'más caros' in consulta_lower) and any(zona in consulta_lower for zona in ['santa mónica', 'urbari', 'los olivos', 'zona norte', 'zona sur']):
+        zona_detectada = _detectar_zona(consulta_lower)
+        if zona_detectada:
+            datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+            if datos:
+                ordenados = sorted([p for p in datos if p.get('precio')], key=lambda x: x['precio'], reverse=True)[:5]
+                respuesta = f"Las propiedades más caras de {zona_detectada.title()} son:\n"
+                for i, prop in enumerate(ordenados, 1):
+                    precio = prop.get('precio', 0)
+                    if precio:
+                        respuesta += f"{i}. ${precio:,.0f} USD - {prop.get('tipo_propiedad', 'Propiedad')}\n"
+
+    # 3. Consultas de cantidad de propiedades por zona
+    elif ('cuantas' in consulta_lower or 'cuántas' in consulta_lower) and 'propiedades' in consulta_lower:
+        zona_detectada = _detectar_zona(consulta_lower)
+        if zona_detectada:
+            datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+            count = len(datos) if datos else 0
+            respuesta = f"Hay {count} propiedades disponibles en {zona_detectada.title()}."
+        else:
+            # Total de propiedades
+            respuesta = f"Hay {len(propiedades)} propiedades en total en la base de datos."
+
+    # 4. Consultas de precios promedio por zona
+    elif ('precio promedio' in consulta_lower or 'promedio' in consulta_lower) and 'equipetrol' in consulta_lower:
+        zona_filtro = 'equipetrol'
+        datos = _get_propiedades_by_zona(propiedades, zona_filtro)
+        if datos:
+            precios = [p.get('precio', 0) for p in datos if p.get('precio')]
+            if precios:
+                promedio = sum(precios) / len(precios)
+                respuesta = f"El precio promedio en Equipetrol es de ${promedio:,.0f} USD."
+            else:
+                respuesta = "No hay información de precios disponible para Equipetrol."
+        else:
+            respuesta = "No se encontraron propiedades en Equipetrol."
+
+    # 5. Consultas generales de conteo
+    elif 'cuantas' in consulta_lower or 'cuántas' in consulta_lower:
+        zona_detectada = _detectar_zona(consulta_lower)
+        tipo_detectado = _detectar_tipo_propiedad(consulta_lower)
+
+        if zona_detectada and tipo_detectado:
+            datos = [p for p in propiedades
+                    if (p.get('zona', '').lower() == zona_detectada.lower() or
+                        p.get('ubicacion', {}).get('zona', '').lower() == zona_detectada.lower()) and
+                       p.get('tipo_propiedad', '').lower() == tipo_detectado.lower()]
+            respuesta = f"Hay {len(datos)} {tipo_detectado}s en {zona_detectada.title()}."
+        elif zona_detectada:
+            datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+            count = len(datos) if datos else 0
+            respuesta = f"Hay {count} propiedades en {zona_detectada.title()}."
+        else:
+            respuesta = f"Hay {len(propiedades)} propiedades en total en la base de datos."
+
+    # 6. Consultas de disponibilidad
+    elif 'disponibles' in consulta_lower or 'en venta' in consulta_lower:
+        zona_detectada = _detectar_zona(consulta_lower)
+        tipo_detectado = _detectar_tipo_propiedad(consulta_lower)
+
+        if zona_detectada:
+            datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+            if tipo_detectado:
+                datos = [p for p in datos if p.get('tipo_propiedad', '').lower() == tipo_detectado.lower()]
+                respuesta = f"Hay {len(datos)} {tipo_detectado}s disponibles en {zona_detectada.title()}."
+            else:
+                respuesta = f"Hay {len(datos)} propiedades disponibles en {zona_detectada.title()}."
+        else:
+            respuesta = f"Hay {len(propiedades)} propiedades disponibles en total."
+
+    # 7. Consulta genérica si no se detectó ningún patrón específico
+    else:
+        # Intentar extraer zona y dar información básica
+        zona_detectada = _detectar_zona(consulta_lower)
+        if zona_detectada:
+            datos = _get_propiedades_by_zona(propiedades, zona_detectada)
+            if datos:
+                precios = [p.get('precio', 0) for p in datos if p.get('precio')]
+                if precios:
+                    min_precio = min(precios)
+                    max_precio = max(precios)
+                    promedio = sum(precios) / len(precios)
+                    respuesta = f"En {zona_detectada.title()} hay {len(datos)} propiedades con precios entre ${min_precio:,.0f} y ${max_precio:,.0f} USD (promedio: ${promedio:,.0f} USD)."
+                else:
+                    respuesta = f"En {zona_detectada.title()} hay {len(datos)} propiedades disponibles, pero no hay información de precios."
+            else:
+                respuesta = f"No se encontraron propiedades en {zona_detectada.title()}."
+        else:
+            # No es una consulta analítica clara
+            return {'success': False, 'error': 'Consulta no reconocida como analítica'}
+
+    return {
+        'success': True,
+        'consulta': consulta,
+        'respuesta': respuesta,
+        'datos_encontrados': len(datos) if datos else 0,
+        'tipo_consulta': 'analitica_directa'
+    }
+
+def _procesar_solicitud_recomendacion(mensaje: str) -> dict:
+    """
+    Procesa solicitudes de recomendación (mantiene la lógica original)
+    """
+    # Intentar usar LLM si está configurado
+    perfil_extraido = None
+    respuesta_llm = None
+    recomendaciones = []
+    llm_usado = False
+    provider_usado = None
+    fallback_activado = False
+    error_details = None
+
+    try:
+        from llm_integration import LLMIntegration, LLMConfig
+
+        # Inicializar LLM con configuración principal (Z.AI)
+        llm_config = LLMConfig(
+            provider=os.getenv('LLM_PROVIDER', 'zai'),
+            api_key=os.getenv('ZAI_API_KEY'),
+            model=os.getenv('LLM_MODEL', 'glm-4.5-air')
+        )
+
+        llm = LLMIntegration(llm_config)
+
+        # Validar configuración básica
+        if llm.validar_configuracion():
+            # Usar el método con fallback automático
+            prompt = llm._build_prompt(mensaje)
+
+            try:
+                # Intentar consulta con fallback automático
+                resultado_llm = llm.consultar_con_fallback(prompt, use_fallback=True)
+
+                if resultado_llm:
+                    respuesta_llm_raw = resultado_llm['respuesta']
+                    provider_usado = resultado_llm['provider_usado']
+                    fallback_activado = resultado_llm['fallback_activado']
+                    llm_usado = True
+
+                    # Parsear el perfil desde la respuesta
+                    perfil_extraido = llm._parse_llm_response(respuesta_llm_raw)
+
+                    # Generar recomendaciones si se extrajo un perfil válido
+                    if perfil_extraido and perfil_extraido.get('presupuesto', {}).get('max'):
+                        # Adaptar perfil para el motor de recomendaciones
+                        perfil_motor = {
+                            'id': 'chat_profile',
+                            'presupuesto': perfil_extraido.get('presupuesto', {}),
+                            'composicion_familiar': perfil_extraido.get('composicion_familiar', {}),
+                            'preferencias': perfil_extraido.get('preferencias', {}),
+                            'necesidades': perfil_extraido.get('necesidades', [])
+                        }
+
+                        # Generar recomendaciones con motor mejorado
+                        resultados = motor_mejorado.generar_recomendaciones(
+                            perfil_motor,
+                            limite=6,
+                            umbral_minimo=0.05  # Reducido de 0.3 a 0.05 (5%)
+                        )
+
+                        # Formatear recomendaciones
+                        for rec in resultados:
+                            prop = rec['propiedad']
+                            caract = prop.get('caracteristicas_principales', {})
+                            if not caract:
+                                caract = {
+                                    'precio': prop.get('precio', 0),
+                                    'superficie_m2': prop.get('superficie', 0),
+                                    'habitaciones': prop.get('habitaciones', 0),
+                                    'banos_completos': prop.get('banos', 0)
+                                }
+
+                            ubicacion = prop.get('ubicacion', {})
+                            if not ubicacion:
+                                ubicacion = {
+                                    'zona': prop.get('zona', ''),
+                                    'direccion': prop.get('direccion', '')
+                                }
+
+                            recomendaciones.append({
+                                'id': prop.get('id', ''),
+                                'nombre': prop.get('tipo_propiedad', f"Propiedad en {prop.get('zona', 'Zona')}"),
+                                'precio': caract.get('precio', 0),
+                                'superficie_m2': caract.get('superficie_m2', 0),
+                                'habitaciones': caract.get('habitaciones', 0),
+                                'banos': caract.get('banos_completos', 0),
+                                'zona': ubicacion.get('zona', ''),
+                                'compatibilidad': round(rec['compatibilidad'], 1),
+                                'justificacion': rec.get('justificacion', ''),
+                                'servicios_cercanos': rec.get('servicios_cercanos', '')
+                            })
+
+                        if fallback_activado:
+                            respuesta_llm = f"He analizado tu solicitud con sistema Multi-LLM ({provider_usado}) y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
+                        else:
+                            respuesta_llm = f"He analizado tu solicitud y encontré {len(recomendaciones)} propiedades que coinciden con tu perfil."
+                    else:
+                        if fallback_activado:
+                            respuesta_llm = f"He entendido tu mensaje usando sistema Multi-LLM ({provider_usado}). ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+                        else:
+                            respuesta_llm = "He entendido tu mensaje. ¿Podrías darme más detalles sobre tu presupuesto y preferencias?"
+
+            except Exception as llm_error:
+                # Error específico en LLM - capturar detalles para debug
+                error_details = analizar_error_llm(str(llm_error))
+                print(f"[LLM ERROR] {error_details}")
+
+                # Usar análisis básico como fallback
+                perfil_extraido = extraer_perfil_basico(mensaje)
+                respuesta_llm = generar_mensaje_error_llm(error_details)
+
+        else:
+            # LLM no configurado, usar análisis básico
+            error_details = {
+                'tipo': 'config_incompleta',
+                'mensaje': 'API keys no configuradas',
+                'providers_intentados': [],
+                'errores': [],
+                'recomendacion': 'Configurar ZAI_API_KEY y OPENROUTER_API_KEY en .env'
+            }
+            perfil_extraido = extraer_perfil_basico(mensaje)
+            respuesta_llm = "Procesé tu mensaje con análisis básico. Para mejores resultados, configura la integración con Z.AI."
+
+    except ImportError as e:
+        # Módulo LLM no disponible
+        error_details = {
+            'tipo': 'modulo_no_disponible',
+            'mensaje': f'Error importando llm_integration: {str(e)}',
+            'providers_intentados': [],
+            'errores': [],
+            'recomendacion': 'Verificar instalación de dependencias'
+        }
+        perfil_extraido = extraer_perfil_basico(mensaje)
+        respuesta_llm = "Sistema básico activo. Configura Z.AI para análisis avanzado."
+
+    except Exception as e:
+        # Error general en procesamiento
+        error_details = {
+            'tipo': 'error_general',
+            'mensaje': str(e),
+            'providers_intentados': [],
+            'errores': [],
+            'recomendacion': 'Revisar logs del servidor para más detalles'
+        }
+        print(f"Error procesando mensaje de chat: {e}")
+        perfil_extraido = extraer_perfil_basico(mensaje)
+        respuesta_llm = "Hubo un problema con el análisis avanzado. Procesé tu mensaje con el sistema básico."
+
+    return {
+        'success': True,
+        'tipo_respuesta': 'recomendaciones',
+        'perfil': perfil_extraido,
+        'recomendaciones': recomendaciones,
+        'respuesta': respuesta_llm,
+        'consulta_original': mensaje,
+        'llm_usado': llm_usado,
+        'provider_usado': provider_usado,
+        'fallback_activado': fallback_activado,
+        'error_details': error_details
+    }
+
+def _generar_sugerencias_relacionadas(mensaje: str) -> list:
+    """Genera sugerencias de consultas relacionadas basadas en el mensaje original"""
+    mensaje_lower = mensaje.lower()
+    sugerencias = []
+
+    # Si menciona una zona, sugerir consultas sobre esa zona
+    zona_detectada = _detectar_zona(mensaje_lower)
+    if zona_detectada:
+        sugerencias.extend([
+            f"cuántas propiedades hay en {zona_detectada}",
+            f"cuáles son las más caras en {zona_detectada}",
+            f"precio promedio en {zona_detectada}"
+        ])
+
+    # Sugerencias generales
+    sugerencias.extend([
+        "cuáles son los departamentos más caros de equipetrol",
+        "cuántas propiedades hay en santa mónica",
+        "busco departamento en zona norte"
+    ])
+
+    # Limitar a 5 sugerencias únicas
+    return list(dict.fromkeys(sugerencias))[:5]
 
 def analizar_error_llm(error_msg: str) -> dict:
     """

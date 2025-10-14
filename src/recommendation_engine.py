@@ -139,6 +139,9 @@ class RecommendationEngine:
         presupuesto_min = presupuesto.get('min', 0)
         presupuesto_max = presupuesto.get('max', float('inf'))
 
+        # Validar precio antes de llamar a la versión cacheada
+        if precio_propiedad is None:
+            return 0.0
         # Usar la versión cacheada para mejor rendimiento
         return self._evaluar_presupuesto_cache(presupuesto_min, presupuesto_max, precio_propiedad)
 

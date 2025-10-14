@@ -91,8 +91,20 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
   - `llm_integration.py` - Sistema LLM con fallback automático a OpenRouter
   - `description_parser.py` - Sistema híbrido Regex + LLM para extracción
   - `recommendation_engine_mejorado.py` - Motor con geolocalización Haversine
-- **`scripts/`** - ETL, procesamiento y análisis de datos
-  - `build_relevamiento_dataset.py` - ETL con sistema híbrido de extracción
+- **`scripts/`** - Scripts organizados por funcionalidad
+  - `scripts/etl/` - Procesamiento ETL principal
+    - `build_relevamiento_dataset.py` - ETL con sistema híbrido de extracción
+    - `build_urban_services_dataset.py` - Integración servicios urbanos
+    - `etl_proveedor02_mejorado.py` - ETL especializado Proveedor 02
+  - `scripts/analysis/` - Análisis y reporting de datos
+    - `analizar_por_proveedor.py` - Análisis por proveedor
+    - `analizar_calidad_datos.py` - Análisis de calidad
+    - `detectar_duplicados.py` - Detección de duplicados
+  - `scripts/maintenance/` - Mantenimiento y utilidades
+    - `build_sample_inventory.py` - Generador de inventarios
+    - `geocodificar_coordenadas.py` - Geocodificación
+    - `normalizar_precios.py` - Normalización de precios
+  - `scripts/legacy/` - Scripts obsoletos y de depuración
 - **`migration/`** - Scripts y configuración para migración PostgreSQL
   - `scripts/etl_*.py` - Scripts ETL para agentes, propiedades, servicios
   - `database/01_create_schema.sql` - DDL PostgreSQL + PostGIS
@@ -134,13 +146,13 @@ python -m http.server 8080
 ### Procesamiento de Datos
 ```bash
 # Construir dataset de relevamiento (Excel -> JSON)
-python scripts/build_relevamiento_dataset.py
+python scripts/etl/build_relevamiento_dataset.py
 
 # Construir dataset de servicios urbanos
-python scripts/build_urban_services_dataset.py
+python scripts/etl/build_urban_services_dataset.py
 
 # Generar inventario de ejemplo para demostraciones
-python scripts/build_sample_inventory.py
+python scripts/maintenance/build_sample_inventory.py
 ```
 
 ### CLI para Inversores
@@ -161,10 +173,10 @@ python src/cli.py natural-query "busco propiedad con potencial de plusvalía en 
 python test_fallback_simple.py
 
 # Test de extracción con muestras del Proveedor 02
-python scripts/test_proveedor02_sample.py
+python scripts/legacy/test_proveedor02_sample.py
 
 # Análisis de calidad de datos por proveedor
-python scripts/analizar_por_proveedor.py
+python scripts/analysis/analizar_por_proveedor.py
 ```
 
 **Configuración requerida en `.env`:**
@@ -303,9 +315,9 @@ pytest tests/test_api_simple.py -v
 5. **Validation** - Quality checks and deduplication
 
 ### Key Processing Scripts
-- **`build_relevamiento_dataset.py`** - Main data processing pipeline (scraping Excel → JSON)
-- **`build_urban_services_dataset.py`** - Municipal urban guide integration
-- **`build_sample_inventory.py`** - Sample inventory generator for demos/tests
+- **`scripts/etl/build_relevamiento_dataset.py`** - Main data processing pipeline (scraping Excel → JSON)
+- **`scripts/etl/build_urban_services_dataset.py`** - Municipal urban guide integration
+- **`scripts/maintenance/build_sample_inventory.py`** - Sample inventory generator for demos/tests
 
 ## Development Guidelines
 
