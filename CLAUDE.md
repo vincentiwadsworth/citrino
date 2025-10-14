@@ -37,9 +37,9 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - Responsive design with professional UI
 
 ### Data Storage
-- **JSON format** (implementación actual con datos de scraping)
-- **PostgreSQL** planeado para futura migración
-- **1.58MB** datos procesados de propiedades de inversión
+- **JSON format** (implementación actual - siendo migrada)
+- **PostgreSQL + PostGIS** (en proceso de migración - ver `MIGRATION_PLAN.md`)
+- **1,588 propiedades** + **4,777 servicios urbanos** (escala actual)
 
 ### Arquitectura del Sistema
 
@@ -69,9 +69,20 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 #### Arquitectura de Datos
 ```
 /data/
-├── base_datos_relevamiento.json    # Base de datos de scraping (1,583 propiedades)
-├── data/processed/                 # Datos procesados y validados
-└── perfiles_inversion/               # Plantillas de perfiles de inversores
+├── base_datos_relevamiento.json          # JSON actual (siendo migrado)
+├── guia_urbana_municipal_completa.json   # Servicios urbanos (4,777)
+└── perfiles_inversion/                   # Plantillas de perfiles
+
+# Nueva estructura en migración:
+/migration/
+├── scripts/           # Scripts ETL para PostgreSQL
+├── database/          # DDL y esquemas SQL
+└── config/           # Configuración conexión
+
+# PostgreSQL (target):
+- agentes (tabla normalizada)
+- propiedades (con coordenadas GEOGRAPHY + PostGIS)
+- servicios (con índices espaciales GIST)
 ```
 
 #### Directorios Clave
@@ -79,23 +90,22 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - **`src/`** - Motores de recomendación, lógica de negocio e integración LLM
   - `llm_integration.py` - Sistema LLM con fallback automático a OpenRouter
   - `description_parser.py` - Sistema híbrido Regex + LLM para extracción
-  - `regex_extractor.py` - Extractor basado en patrones (nuevo, 2025)
-  - `recommendation_engine_mejorado.py` - Motor principal con geolocalización Haversine
+  - `recommendation_engine_mejorado.py` - Motor con geolocalización Haversine
 - **`scripts/`** - ETL, procesamiento y análisis de datos
   - `build_relevamiento_dataset.py` - ETL con sistema híbrido de extracción
-  - `test_regex_vs_llm.py` - Medición de ahorro de tokens (nuevo)
-  - `analizar_descripciones_p02.py` - Análisis de patrones Proveedor 02
-- **`tests/`** - Suite de pruebas completa (movidos desde root)
-- **`data/`** - Base de datos de propiedades (1,583) y servicios (4,777)
+- **`migration/`** - Scripts y configuración para migración PostgreSQL
+  - `scripts/etl_*.py` - Scripts ETL para agentes, propiedades, servicios
+  - `database/01_create_schema.sql` - DDL PostgreSQL + PostGIS
+- **`tests/`** - Suite de pruebas completa
+- **`data/`** - Datos JSON actuales (en proceso de migración)
 - **`assets/`** - CSS y JavaScript del frontend
 - **`docs/`** - Documentación técnica organizada
-  - `SISTEMA_HIBRIDO_EXTRACCION.md` - Detalles del sistema Regex+LLM
-  - `ARQUITECTURA_TECNICA.md` - Arquitectura y stack completo
-  - `GUIA_DESARROLLO.md` - Setup, comandos, testing
-  - `API_REFERENCE.md` - Referencia completa de endpoints
-  - `ROADMAP.md` - Plan de evolución 2025
-  - `CALIDAD_DATOS.md` - Métricas y análisis de calidad
-  - `historico/` - Documentación archivada de fases anteriores
+  - `CHANGELOG.md` - Historial de versiones (nuevo)
+  - `SCRUM_BOARD.md` - Gestión de sprint actual (nuevo)
+  - `COMMITS_PLAN.md` - Planificación detallada de commits (nuevo)
+  - `WORKFLOW.md` - Guía de flujo por commits (nuevo)
+  - `DATA_ARCHITECTURE.md` - Arquitectura y migración PostgreSQL (actualizado)
+  - `MIGRATION_PLAN.md` - Plan detallado de migración (nuevo)
 
 ## Comandos de Desarrollo
 
@@ -305,16 +315,17 @@ pytest tests/test_api_simple.py -v
 - Implement proper error handling and logging
 - Maintain thread safety for cached data
 
-### CRITICAL: PROHIBICIÓN DE EMOJIS
+### CRITICAL: PROHIBICIÓN ABSOLUTA DE EMOJIS
 **ESTRICTAMENTE PROHIBIDO usar emojis en cualquier código, comentarios, logs o documentación.**
-- **MOTIVO**: Los emojis consumen una cantidad excesiva e innecesaria de tokens
-- **REGLA**: Texto plano únicamente. Sin caracteres Unicode innecesarios
-- **CONSECUENCIA**: Violación grave de las mejores prácticas de desarrollo
-- **ALTERNATIVAS**: Use texto descriptivo en lugar de símbolos
-  - ❌ "🔴 Error" → ✅ "ERROR:"
-  - ❌ "✅ Success" → ✅ "SUCCESS:"
-  - ❌ "⚠️ Warning" → ✅ "WARNING:"
-  - ❌ "📁 File" → ✅ "FILE:"
+- **MOTIVO**: Los emojis consumen una cantidad excesiva e innecesaria de tokens y violan las mejores prácticas
+- **REGLA**: Texto plano únicamente. Sin caracteres Unicode innecesarios bajo NINGUNA circunstancia
+- **CONSECUENCIA**: Violación GRAVE de las mejores prácticas de desarrollo - NUNCA usar emojis
+- **ALTERNATIVAS**: Use texto descriptivo en lugar de símbolos SIEMPRE
+  - ERROR: "Error" (NUNCA usar emojis)
+  - SUCCESS: "Success" (NUNCA usar emojis)
+  - WARNING: "Warning" (NUNCA usar emojis)
+  - FILE: "File" (NUNCA usar emojis)
+- **IMPORTANTE**: Esta regla es INFLEXIBLE y se aplica a TODO el código, comentarios, logs y documentación
 
 ### Data Handling
 - Always validate coordinates before distance calculations
@@ -348,17 +359,70 @@ streamlit run demo_stable.py    # Start demo interface
 - Consultas directas a la API de recomendaciones
 - Pantalla de bienvenida y UI alineadas con los flujos internos
 
+## Migration to PostgreSQL + PostGIS (2025)
+
+### Current Status: In Progress
+- **Target**: PostgreSQL 15+ con PostGIS 3.3+
+- **Source**: 1,588 propiedades + 4,777 servicios urbanos
+- **Goal**: Queries geoespaciales de segundos → milisegundos
+- **Based on**: Investigación experta con Tongyi
+
+### Nueva Arquitectura de Datos
+```sql
+-- Tablas principales con PostGIS
+CREATE TABLE propiedades (
+    id BIGSERIAL PRIMARY KEY,
+    coordenadas GEOGRAPHY(POINT, 4326) NOT NULL,
+    -- Indices GIST para búsquedas espaciales
+);
+
+CREATE TABLE servicios (
+    id BIGSERIAL PRIMARY KEY,
+    coordenadas GEOGRAPHY(POINT, 4326) NOT NULL,
+    -- Optimizado para ST_DWithin queries
+);
+```
+
+### Scripts de Migración
+- `migration/scripts/01_etl_agentes.py` - Deduplicación de agentes
+- `migration/scripts/02_etl_propiedades.py` - Migración con coordenadas PostGIS
+- `migration/scripts/03_etl_servicios.py` - Servicios urbanos con índices
+- `migration/scripts/04_validate_migration.py` - Validación completa
+
+### Plan de Ejecución
+```bash
+# 1. Preparar PostgreSQL
+export DB_HOST=localhost DB_NAME=citrino DB_USER=postgres
+psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f migration/database/01_create_schema.sql
+
+# 2. Ejecutar ETLs
+python migration/scripts/01_etl_agentes.py
+python migration/scripts/02_etl_propiedades.py
+python migration/scripts/03_etl_servicios.py
+
+# 3. Validar
+python migration/scripts/04_validate_migration.py
+
+# 4. Activar nuevo sistema
+export USE_POSTGRES=true
+python api/server.py
+```
+
+### Documentación Completa
+- **`DATA_ARCHITECTURE.md`** - Arquitectura completa y transformación de queries
+- **`MIGRATION_PLAN.md`** - DDL completo, scripts ETL y validación
+- **`COMMITS_PLAN.md`** - Plan detallado de implementación por commits
+
 ## Future Development
 
-### Planned Enhancements
-- PostgreSQL migration for better performance
-- LLM integration for natural language queries
-- Mobile app for real estate agents
-- Advanced analytics dashboard
-- WhatsApp integration for notifications
+### Post-Migration Enhancements
+- Motor de recomendación optimizado para PostGIS
+- Capacidades analíticas avanzadas con SQL espacial
+- Dashboard en tiempo real con consultas complejas
+- Sistema de actualizaciones incrementales concurrentes
 
 ### Data Quality Improvements
-- Repair 46.6% of corrupted zones
-- Implement automatic validation controls
-- Intelligent deduplication between data sources
-- Real-time quality monitoring dashboard
+- Deduplicación automática con algoritmos mejorados
+- Validación de coordenadas geoespaciales
+- Sistema de confianza por proveedor de datos
+- Monitoreo de calidad en tiempo real
