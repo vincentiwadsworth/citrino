@@ -20,6 +20,12 @@ Historial de versiones y cambios del sistema de análisis inmobiliario.
 - Documentación de transición de arquitectura
 - Plan de migración a base de datos optimizada
 
+### Limpieza de Repositorio
+- Eliminados archivos JSON temporales (test_*.json)
+- Removidos scripts de debug (debug_*.py)
+- Limpiada documentación temporal obsoleta
+- Validado funcionamiento del sistema post-limpieza
+
 ---
 
 ## v1.8.5 - 2025-10-14
