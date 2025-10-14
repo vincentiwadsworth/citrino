@@ -1,25 +1,57 @@
-# 🚀 Plan de Migración: JSON a PostgreSQL + PostGIS
+# 🚀 Plan de Migración a PostgreSQL + PostGIS
 
-**Versión**: 1.0
-**Fecha**: 2025-10-14
-**Basado en**: Investigación Tongyi + Arquitectura Citrino
-**Objetivo**: Migración completa con rendimiento optimizado y rollback seguro
+**Documentación completa para la migración desde JSON centralizado a PostgreSQL + PostGIS**
 
 ---
 
 ## 📋 Resumen Ejecutivo
 
-### Migración Estratégica
-- **Origen**: Archivos JSON centralizados (1,588 propiedades + 4,777 servicios)
-- **Destino**: PostgreSQL 15+ con PostGIS 3.3+
-- **Resultado**: Consultas geoespaciales de segundos → milisegundos
-- **Seguridad**: Rollback instantáneo disponible
+### Objetivo Principal
+Migrar el sistema de Citrino desde archivos JSON a PostgreSQL + PostGIS para mejorar drásticamente el rendimiento de consultas geoespaciales, escalabilidad y mantenibilidad.
 
-### Beneficios Clave
-1. **Performance**: Índices GIST para búsquedas espaciales ultra rápidas
-2. **Integridad**: Transacciones ACID y claves foráneas
-3. **Escalabilidad**: Soporte para 10x crecimiento de datos
-4. **Concurrencia**: Múltiples usuarios sin bloqueos
+### Impacto Esperado
+- **Rendimiento**: Consultas geoespaciales de segundos → milisegundos (95% de mejora)
+- **Escalabilidad**: Capacidad para 10x crecimiento sin degradación
+- **Concurrencia**: Múltiples usuarios sin bloqueos
+- **Calidad**: Deduplicación automática y validación de datos
+
+### Datos a Migrar
+- **1,588 propiedades** con coordenadas geoespaciales
+- **4,777 servicios urbanos** (colegios, hospitales, etc.)
+- **Agentes inmobiliarios** (deduplicación automática)
+
+---
+
+## 🗄️ Arquitectura Actual vs Destino
+
+### Sistema Actual (JSON)
+```
+/data/
+├── base_datos_relevamiento.json    # 1,588 propiedades
+└── guia_urbana_municipal_completa.json  # 4,777 servicios
+
+Limitaciones:
+- Consultas O(n×m): 7,585,876 cálculos por búsqueda
+- Sin concurrencia en actualizaciones
+- Duplicación de agentes
+- Performance: segundos por consulta geoespacial
+```
+
+### Sistema Propuesto (PostgreSQL + PostGIS)
+```
+PostgreSQL Database:
+├── agentes (tabla normalizada)
+├── propiedades (con coordenadas GEOGRAPHY)
+├── servicios (con índices espaciales GIST)
+├── proveedores_datos
+└── migration_log
+
+Ventajas:
+- Consultas con índices: milisegundos
+- Integridad referencial completa
+- Concurrencia transaccional
+- Deduplicación automática
+```
 
 ---
 
