@@ -26,6 +26,13 @@ Historial de versiones y cambios del sistema de análisis inmobiliario.
 - Limpiada documentación temporal obsoleta
 - Validado funcionamiento del sistema post-limpieza
 
+### Documentación de Arquitectura Completa
+- Documentación completa de arquitectura actual basada en JSON
+- Análisis detallado de problemas y limitaciones críticas
+- Justificación técnica y de negocio para migración PostgreSQL
+- Especificaciones completas para nueva arquitectura
+- Plan de migración con ETL, DDL y validación
+
 ---
 
 ## v1.8.5 - 2025-10-14
