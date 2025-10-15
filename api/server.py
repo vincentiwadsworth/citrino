@@ -98,6 +98,16 @@ def inicializar_datos():
 print("Iniciando carga de datos...")
 inicializar_datos()
 
+# Importar y configurar Chatbot API
+try:
+    from chatbot_completions import create_chatbot_routes, chatbot_api
+    create_chatbot_routes(app)
+    logger.info("Chatbot API integrada correctamente")
+except ImportError as e:
+    logger.warning(f"No se pudo importar Chatbot API: {e}")
+except Exception as e:
+    logger.error(f"Error configurando Chatbot API: {e}")
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Verifica que el API está funcionando"""

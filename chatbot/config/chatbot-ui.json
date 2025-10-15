@@ -1,0 +1,51 @@
+{
+  "name": "Citrino Chat",
+  "description": "Asistente inmobiliario especializado en Santa Cruz de la Sierra",
+  "botName": "Citrino Assistant",
+  "avatar": "/citrino-logo.png",
+  "theme": {
+    "primaryColor": "#667eea",
+    "secondaryColor": "#764ba2"
+  },
+  "models": [
+    {
+      "id": "citrino-v1",
+      "name": "Citrino Property Expert",
+      "provider": "openai",
+      "apiBase": "http://host.docker.internal:5001/v1",
+      "description": "Modelo especializado en propiedades y mercado inmobiliario de Santa Cruz",
+      "temperature": 0.1,
+      "maxTokens": 4000
+    }
+  ],
+  "defaultModel": "citrino-v1",
+  "features": {
+    "chatHistory": true,
+    "markdown": true,
+    "codeHighlighting": true,
+    "latex": false,
+    "imageGeneration": false,
+    "shareChats": false,
+    "exportChats": true
+  },
+  "welcomeMessage": "¡Hola! Soy el asistente inmobiliario de Citrino. Puedo ayudarte a:\n\n• Buscar propiedades según tus criterios\n• Analizar el mercado por zona\n• Encontrar servicios cercanos\n• Evaluar oportunidades de inversión\n\n¿Qué estás buscando hoy?",
+  "systemPrompt": "Eres el asistente inmobiliario experto de Citrino, especializado en el mercado de Santa Cruz de la Sierra, Bolivia.\n\nTienes acceso a:\n- Base de datos de 1,385 propiedades actualizadas\n- Análisis de mercado por zona\n- Sistema de georreferenciación\n- Algoritmos de recomendación personalizada\n\nTus capacidades:\n- Búsqueda natural de propiedades\n- Análisis de tendencias del mercado\n- Recomendaciones basadas en preferencias\n- Información sobre servicios urbanos cercanos\n\nSiempre responde en español boliviano, sé profesional pero amigable, y enfócate en proporcionar información precisa y útil para decisiones inmobiliarias.\n\nCuando busques propiedades, considera:\n- Presupuesto del cliente\n- Zonas de preferencia\n- Características específicas\n- Proximidad a servicios importantes\n- Potencial de plusvalía\n\nSi no tienes información sobre algo específico, indícalo claramente y sugiere alternativas disponibles.",
+  "examples": [
+    {
+      "title": "Buscar propiedades",
+      "prompt": "Busca casas de 3 dormitorios en Equipetrol con presupuesto hasta 200.000 USD"
+    },
+    {
+      "title": "Análisis de zona",
+      "prompt": "¿Cuál es el precio promedio por metro cuadrado en Santa Mónica?"
+    },
+    {
+      "title": "Inversión",
+      "prompt": "Muéstrame departamentos con potencial de renta en zona norte"
+    },
+    {
+      "title": "Servicios cercanos",
+      "prompt": "¿Qué colegios y hospitales hay cerca de propiedades en Urbari?"
+    }
+  ]
+}

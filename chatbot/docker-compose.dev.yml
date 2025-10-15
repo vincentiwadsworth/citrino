@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  chatbot-ui:
+    image: ghcr.io/mckaywrigley/chatbot-ui:main
+    container_name: citrino-chatbot-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-placeholder}
+      - OPENAI_API_BASE_URL=http://host.docker.internal:5001/v1
+      - DEFAULT_MODEL=citrino-v1
+      - PUBLIC_GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID:-}
+      - PUBLIC_ANNOUNCEMENT_BANNERS=${ANNOUNCEMENT_BANNERS:-}
+    volumes:
+      - ./config:/app/config
+      - ./db:/app/db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - citrino-api
+    networks:
+      - citrino-network
+
+  citrino-api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: citrino-api
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+      - PORT=5001
+      - ZAI_API_KEY=${ZAI_API_KEY}
+      - LLM_PROVIDER=zai
+      - LLM_MODEL=glm-4.6
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=qwen/qwen-2.5-72b-instruct:free
+    volumes:
+      - ../data:/app/data
+      - ../src:/app/src
+    networks:
+      - citrino-network
+
+networks:
+  citrino-network:
+    driver: bridge
+
+volumes:
+  chatbot-db:
+    driver: local

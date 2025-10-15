@@ -434,5 +434,40 @@ citrino-clean/
 
 ---
 
-*Última actualización: 2025-10-14 (basado en investigación Tongyi)*
-**Próxima fase**: Implementación de scripts ETL y DDL PostgreSQL
+---
+
+## 🤖 Integración con Chatbot UI (v2.1.0)
+
+### Sistema Conversacional
+El nuevo chatbot profesional integrado en v2.1.0 utiliza la arquitectura de datos actual (JSON) pero está preparado para migración PostgreSQL:
+
+```python
+# api/chatbot_completions.py
+class CitrinoChatbotAPI:
+    def __init__(self):
+        self.propiedades = self._load_properties()  # JSON actual
+        self.recommendation_engine = RecommendationEngineMejorado()
+
+    def generate_property_search_response(self, entities):
+        # Sistema híbrido actual - pronto migrará a PostgreSQL
+        if self.recommendation_engine:
+            recomendaciones = self.recommendation_engine.generar_recomendaciones(
+                perfil, limite=5, umbral_minimo=0.01
+            )
+```
+
+### Preparación para Migración
+- **Data source abstraction**: Capa de abstracción lista para PostgreSQL
+- **API endpoints consistentes**: Mismos endpoints durante y post-migración
+- **Performance monitoring**: Métricas actuales baseline vs mejoras PostgreSQL esperadas
+
+### Beneficios Esperados con PostgreSQL
+- **Chatbot response time**: De 2s → <200ms con consultas PostGIS
+- **Concurrent users**: Soporte multiusuario sin bloqueos
+- **Advanced queries**: Búsqueda geoespacial compleja en tiempo real
+- **Data freshness**: Actualizaciones incrementales concurrentes
+
+---
+
+*Última actualización: 2025-10-15 (con integración Chatbot UI v2.1.0)*
+**Estado actual**: Chatbot UI operativo con JSON, migración PostgreSQL preparada
