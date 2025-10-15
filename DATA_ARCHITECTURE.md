@@ -423,7 +423,7 @@ citrino-clean/
 ### Cambios Inmediatos
 - **Recomendation Engine**: Migración de Haversine Python a PostGIS
 - **API Server**: Nuevos endpoints para consultas PostgreSQL
-- **ETL Process**: Sistema de migración desde JSON
+- **ETL Process**: Sistema de procesamiento de datos
 - **Configuration**: Sistema switching JSON/PostgreSQL
 
 ### Beneficios a Largo Plazo

@@ -8,7 +8,7 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 
 ### Enfoque Principal
 - **Objetivo**: Herramienta de trabajo para el equipo de Citrino al atender a sus clientes inversores (no orientada al público general)
-- **Datos procesados**: Conjuntos JSON mantenidos por Citrino con propiedades y servicios urbanos actualizados
+- **Datos procesados**: Base de datos con propiedades y servicios urbanos actualizados
 - **Usuarios internos**: Analistas de datos, consultores de inversión y equipo comercial de Citrino
 - **Criterios de análisis**: Ponderaciones configurables, cobertura de servicios cercanos y cálculos basados en distancias Haversine
 
@@ -20,7 +20,7 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - **LLM Primario**: Z.AI GLM-4.6 para análisis y extracción de datos
 - **LLM Fallback**: OpenRouter con Qwen2.5 72B (gratuito, 2025)
 - **Extracción Híbrida**: Sistema Regex + LLM (80% sin LLM, 90% reducción tokens)
-- **Datos**: JSON con 1,583 propiedades + 4,777 servicios urbanos
+- **Datos**: Base de datos con propiedades y servicios urbanos actualizados
 
 ## Technology Stack
 
@@ -37,9 +37,8 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - Responsive design with professional UI
 
 ### Data Storage
-- **JSON format** (implementación actual - siendo migrada)
-- **PostgreSQL + PostGIS** (en proceso de migración - ver `MIGRATION_PLAN.md`)
-- **1,588 propiedades** + **4,777 servicios urbanos** (escala actual)
+- **Base de datos principal** (implementación actual)
+- Propiedades y servicios urbanos con actualizaciones dinámicas
 
 ### Arquitectura del Sistema
 
@@ -145,7 +144,7 @@ python -m http.server 8080
 
 ### Procesamiento de Datos
 ```bash
-# Construir dataset de relevamiento (Excel -> JSON)
+# Procesar datos de relevamiento
 python scripts/etl/build_relevamiento_dataset.py
 
 # Construir dataset de servicios urbanos
@@ -315,7 +314,7 @@ pytest tests/test_api_simple.py -v
 5. **Validation** - Quality checks and deduplication
 
 ### Key Processing Scripts
-- **`scripts/etl/build_relevamiento_dataset.py`** - Main data processing pipeline (scraping Excel → JSON)
+- **`scripts/etl/build_relevamiento_dataset.py`** - Main data processing pipeline
 - **`scripts/etl/build_urban_services_dataset.py`** - Municipal urban guide integration
 - **`scripts/maintenance/build_sample_inventory.py`** - Sample inventory generator for demos/tests
 

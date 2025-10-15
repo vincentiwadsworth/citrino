@@ -41,7 +41,7 @@ python scripts/detectar_duplicados.py
 ### Procesamiento ETL
 
 ```bash
-# Regenerar dataset de relevamiento (Excel → JSON)
+# Regenerar dataset de relevamiento
 python scripts/build_relevamiento_dataset.py
 
 # Regenerar servicios urbanos
