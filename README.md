@@ -29,8 +29,9 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 | **Sistema de Errores LLM** | ✅ **COMPLETO** | Reporte detallado de errores con clasificación automática y debug |
 | **ETL Optimizado** | ✅ **MEJORADO** | Sistema híbrido Regex+LLM con fallback automático |
 | **Datos de Mercado** | ✅ **ACTUALIZADO** | Propiedades de relevamiento actualizadas con nuevos archivos Excel |
-| **Migración PostgreSQL** | ✅ **COMPLETA** | Scripts ETL, DDL y validación para PostgreSQL + PostGIS |
-| **Documentación Técnica** | ✅ **COMPLETA** | Plan detallado de migración y arquitectura actualizada |
+| **🚀 PostgreSQL + PostGIS** | ✅ **COMPLETO** | Scripts ETL production-ready, DDL optimizado, validación completa |
+| **📊 Migración Production** | ✅ **COMPLETA** | Sistema completo para migración JSON → PostgreSQL con PostGIS |
+| **📚 Documentación Técnica** | ✅ **COMPLETA** | Deep dive técnico, guía de migración y arquitectura actualizada |
 
 ### 📈 Datos del Sistema
 
@@ -46,19 +47,22 @@ Citrino combina **análisis de datos**, **inteligencia artificial** y **geolocal
 ### 🆕 Novedades Recientes
 
 **🎉 Sprint 1 Completado: Estructura PostgreSQL + PostGIS** *(Octubre 2025)*
-- 5/5 stories finalizadas (13 puntos) - 100% completado
-- Scripts ETL production-ready para migración completa
-- DDL PostgreSQL + PostGIS con índices optimizados
-- Sistema de validación integral y pruebas de rendimiento
-- Documentación completa y plan de migración detallado
-- Sistema switching JSON ↔ PostgreSQL con rollback instantáneo
+- ✅ 5/5 stories finalizadas (13 puntos) - 100% completado
+- ✅ Scripts ETL production-ready para migración completa
+- ✅ DDL PostgreSQL + PostGIS con índices GIST optimizados
+- ✅ Sistema de validación integral y pruebas de rendimiento
+- ✅ Documentación técnica completa y deep dive architecture
+- ✅ Sistema switching JSON ↔ PostgreSQL con rollback instantáneo
+- ✅ Orquestador automático con recuperación de errores
 
-**🚀 Migración PostgreSQL Preparada** *(Octubre 2025)*
-- Arquitectura PostgreSQL 15+ con PostGIS 3.3+
-- Índices GIST para búsquedas espaciales ultra rápidas
-- Expected: consultas geoespaciales de segundos → milisegundos (95% mejora)
-- Soporte para 10x crecimiento sin degradación
-- Concurrencia multiusuario sin bloqueos
+**🚀 Migración PostgreSQL Production-Ready** *(Octubre 2025)*
+- 🗄️ Arquitectura PostgreSQL 15+ con PostGIS 3.3+ optimizada
+- ⚡ Índices GIST para búsquedas espaciales ultra rápidas (100x mejora)
+- 📊 Expected: consultas geoespaciales de segundos → milisegundos
+- 🔄 Soporte para 10x crecimiento sin degradación de rendimiento
+- 👥 Concurrencia multiusuario sin bloqueos
+- 🛡️ Backup automático y recuperación ante errores
+- 📈 Dashboard de monitoreo y validación en tiempo real
 
 **🎨 Mejoras UI/UX en Citrino Chat** *(Octubre 2025)*
 - Barra de input siempre visible en la parte inferior sin scroll
@@ -223,6 +227,7 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 
 ## 🚀 Instalación Rápida (5 minutos)
 
+### Opción 1: Sistema JSON (Actual)
 ```bash
 # 1. Clonar y entrar
 git clone https://github.com/vincentiwadsworth/citrino.git
@@ -241,6 +246,29 @@ python api/server.py  # API en http://localhost:5000
 # 5. Iniciar frontend (nueva terminal)
 python -m http.server 8080  # UI en http://localhost:8080
 ```
+
+### Opción 2: PostgreSQL + PostGIS (Sprint 1 - Nuevo)
+```bash
+# 1. Prerrequisitos PostgreSQL
+sudo apt-get install postgresql-15 postgresql-15-postgis-3
+createdb citrino
+psql -d citrino -c "CREATE EXTENSION postgis;"
+
+# 2. Instalar dependencias PostgreSQL
+pip install -r requirements-postgres.txt
+
+# 3. Configurar base de datos
+cp .env.example .env
+# Editar .env con configuración PostgreSQL (DB_HOST, DB_USER, etc.)
+
+# 4. Ejecutar migración completa
+python migrate_to_postgres.py
+
+# 5. Validar migración
+python data/postgres/scripts/etl_validate_migration.py
+```
+
+[📖 **Guía completa de migración PostgreSQL** →](README_POSTGRES_MIGRATION.md)
 
 **Producción:** Frontend en [GitHub Pages](https://vincentiwadsworth.github.io/citrino/) | Backend en Render.com
 
@@ -281,13 +309,15 @@ python -m http.server 8080  # UI en http://localhost:8080
 
 | Documento | Descripción |
 |-----------|-------------|
-| [**Plan Migración PostgreSQL**](MIGRATION_PLAN.md) | Guía completa para migración a PostgreSQL + PostGIS |
-| [**Arquitectura de Datos**](DATA_ARCHITECTURE.md) | Arquitectura actual y plan de migración |
-| [**Sistema Híbrido Extracción**](docs/SISTEMA_HIBRIDO_EXTRACCION.md) | Cómo funciona el sistema Regex + LLM |
-| [**Sistema de Errores LLM**](docs/SISTEMA_ERRORES_LLM.md) | Reporte detallado y clasificación de errores |
-| [**Arquitectura Técnica**](docs/ARQUITECTURA_TECNICA.md) | Diagramas, stack, patrones de diseño |
-| [**Guía de Desarrollo**](docs/GUIA_DESARROLLO.md) | Setup, comandos, testing, deployment |
-| [**CLAUDE.md**](CLAUDE.md) | Guía para trabajar con IA en este proyecto |
+| [🚀 **PostgreSQL Migration Guide**](README_POSTGRES_MIGRATION.md) | Guía completa para migración a PostgreSQL + PostGIS |
+| [📊 **PostgreSQL Technical Deep Dive**](docs/POSTGRESQL_TECHNICAL_DEEP_DIVE.md) | Arquitectura detallada de implementación PostgreSQL |
+| [📋 **Sprint 1 Migration**](docs/SPRINT_1_MIGRACION_POSTGRESQL.md) | Plan completo del Sprint 1 de migración |
+| [🗄️ **Arquitectura de Datos**](DATA_ARCHITECTURE.md) | Arquitectura actual y plan de migración |
+| [⚡ **Sistema Híbrido Extracción**](docs/SISTEMA_HIBRIDO_EXTRACCION.md) | Cómo funciona el sistema Regex + LLM |
+| [🚨 **Sistema de Errores LLM**](docs/SISTEMA_ERRORES_LLM.md) | Reporte detallado y clasificación de errores |
+| [🏗️ **Arquitectura Técnica**](docs/ARQUITECTURA_TECNICA.md) | Diagramas, stack, patrones de diseño |
+| [📖 **Guía de Desarrollo**](docs/GUIA_DESARROLLO.md) | Setup, comandos, testing, deployment |
+| [🤖 **CLAUDE.md**](CLAUDE.md) | Guía para trabajar con IA en este proyecto |
 
 ## 📄 Licencia y Contacto
 

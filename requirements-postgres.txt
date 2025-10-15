@@ -1,0 +1,53 @@
+# Dependencias para Sprint 1 PostgreSQL Migration
+# Instalar con: pip install -r requirements-postgres.txt
+
+# Base de datos PostgreSQL
+psycopg2-binary==2.9.9              # Driver PostgreSQL para Python
+psycopg2==2.9.9                      # Alternative driver (para sistemas que lo requieran)
+
+# Procesamiento de datos
+pandas==2.1.4                        # DataFrames y procesamiento
+numpy==1.25.2                        # Computación numérica
+openpyxl==3.1.2                      # Lectura/Escritura Excel
+xlrd==2.0.1                          # Lectura Excel (legacy)
+
+# Utilidades para ETL
+python-dotenv==1.0.0                 # Variables de entorno
+pathlib2==2.3.7                      # Path utilities (Python < 3.4)
+typing-extensions==4.8.0             # Type hints extensions
+
+# Validación y procesamiento de texto
+unicodedata2==15.1.1                 # Unicode normalization
+difflib2==0.1.0                      # Sequence matching (para deduplicación)
+regex==2023.10.3                     # Expresiones regulares avanzadas
+
+# Logging y monitoreo
+colorlog==6.8.0                      # Colored logging
+tqdm==4.66.1                         # Progress bars
+
+# Geoprocesamiento (opcional, para validación avanzada)
+shapely==2.0.2                       # Geometric objects
+fiona==1.9.5                         # Vector data I/O
+pyproj==3.6.1                        # Coordinate transformations
+
+# Utilidades de sistema
+python-dateutil==2.8.2               # Date utilities
+pytz==2023.3                         # Timezone handling
+hashlib-compat==1.0.2                # Hash utilities
+
+# Testing (para desarrollo)
+pytest==7.4.3                        # Testing framework
+pytest-cov==4.1.0                    # Coverage testing
+pytest-mock==3.12.0                  # Mock objects
+
+# Development tools
+black==23.11.0                       # Code formatting
+flake8==6.1.0                        # Linting
+mypy==1.7.1                          # Type checking
+
+# Notas sobre dependencias:
+# =======================
+# 1. psycopg2-binary es recomendado para desarrollo
+# 2. Para producción, considere compilar psycopg2 desde fuente
+# 3. PostGIS debe estar instalado en PostgreSQL antes de ejecutar migración
+# 4. Requiere PostgreSQL 15+ y PostGIS 3.3+ para rendimiento óptimo
