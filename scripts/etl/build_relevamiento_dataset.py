@@ -25,7 +25,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Agregar path para importar extractor de zonas y parser LLM
-sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 try:
     from zonas_extractor import ZonasExtractor
@@ -439,12 +438,38 @@ class ProcesadorDatosRelevamiento:
 
         try:
             # Remover símbolos y texto
-            precio_str = str(precio)
-            precio_str = precio_str.replace('$', '').replace('USD', '').replace('US$', '')
-            precio_str = precio_str.replace(',', '').replace('.', '').replace(' ', '')
+            precio_str = str(precio).strip()
+
+            # Si es precio inválido como "0.00 BOB", intentar extraer de descripción
+            if precio_str in ['0.00 BOB', '0,00 BOB', '0 BOB', '0', '0.00', '0,00', 'NaN', 'nan']:
+                return None
+
+            # Remover símbolos de moneda
+            precio_str = re.sub(r'[USD$US\$\sBOB|Bs|Bs\.]', '', precio_str)
+
+            # Manejar diferentes formatos de separadores decimales
+            if ',' in precio_str and '.' in precio_str:
+                # Si tiene ambos, asumir formato europeo: 1.234,56 -> 1234.56
+                precio_str = precio_str.replace('.', '').replace(',', '.')
+            elif ',' in precio_str and precio_str.count(',') == 1:
+                # Si solo tiene una coma, podría ser decimal: 1234,56 -> 1234.56
+                if len(precio_str.split(',')) == 2:
+                    partes = precio_str.split(',')
+                    if len(partes[1]) <= 2:  # Probablemente decimal
+                        precio_str = precio_str.replace(',', '.')
+                    else:  # Probablemente separador de miles
+                        precio_str = precio_str.replace(',', '')
+
+            # Remover espacios restantes
+            precio_str = precio_str.replace(' ', '')
 
             # Convertir a número
             precio_num = float(precio_str)
+
+            # Ignorar precios irrazonablemente bajos o altos
+            if precio_num <= 0 or precio_num > 10000000:  # 10 millones como máximo
+                return None
+
             return precio_num
         except:
             return None
@@ -456,10 +481,10 @@ class ProcesadorDatosRelevamiento:
 
         try:
             coord_num = float(coord)
-            # Validar rangos para Santa Cruz, Bolivia
-            # Latitud: entre -18.0 y -17.0
-            # Longitud: entre -63.5 y -63.0
-            if not (-18.0 <= coord_num <= -17.0) and not (-63.5 <= coord_num <= -63.0):
+            # Validar rangos para Santa Cruz, Bolivia (expandido)
+            # Latitud: entre -19.0 y -16.0 (rango más amplio)
+            # Longitud: entre -65.0 y -62.0 (rango más amplio)
+            if not (-19.0 <= coord_num <= -16.0) and not (-65.0 <= coord_num <= -62.0):
                 return None
             return coord_num
         except:
@@ -537,11 +562,19 @@ class ProcesadorDatosRelevamiento:
 
     def validar_propiedad(self, propiedad: Dict[str, Any]) -> bool:
         """Valida que la propiedad tenga datos mínimos requeridos."""
-        # Requerir al menos precio o coordenadas
-        if not propiedad.get('precio') and not (propiedad.get('latitud') and propiedad.get('longitud')):
+        # Requerir al menos uno de: título, precio, coordenadas, o descripción larga
+        tiene_titulo = bool(propiedad.get('titulo') and propiedad.get('titulo').strip())
+        tiene_precio = bool(propiedad.get('precio'))
+        tiene_coordenadas = bool(propiedad.get('latitud') and propiedad.get('longitud'))
+        tiene_descripcion = bool(propiedad.get('descripcion') and len(propiedad.get('descripcion', '')) > 50)
+
+        # Al menos necesita título O descripción larga, Y precio O coordenadas
+        if not (tiene_titulo or tiene_descripcion):
             return False
 
-        # El tipo de propiedad se puede extraer del título, así que no es obligatorio aquí
+        if not (tiene_precio or tiene_coordenadas):
+            return False
+
         return True
 
     def procesar_todos_los_archivos(self, limitar_muestra: bool = False, max_registros: int = 3) -> List[Dict[str, Any]]:

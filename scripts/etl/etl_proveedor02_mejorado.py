@@ -15,7 +15,7 @@ from typing import List, Dict, Any
 import logging
 
 # Agregar path para importar módulos
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
 from regex_extractor import RegexExtractor
 from description_parser import DescriptionParser

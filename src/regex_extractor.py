@@ -185,15 +185,23 @@ class RegexExtractor:
         for pattern in self.precio_patterns:
             match = re.search(pattern, texto, re.IGNORECASE)
             if match:
-                # Obtener el grupo capturado (puede estar en group(1) o group(2))
-                precio_str = match.group(1) if match.group(1) else match.group(2) if len(match.groups()) > 1 else None
-                if precio_str:
-                    # Limpiar y convertir
-                    precio_str = precio_str.replace(',', '').replace('.', '')
-                    try:
-                        return float(precio_str)
-                    except ValueError:
-                        continue
+                # Obtener el grupo capturado (manejar diferentes números de grupos)
+                groups = match.groups()
+                if groups:
+                    # Buscar el primer grupo no nulo
+                    precio_str = None
+                    for group in groups:
+                        if group is not None:
+                            precio_str = group
+                            break
+
+                    if precio_str:
+                        # Limpiar y convertir
+                        precio_str = precio_str.replace(',', '').replace('.', '')
+                        try:
+                            return float(precio_str)
+                        except ValueError:
+                            continue
         return None
     
     def extract_moneda(self, texto: str) -> str:
@@ -212,20 +220,21 @@ class RegexExtractor:
         for pattern in self.superficie_patterns:
             match = re.search(pattern, texto, re.IGNORECASE)
             if match:
-                if len(match.groups()) == 2:
+                groups = match.groups()
+                if len(groups) == 2 and groups[0] is not None and groups[1] is not None:
                     # Formato axb (calcular área)
                     try:
-                        a = float(match.group(1).replace(',', '.'))
-                        b = float(match.group(2).replace(',', '.'))
+                        a = float(groups[0].replace(',', '.'))
+                        b = float(groups[1].replace(',', '.'))
                         return round(a * b, 2)
-                    except ValueError:
+                    except (ValueError, AttributeError):
                         continue
-                else:
+                elif groups and groups[0] is not None:
                     # Formato directo
                     try:
-                        sup_str = match.group(1).replace(',', '').replace('.', '')
+                        sup_str = groups[0].replace(',', '').replace('.', '')
                         return float(sup_str)
-                    except ValueError:
+                    except (ValueError, AttributeError):
                         continue
         return None
     
@@ -233,23 +242,26 @@ class RegexExtractor:
         """Extrae el número de habitaciones."""
         for pattern in self.habitaciones_patterns:
             match = re.search(pattern, texto, re.IGNORECASE)
-            if match and match.group(1):
-                try:
-                    return int(match.group(1))
-                except ValueError:
-                    continue
+            if match:
+                groups = match.groups()
+                if groups and groups[0] is not None:
+                    try:
+                        return int(groups[0])
+                    except (ValueError, AttributeError):
+                        continue
         return None
-    
+
     def extract_banos(self, texto: str) -> Optional[float]:
         """Extrae el número de baños (permite medio baño: 1.5)."""
         for pattern in self.banos_patterns:
             match = re.search(pattern, texto, re.IGNORECASE)
             if match:
-                if match.group(1):
+                groups = match.groups()
+                if groups and groups[0] is not None:
                     try:
                         # Permite valores como 1.5 (medio baño)
-                        return float(match.group(1))
-                    except ValueError:
+                        return float(groups[0])
+                    except (ValueError, AttributeError):
                         continue
                 else:
                     # Si solo dice "baño privado" sin número, asumir 1
