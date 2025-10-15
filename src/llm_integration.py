@@ -514,6 +514,30 @@ JSON:"""
         # Si todos los providers fallaron
         raise ConnectionError(f"Todos los providers fallaron: {'; '.join(errores)}")
     
+    def extract_structured_data(self, prompt: str, text_to_analyze: str = "") -> str:
+        """
+        Extrae datos estructurados usando LLM con un prompt específico.
+
+        Args:
+            prompt: Prompt para extracción estructurada
+            text_to_analyze: Texto a analizar (opcional, puede estar en el prompt)
+
+        Returns:
+            Respuesta del LLM con datos estructurados (generalmente JSON)
+
+        Raises:
+            ValueError: Si el proveedor no está soportado o hay error en la respuesta
+            ConnectionError: Si hay error de conexión
+        """
+        # Usar el método consultar con fallback
+        try:
+            resultado = self.consultar_con_fallback(prompt)
+            return resultado["respuesta"]
+        except Exception as e:
+            print(f"Error en extract_structured_data: {e}")
+            # Fallback: usar consultar simple
+            return self.consultar(prompt)
+
     def consultar(self, prompt: str) -> str:
         """
         Realiza una consulta genérica al LLM.
