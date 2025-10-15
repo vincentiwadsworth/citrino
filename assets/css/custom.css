@@ -565,6 +565,189 @@
     }
 }
 
+/* ===== v2.2.0 Update Cards ===== */
+.update-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+    height: 100%;
+    border-left: 4px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.update-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--citrino-primary), var(--citrino-info));
+}
+
+.update-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-left-color: var(--citrino-primary);
+}
+
+.update-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.update-card:hover .update-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ===== Migration Section Styles ===== */
+.migration-highlights {
+    position: relative;
+}
+
+.highlight-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid #dee2e6;
+    position: relative;
+    overflow: hidden;
+}
+
+.highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--citrino-gradient);
+}
+
+.highlight-card h5 {
+    color: var(--citrino-primary);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.highlight-card ul li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.highlight-card ul li:hover {
+    background: rgba(13, 110, 253, 0.05);
+    padding-left: 0.5rem;
+}
+
+.highlight-card ul li:last-child {
+    border-bottom: none;
+}
+
+/* ===== Version Badge ===== */
+.version-badge {
+    display: inline-block;
+    background: var(--citrino-gradient);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+
+/* ===== Alert Enhancements ===== */
+.alert {
+    border-radius: var(--radius-md);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+/* ===== Stats Grid Improvements ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-item i {
+    font-size: 2rem;
+    color: var(--citrino-primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--citrino-dark);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--citrino-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* ===== Reduced Motion ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
