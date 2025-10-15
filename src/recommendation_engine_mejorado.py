@@ -46,12 +46,12 @@ class RecommendationEngineMejorado:
         self.propiedades = propiedades
         self._limpiar_cache()
 
-    def cargar_guias_urbanas(self, ruta_guias: str):
+    def cargar_guias_urbanas(self, ruta_guias: str = "data/guia_urbana_municipal_v2.json"):
         """Carga la guía urbana y crea índices espaciales."""
         try:
             with open(ruta_guias, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                self.guias_urbanas = data.get('servicios_consolidados', [])
+                self.guias_urbanas = data.get('servicios', [])
 
             # Crear índice espacial para búsquedas eficientes
             self._crear_indice_espacial_servicios()

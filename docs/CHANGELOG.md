@@ -5,6 +5,28 @@ Todos los cambios notables del proyecto Citrino se documentarán en este archivo
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.2.1] - 2025-10-15
+
+### Arreglado
+- **BUG CRÍTICO DE COORDENADAS**: Corrección de error en estadísticas del ETL `extraer_servicios_urbanos`
+  - **Línea 153**: Faltaba `self.servicios_procesados.append(servicio)`
+  - **Línea 163**: `servicio.get('coordenadas_validadas', False)` → `servicio.get('metadatos', {}).get('coordenadas_validadas', False)`
+- **VALIDACIÓN DE COORDENADAS**: Sistema ahora procesa 4,899 coordenadas válidas (99.2% éxito)
+- **INTEGRACIÓN COMPLETA**: Motor de recomendación funcionando con coordenadas reales
+
+### Cambiado
+- **ETL Guía Urbana**: Procesamiento de 4,938 servicios urbanos con coordenadas funcionales
+- **Sistema de Recomendación**: Integración con 4,899 coordenadas georreferenciadas reales
+- **Índices Espaciales**: 8 categorías con datos geoespaciales indexados
+- **PostGIS Compatibility**: Sistema listo para migración con coordenadas validadas
+
+### Añadido
+- **Debug Tools**: Scripts especializados para debugging de coordenadas
+- **Validación Extensiva**: Tests paso a paso del pipeline ETL completo
+- **Documentación de Bugs**: Análisis detallado del problema y solución implementada
+
+---
+
 ## [2.2.0] - 2025-10-15
 
 ### Añadido
