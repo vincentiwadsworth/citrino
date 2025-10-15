@@ -7,7 +7,9 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(dir:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "WebFetch(domain:vincentiwadsworth.github.io)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

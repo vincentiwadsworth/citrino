@@ -22,6 +22,7 @@ try:
     from llm_integration import LLMIntegration, LLMConfig
     from description_parser import DescriptionParser
     from recommendation_engine_mejorado import RecommendationEngineMejorado
+    from prompts.system_prompt_chat import CITRINO_CHAT_SYSTEM_PROMPT, CITRINO_CHAT_CONFIG
     LLM_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"LLM modules not available: {e}")
@@ -335,6 +336,66 @@ class CitrinoChatbotAPI:
             logger.error(f"Error en análisis de mercado: {e}")
             return "Tuve un problema al analizar el mercado. Por favor, intenta más tarde."
 
+    def validate_citrino_response(self, response: str) -> str:
+        """
+        Valida que la respuesta solo contenga información de Citrino y base de datos.
+
+        Args:
+            response: Respuesta generada por el LLM
+
+        Returns:
+            Respuesta validada y corregida si es necesario
+        """
+        # Lista de zonas permitidas en la base de datos
+        zonas_permitidas = [
+            "equipetrol", "santa mónica", "urbari", "las palmas", "santiago",
+            "sacta", "pampa de la isla", "los olivos", "zona norte", "zona sur",
+            "centro", "urbari", "santa monica"
+        ]
+
+        # Lista de temas prohibidos
+        temas_prohibidos = [
+            "política", "religión", "deportes", "celebridades", "entretenimiento",
+            "noticias nacionales", "internacional", "tecnología general", "ciencia",
+            "historia", "geografía general", "economía global", "bolsa", "criptomonedas"
+        ]
+
+        response_lower = response.lower()
+
+        # Detectar si hay temas prohibidos
+        for tema in temas_prohibidos:
+            if tema in response_lower and len(tema.split()) == 1:  # Evita falsos positivos
+                # Reemplazar con respuesta apropiada
+                return f"""Lo siento, solo puedo ayudarte con temas relacionados con inversiones inmobiliarias en Santa Cruz de la Sierra.
+
+Soy el asistente especializado de Citrino y mi conocimiento se limita a:
+
+🏠 **Búsqueda de propiedades**: Según nuestras 1,578 propiedades registradas
+📊 **Análisis de mercado**: Precios y tendencias basados en datos reales
+🏘️ **Información de zonas**: Características de barrios donde tenemos propiedades
+💰 **Asesoría de inversión**: Oportunidades basadas en nuestra base de datos
+
+¿Te gustaría consultar sobre propiedades en alguna zona específica de Santa Cruz?"""
+
+        # Validar que solo se mencionen zonas permitidas
+        palabras = response_lower.split()
+        for palabra in palabras:
+            if len(palabra) > 3 and palabra not in zonas_permitidas:
+                # Si menciona una zona no permitida, advertir
+                if any(indicador in palabra for indicador in ['zona', 'barrio', 'sector']):
+                    return f"""Según nuestra base de datos, no tengo propiedades registradas en esa zona específica.
+
+Las zonas donde sí tengo información incluyen:
+- Equipetrol
+- Santa Mónica
+- Urbari
+- Las Palmas
+- Santiago
+
+¿Te gustaría que te muestre propiedades en alguna de estas zonas?"""
+
+        return response
+
     def generate_general_info_response(self, message: str) -> str:
         """
         Genera respuesta para información general.
@@ -348,28 +409,43 @@ class CitrinoChatbotAPI:
         try:
             # Usar LLM si está disponible
             if self.llm:
-                prompt = f"""Eres el asistente inmobiliario de Citrino. Responde a esta consulta de manera profesional y útil:
+                # Construir prompt con el system prompt de Citrino Chat
+                full_prompt = f"""{CITRINO_CHAT_SYSTEM_PROMPT}
 
-Consulta: {message}
+CONSULTA DEL USUARIO: {message}
 
-Contexto: Tienes acceso a 1,385 propiedades en Santa Cruz de la Sierra, Bolivia.
-Las zonas principales incluyen Equipetrol, Santa Mónica, Urbari, Los Olivos, etc.
+BASE DE DATOS DISPONIBLE:
+- Total propiedades: {len(self.propiedades)}
+- Zonas principales: Equipetrol, Santa Mónica, Urbari, Las Palmas, Santiago, etc.
+- Rango de precios: $50,000 - $5,000,000 USD
+- Tipos de propiedad: casa, departamento, terreno, duplex, loft
 
-Responde de manera concisa pero informativa, enfocándote en información práctica para decisiones inmobiliarias."""
+Responde ÚNICAMENTE con datos existentes en esta base de datos."""
 
-                resultado = self.llm.consultar_con_fallback(prompt, use_fallback=True)
-                return resultado.get("respuesta", "No pude procesar tu consulta en este momento.")
+                # Usar configuración específica para Citrino Chat
+                resultado = self.llm.consultar_con_fallback(
+                    full_prompt,
+                    use_fallback=True,
+                    temperature=CITRINO_CHAT_CONFIG['temperature'],
+                    max_tokens=CITRINO_CHAT_CONFIG['max_tokens']
+                )
+
+                # Validar respuesta para asegurar que solo contenga información de Citrino
+                respuesta = resultado.get("respuesta", "No pude procesar tu consulta en este momento.")
+                return self.validate_citrino_response(respuesta)
             else:
                 # Respuesta fallback sin LLM
                 return """Soy el asistente inmobiliario de Citrino. Puedo ayudarte con:
 
 🏠 **Búsqueda de propiedades**: Dime qué buscas (zona, presupuesto, características)
 
-📊 **Análisis de mercado**: Precios promedio, tendencias por zona
+📊 **Análisis de mercado**: Precios promedio por zona según nuestros datos
 
-🏘️ **Información de zonas**: Características de los barrios de Santa Cruz
+🏘️ **Información de zonas**: Características basadas en propiedades registradas
 
-💰 **Asesoría de inversión**: Oportunidades y potencial de plusvalía
+💰 **Asesoría de inversión**: Oportunidades basadas en datos existentes
+
+Mi conocimiento se limita estrictamente a las propiedades registradas en nuestra base de datos de Santa Cruz de la Sierra.
 
 ¿Qué te gustaría consultar hoy?"""
 

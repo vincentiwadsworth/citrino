@@ -727,13 +727,13 @@ class RecommendationEngineMejorado:
                 justificacion.append(f"Buen acceso a {servicios_resumen}.")
 
         # Características atractivas para inversión
-        superficie = propiedad.get('superficie', 0)
-        habitaciones = propiedad.get('habitaciones', 0)
+        superficie = propiedad.get('superficie') or propiedad.get('superficie_m2') or 0
+        habitaciones = propiedad.get('habitaciones') or 0
         tipo = propiedad.get('tipo_propiedad', propiedad.get('tipo', 'inmueble'))
 
-        if superficie >= 100:
+        if superficie and superficie >= 100:
             justificacion.append(f"Amplia superficie de {superficie}m².")
-        if habitaciones >= 3:
+        if habitaciones and habitaciones >= 3:
             justificacion.append(f"{habitaciones} habitaciones.")
 
         # Disponibilidad
@@ -940,7 +940,7 @@ class RecommendationEngineMejorado:
                 puntuacion += 0.4
 
         # 2. Superficie (30%)
-        superficie = propiedad.get('superficie', 0)
+        superficie = propiedad.get('superficie', 0) or propiedad.get('superficie_m2', 0) or 0
         if superficie >= 100:  # Superficie generosa
             puntuacion += 0.3
         elif superficie >= 60:
@@ -950,13 +950,13 @@ class RecommendationEngineMejorado:
 
         # 3. Características atractivas para inversión (30%)
         caracteristicas_inversion = 0
-        if propiedad.get('garajes', 0) > 0:
+        if (propiedad.get('garajes') or 0) > 0:
             caracteristicas_inversion += 1
-        if propiedad.get('habitaciones', 0) >= 3:
+        if (propiedad.get('habitaciones') or 0) >= 3:
             caracteristicas_inversion += 1
-        if propiedad.get('banos', 0) >= 2:
+        if (propiedad.get('banos') or 0) >= 2:
             caracteristicas_inversion += 1
-        if superficie >= 200:  # Propiedades grandes
+        if superficie and superficie >= 200:  # Propiedades grandes
             caracteristicas_inversion += 1
 
         if caracteristicas_inversion >= 3:
