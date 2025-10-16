@@ -36,7 +36,8 @@
       "Bash(where:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []

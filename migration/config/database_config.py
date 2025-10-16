@@ -132,7 +132,7 @@ class DockerPostgresConnection:
 
     def __init__(self, config: DatabaseConfig):
         self.config = config
-        self.container_name = 'citrino-postgres-new'
+        self.container_name = 'citrino-postgresql'  # Actualizado para docker-compose
         self._committed = False
         self._closed = False
 
@@ -408,7 +408,7 @@ def create_connection(config: Optional[DatabaseConfig] = None) -> DockerPostgres
 
     try:
         # Test Docker container is running
-        container_name = 'citrino-postgres-new'
+        container_name = 'citrino-postgresql'  # Actualizado para docker-compose
         test_cmd = ['docker', 'exec', container_name, 'pg_isready']
         result = subprocess.run(test_cmd, capture_output=True, text=True, timeout=10)
 

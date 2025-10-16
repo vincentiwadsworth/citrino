@@ -1,0 +1,20 @@
+services:
+  citrino-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: citrino-postgresql
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: citrino
+      POSTGRES_USER: citrino_app
+      POSTGRES_PASSWORD: citrino123
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+    volumes:
+      - citrino_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  citrino_data:

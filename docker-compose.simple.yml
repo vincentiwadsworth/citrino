@@ -1,0 +1,43 @@
+# Docker Compose Simple - PostGIS Oficial
+# Solución definitiva al problema de encoding Windows
+
+services:
+  citrino-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: citrino-postgresql
+    hostname: citrino-db
+    ports:
+      - "5433:5432"
+    environment:
+      # Configuración UTF-8 español nativo
+      POSTGRES_DB: citrino
+      POSTGRES_USER: citrino_app
+      POSTGRES_PASSWORD: citrino123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=es_ES.UTF-8"
+
+      # Encoding UTF-8 nativo (no más problemas Windows)
+      PYTHONIOENCODING=utf-8
+      LANG: es_ES.UTF-8
+      LC_ALL: es_ES.UTF-8
+
+    volumes:
+      # Persistencia de datos
+      - citrino_data:/var/lib/postgresql/data
+
+      # Datos para procesar
+      - ./data:/app/data
+
+    networks:
+      - citrino-network
+
+    restart: unless-stopped
+
+volumes:
+  citrino_data:
+    driver: local
+
+networks:
+  citrino-network:
+    driver: bridge

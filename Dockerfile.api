@@ -1,0 +1,32 @@
+# Dockerfile API Flask Citrino
+# Conexión directa a PostgreSQL sin wrappers
+
+FROM python:3.11-slim
+
+# Configuración UTF-8 nativo
+ENV LANG=es_ES.UTF-8
+ENV LANGUAGE=es_ES:es
+ENV LC_ALL=es_ES.UTF-8
+ENV PYTHONIOENCODING=utf-8
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependencias Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código de la aplicación
+COPY ./api ./api
+COPY ./src ./src
+
+# Exponer puerto
+EXPOSE 5001
+
+# Iniciar API Flask
+CMD ["python", "-u", "api/server.py"]
