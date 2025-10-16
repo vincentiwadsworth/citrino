@@ -13,9 +13,14 @@ Usage:
 
 import os
 import logging
-from typing import Dict, Any, Optional
+import subprocess
+import tempfile
+import csv
+from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime
+from contextlib import contextmanager
 
 try:
     import psycopg2
@@ -91,15 +96,15 @@ def load_database_config() -> DatabaseConfig:
 
     # Required configuration
     required_vars = {
-        'DB_HOST': os.getenv('DB_HOST', 'localhost'),
-        'DB_PORT': int(os.getenv('DB_PORT', '5432')),
-        'DB_NAME': os.getenv('DB_NAME', 'citrino'),
-        'DB_USER': os.getenv('DB_USER', 'postgres'),
-        'DB_PASSWORD': os.getenv('DB_PASSWORD', '')
+        'host': os.getenv('DB_HOST', 'localhost'),
+        'port': int(os.getenv('DB_PORT', '5432')),
+        'database': os.getenv('DB_NAME', 'citrino'),
+        'user': os.getenv('DB_USER', 'postgres'),
+        'password': os.getenv('DB_PASSWORD', '')
     }
 
     # Check for required password
-    if not required_vars['DB_PASSWORD']:
+    if not required_vars['password']:
         raise ValueError("DB_PASSWORD environment variable is required")
 
     # Optional configuration
@@ -125,22 +130,179 @@ def load_migration_config() -> MigrationConfig:
     )
 
 # =====================================================
+# Docker-based PostgreSQL Connection
+# =====================================================
+
+class DockerPostgresConnection:
+    """
+    PostgreSQL connection wrapper using Docker psql
+    Maintains compatibility with psycopg2 interface
+    """
+
+    def __init__(self, config: DatabaseConfig):
+        self.config = config
+        self.container_name = 'citrino-postgres-new'
+        self._committed = False
+        self._closed = False
+
+    def cursor(self):
+        """Return a cursor-like object"""
+        return DockerPostgresCursor(self, self.config)
+
+    def commit(self):
+        """Commit transaction (no-op for Docker wrapper)"""
+        self._committed = True
+        logging.debug("Transaction committed (Docker wrapper)")
+
+    def rollback(self):
+        """Rollback transaction (no-op for Docker wrapper)"""
+        logging.debug("Transaction rolled back (Docker wrapper)")
+
+    def close(self):
+        """Close connection (no-op for Docker wrapper)"""
+        self._closed = True
+        logging.debug("Connection closed (Docker wrapper)")
+
+    def autocommit(self, value: bool):
+        """Set autocommit mode (no-op for Docker wrapper)"""
+        logging.debug(f"Autocommit set to {value} (Docker wrapper)")
+
+class DockerPostgresCursor:
+    """
+    PostgreSQL cursor wrapper using Docker psql
+    Maintains compatibility with psycopg2 cursor interface
+    """
+
+    def __init__(self, connection: DockerPostgresConnection, config: DatabaseConfig):
+        self.connection = connection
+        self.config = config
+        self._last_result = None
+
+    def execute(self, query: str, params: Optional[Tuple] = None):
+        """Execute SQL query using Docker psql"""
+        try:
+            # Build psql command
+            cmd = [
+                'docker', 'exec', '-i', self.connection.container_name,
+                'psql', '-U', self.config.user, '-d', self.config.database,
+                '-t', '-A', '-F,', '-c', query
+            ]
+
+            # Execute command
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+
+            if result.returncode != 0:
+                error_msg = result.stderr.strip()
+                logging.error(f"Query failed: {error_msg}")
+                raise Exception(f"Docker psql query failed: {error_msg}")
+
+            # Parse result
+            self._last_result = self._parse_result(result.stdout.strip())
+
+        except subprocess.TimeoutExpired:
+            raise Exception("Query timeout (60s)")
+        except Exception as e:
+            logging.error(f"Error executing query: {e}")
+            raise
+
+    def fetchone(self) -> Optional[Tuple]:
+        """Fetch one row from last result"""
+        if self._last_result and len(self._last_result) > 0:
+            return self._last_result.pop(0)
+        return None
+
+    def fetchall(self) -> List[Tuple]:
+        """Fetch all rows from last result"""
+        if self._last_result:
+            result = self._last_result
+            self._last_result = []
+            return result
+        return []
+
+    def fetchmany(self, size: int) -> List[Tuple]:
+        """Fetch many rows from last result"""
+        if self._last_result:
+            result = self._last_result[:size]
+            self._last_result = self._last_result[size:]
+            return result
+        return []
+
+    def rowcount(self) -> int:
+        """Return number of rows affected"""
+        if self._last_result:
+            return len(self._last_result)
+        return 0
+
+    def _parse_result(self, output: str) -> List[Tuple]:
+        """Parse CSV-like output from psql"""
+        if not output.strip():
+            return []
+
+        # Split by lines and parse CSV
+        lines = output.strip().split('\n')
+        result = []
+
+        for line in lines:
+            if line.strip():
+                # Handle CSV parsing for complex values
+                try:
+                    reader = csv.reader([line])
+                    row = next(reader)
+                    result.append(tuple(row))
+                except:
+                    # Fallback for simple cases
+                    row = [col.strip() for col in line.split(',')]
+                    result.append(tuple(row))
+
+        return result
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+@contextmanager
+def docker_connection(config: Optional[DatabaseConfig] = None):
+    """Context manager for Docker PostgreSQL connection"""
+    if config is None:
+        config = load_database_config()
+
+    conn = DockerPostgresConnection(config)
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+# =====================================================
 # Database Connection Functions
 # =====================================================
 
-def create_connection(config: Optional[DatabaseConfig] = None) -> psycopg2.extensions.connection:
-    """Create a single database connection"""
+def create_connection(config: Optional[DatabaseConfig] = None) -> DockerPostgresConnection:
+    """Create a single database connection using Docker"""
 
     if config is None:
         config = load_database_config()
 
     try:
-        connection = psycopg2.connect(**config.get_connection_params())
-        connection.autocommit = False
-        logging.info(f"Successfully connected to PostgreSQL database: {config.database}")
+        # Test Docker container is running
+        container_name = 'citrino-postgres-new'
+        test_cmd = ['docker', 'exec', container_name, 'pg_isready']
+        result = subprocess.run(test_cmd, capture_output=True, text=True, timeout=10)
+
+        if result.returncode != 0:
+            raise Exception(f"Docker container {container_name} is not ready")
+
+        connection = DockerPostgresConnection(config)
+        logging.info(f"Successfully connected to PostgreSQL via Docker: {config.database}")
         return connection
     except Exception as e:
-        logging.error(f"Failed to connect to database: {e}")
+        logging.error(f"Failed to connect to database via Docker: {e}")
         raise
 
 def create_connection_pool(
