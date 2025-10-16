@@ -2,37 +2,37 @@
 
 Esta guía explica cómo desplegar Citrino en producción utilizando **GitHub Pages** (frontend) y **Render.com** (backend).
 
-## 📋 Requisitos Previos
+##  Requisitos Previos
 
 - Cuenta de GitHub
 - Cuenta de Render.com (gratis)
 - Cuenta de Z.AI con API Key (para integración LLM)
 - Git instalado localmente
 
-## 🏗️ Arquitectura de Despliegue
+##  Arquitectura de Despliegue
 
 ```
-┌─────────────────┐
-│  GitHub Pages   │  ← Frontend (HTML, CSS, JS)
-│  (Estático)     │     URL: https://[usuario].github.io/citrino-clean/
-└────────┬────────┘
-         │
-         │ API Calls
-         ▼
-┌─────────────────┐
-│   Render.com    │  ← Backend (Flask API)
-│  (Python/Flask) │     URL: https://citrino-api.onrender.com/api/
-└────────┬────────┘
-         │
-         │ LLM Requests
-         ▼
-┌─────────────────┐
-│     Z.AI        │  ← Servicio LLM
-│  (GLM-4.5-Air)  │     API: https://api.z.ai/
-└─────────────────┘
+
+  GitHub Pages     ← Frontend (HTML, CSS, JS)
+  (Estático)          URL: https://[usuario].github.io/citrino-clean/
+
+         
+          API Calls
+         
+
+   Render.com      ← Backend (Flask API)
+  (Python/Flask)      URL: https://citrino-api.onrender.com/api/
+
+         
+          LLM Requests
+         
+
+     Z.AI          ← Servicio LLM
+  (GLM-4.5-Air)       API: https://api.z.ai/
+
 ```
 
-## 🚀 PASO 1: Desplegar Backend en Render.com
+##  PASO 1: Desplegar Backend en Render.com
 
 ### 1.1 Crear cuenta en Render
 
@@ -65,7 +65,7 @@ En la sección **Environment** del dashboard de Render, añadir:
 |----------|-------|-------------|
 | `FLASK_ENV` | `production` | Entorno de Flask |
 | `PORT` | `(autodetectado)` | Puerto del servidor |
-| `ZAI_API_KEY` | `tu_clave_aqui` | API Key de Z.AI (⚠️ marcar como secreta) |
+| `ZAI_API_KEY` | `tu_clave_aqui` | API Key de Z.AI ( marcar como secreta) |
 | `LLM_PROVIDER` | `zai` | Proveedor de LLM |
 | `LLM_MODEL` | `glm-4.5-air` | Modelo de Z.AI |
 | `GITHUB_PAGES_URL` | `https://[tu-usuario].github.io/citrino-clean` | URL del frontend |
@@ -78,7 +78,7 @@ En la sección **Environment** del dashboard de Render, añadir:
 4. Generar nueva API Key
 5. Copiar la clave y añadirla a Render como `ZAI_API_KEY`
 
-⚠️ **IMPORTANTE**: Marcar `ZAI_API_KEY` como **variable secreta** en Render.
+ **IMPORTANTE**: Marcar `ZAI_API_KEY` como **variable secreta** en Render.
 
 ### 1.5 Desplegar
 
@@ -103,7 +103,7 @@ Deberías ver:
 }
 ```
 
-## 🌐 PASO 2: Desplegar Frontend en GitHub Pages
+##  PASO 2: Desplegar Frontend en GitHub Pages
 
 ### 2.1 Configurar GitHub Pages
 
@@ -144,7 +144,7 @@ Si la URL de Render es diferente a `https://citrino-api.onrender.com`, puedes:
 4. Si hay conexión con Render, verás recomendaciones reales
 5. Si Render está "durmiendo" (free tier), esperar 30-60 segundos para que despierte
 
-## 🔄 Actualizaciones Automáticas
+##  Actualizaciones Automáticas
 
 ### Backend (Render)
 
@@ -170,7 +170,7 @@ git push origin master
 
 Los cambios aparecerán en 1-2 minutos.
 
-## ⚠️ Limitaciones del Free Tier de Render
+##  Limitaciones del Free Tier de Render
 
 1. **Sleep después de 15 minutos de inactividad**
    - Primera petición tarda 30-60 segundos en despertar
@@ -184,7 +184,7 @@ Los cambios aparecerán en 1-2 minutos.
    - Primer despliegue: 3-5 minutos
    - Redespliegues: 2-3 minutos
 
-## 🐛 Solución de Problemas
+##  Solución de Problemas
 
 ### Backend no responde
 
@@ -233,7 +233,7 @@ Los cambios aparecerán en 1-2 minutos.
    - Aumentar timeout en `src/llm_integration.py`
    - Verificar logs en Render
 
-## 📊 Monitoreo
+##  Monitoreo
 
 ### Logs de Backend (Render)
 
@@ -262,16 +262,16 @@ Dashboard → citrino-api → Metrics:
 - Request Count
 - Response Time
 
-## 🔐 Seguridad
+##  Seguridad
 
 ### Variables Secretas
 
-⚠️ **NUNCA** commitear:
+ **NUNCA** commitear:
 - `.env` con valores reales
 - `ZAI_API_KEY` en el código
 - Credenciales de base de datos
 
-✅ **SIEMPRE**:
+ **SIEMPRE**:
 - Usar variables de entorno en Render
 - Marcar `ZAI_API_KEY` como secreta
 - Usar `.env.example` como plantilla
@@ -283,7 +283,7 @@ El backend está configurado para aceptar requests solo de:
 - `github.io` (GitHub Pages)
 - URL específica en `GITHUB_PAGES_URL`
 
-## 💰 Costos Estimados
+##  Costos Estimados
 
 | Servicio | Plan | Costo |
 |----------|------|-------|
@@ -292,16 +292,16 @@ El backend está configurado para aceptar requests solo de:
 | Z.AI | GLM-4.5-Air | $3/mes (plan básico) |
 | **Total** | | **$3/mes** |
 
-## 🚀 Próximos Pasos
+##  Próximos Pasos
 
-1. ✅ Desplegar backend en Render
-2. ✅ Desplegar frontend en GitHub Pages
-3. ✅ Configurar Z.AI
-4. 📧 Compartir URL con el equipo de Citrino
-5. 📊 Monitorear uso y métricas
-6. 🔄 Iterar basado en feedback
+1.  Desplegar backend en Render
+2.  Desplegar frontend en GitHub Pages
+3.  Configurar Z.AI
+4.  Compartir URL con el equipo de Citrino
+5.  Monitorear uso y métricas
+6.  Iterar basado en feedback
 
-## 🆘 Soporte
+##  Soporte
 
 Si encuentras problemas:
 
@@ -312,6 +312,6 @@ Si encuentras problemas:
 
 ---
 
-**¡Listo!** Tu sistema Citrino debería estar funcionando online. 🎉
+**¡Listo!** Tu sistema Citrino debería estar funcionando online. 
 
 Comparte la URL de GitHub Pages con el equipo de Citrino para mostrar el avance.

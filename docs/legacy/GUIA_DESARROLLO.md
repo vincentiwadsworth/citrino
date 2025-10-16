@@ -1,6 +1,6 @@
-# 👨‍💻 Guía de Desarrollo para Citrino
+# ‍ Guía de Desarrollo para Citrino
 
-## 🚀 Inicio Rápido
+##  Inicio Rápido
 
 ### Instalación en 5 Minutos
 
@@ -24,43 +24,43 @@ python -m http.server 8080
 # Navegar a http://localhost:8080
 ```
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 citrino/
-├── api/                    # Backend REST API
-│   └── server.py          # Servidor Flask
-├── src/                    # Lógica de negocio
-│   ├── recommendation_engine.py
-│   ├── recommendation_engine_mejorado.py
-│   ├── llm_integration.py
-│   ├── description_parser.py
-│   └── regex_extractor.py
-├── scripts/                # ETL y utilidades
-│   ├── build_relevamiento_dataset.py
-│   ├── test_regex_vs_llm.py
-│   └── analizar_descripciones_p02.py
-├── tests/                  # Suite de pruebas
-│   ├── test_api.py
-│   ├── test_fallback_simple.py
-│   └── test_zai_integration.py
-├── data/                   # Datos del sistema
-│   ├── raw/               # Excel de proveedores
-│   └── base_datos_relevamiento.json
-├── docs/                   # Documentación técnica
-│   ├── SISTEMA_HIBRIDO_EXTRACCION.md
-│   ├── ARQUITECTURA_TECNICA.md
-│   └── historico/         # Docs archivados
-├── assets/                 # Frontend assets
-│   ├── css/
-│   └── js/
-├── index.html             # Landing page
-├── citrino-reco.html      # Recomendaciones
-├── chat.html              # Asistente virtual
-└── README.md              # Este archivo
+ api/                    # Backend REST API
+    server.py          # Servidor Flask
+ src/                    # Lógica de negocio
+    recommendation_engine.py
+    recommendation_engine_mejorado.py
+    llm_integration.py
+    description_parser.py
+    regex_extractor.py
+ scripts/                # ETL y utilidades
+    build_relevamiento_dataset.py
+    test_regex_vs_llm.py
+    analizar_descripciones_p02.py
+ tests/                  # Suite de pruebas
+    test_api.py
+    test_fallback_simple.py
+    test_zai_integration.py
+ data/                   # Datos del sistema
+    raw/               # Excel de proveedores
+    base_datos_relevamiento.json
+ docs/                   # Documentación técnica
+    SISTEMA_HIBRIDO_EXTRACCION.md
+    ARQUITECTURA_TECNICA.md
+    historico/         # Docs archivados
+ assets/                 # Frontend assets
+    css/
+    js/
+ index.html             # Landing page
+ citrino-reco.html      # Recomendaciones
+ chat.html              # Asistente virtual
+ README.md              # Este archivo
 ```
 
-## 🛠️ Comandos de Desarrollo
+##  Comandos de Desarrollo
 
 ### Backend
 
@@ -93,7 +93,7 @@ npm install -g live-server
 live-server --port=8080
 ```
 
-## 🔧 Configuración de Entorno
+##  Configuración de Entorno
 
 ### Archivo .env
 
@@ -133,7 +133,7 @@ CACHE_ENABLED=true
 2. Ve a Keys
 3. Crea key (no requiere tarjeta)
 
-## 💻 Desarrollo de Funcionalidades
+##  Desarrollo de Funcionalidades
 
 ### Agregar Nuevo Endpoint de API
 
@@ -244,7 +244,7 @@ pytest --cov=src --cov-report=html
 pytest -m "not slow"
 ```
 
-## 📊 Debugging
+##  Debugging
 
 ### Logs del Backend
 
@@ -299,7 +299,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Solo desarrollo
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 ```
 
-## 🎨 Convenciones de Código
+##  Convenciones de Código
 
 ### Python (PEP 8)
 
@@ -366,7 +366,7 @@ async function obtenerPropiedades() {
 }
 ```
 
-## 📝 Git Workflow
+##  Git Workflow
 
 ### Branches
 
@@ -402,7 +402,7 @@ chore: tareas de mantenimiento
 - [ ] Sin credenciales hardcoded
 - [ ] Commit message descriptivo
 
-## 🚢 Deployment
+##  Deployment
 
 ### Deploy a Render.com
 
@@ -421,7 +421,7 @@ git push origin main
 # Ver en: https://vincentiwadsworth.github.io/citrino/
 ```
 
-## 📚 Recursos
+##  Recursos
 
 ### Documentación Interna
 - [Sistema Híbrido Extracción](./SISTEMA_HIBRIDO_EXTRACCION.md)

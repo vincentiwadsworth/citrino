@@ -1,6 +1,6 @@
 # Configuración de Z.AI para Citrino
 
-## ✅ Configuración Local (Ya completada)
+##  Configuración Local (Ya completada)
 
 Tu API key de Z.AI está configurada en el archivo `.env` local. Este archivo **NO se sube a GitHub** por seguridad.
 
@@ -27,16 +27,16 @@ python test_zai_integration.py
 ============================================================
 PRUEBA DE INTEGRACIÓN Z.AI
 ============================================================
-✅ API Key configurada: 34431b5a2e38422baa...
+ API Key configurada: 34431b5a2e38422baa...
 Validando configuración...
-✅ Configuración válida
+ Configuración válida
 
-📝 Mensaje de prueba:
+ Mensaje de prueba:
    'Busco un departamento en Equipetrol de 3 habitaciones, presupuesto hasta 200000 dólares'
 
-🔄 Procesando con Z.AI (puede tardar 10-30 segundos)...
+ Procesando con Z.AI (puede tardar 10-30 segundos)...
 
-✅ RESPUESTA DE Z.AI:
+ RESPUESTA DE Z.AI:
 ------------------------------------------------------------
 Composición familiar: {'adultos': 2, 'ninos': [], 'adultos_mayores': 0}
 Presupuesto: {'min': 160000, 'max': 200000, 'tipo': 'compra'}
@@ -44,7 +44,7 @@ Necesidades: []
 Preferencias: {'ubicacion': 'Equipetrol', ...}
 ------------------------------------------------------------
 
-✅ ¡Integración con Z.AI funcionando correctamente!
+ ¡Integración con Z.AI funcionando correctamente!
 ```
 
 ### Paso 3: Iniciar API con Z.AI
@@ -57,7 +57,7 @@ Luego abre en tu navegador: `http://localhost:5001/api/health`
 
 ---
 
-## 🚀 Configurar Z.AI en Producción (Render.com)
+##  Configurar Z.AI en Producción (Render.com)
 
 ### IMPORTANTE: NO subir la API key a GitHub
 
@@ -79,7 +79,7 @@ git push origin master
 
    | Variable | Valor | Secret |
    |----------|-------|--------|
-   | `ZAI_API_KEY` | `34431b5a2e38422baa5551d4d623519f.DEYL3LOWMUFvL0kh` | ✅ Sí |
+   | `ZAI_API_KEY` | `34431b5a2e38422baa5551d4d623519f.DEYL3LOWMUFvL0kh` |  Sí |
    | `LLM_PROVIDER` | `zai` | No |
    | `LLM_MODEL` | `glm-4.5-air` | No |
 
@@ -95,22 +95,22 @@ https://citrino-api.onrender.com/api/health
 
 ---
 
-## 🔒 Seguridad
+##  Seguridad
 
-### ✅ Protecciones Implementadas
+###  Protecciones Implementadas
 
-- ✅ `.env` está en `.gitignore` → NO se sube a GitHub
-- ✅ API key solo en variables de entorno
-- ✅ Render marca `ZAI_API_KEY` como secreta (encriptada)
+-  `.env` está en `.gitignore` → NO se sube a GitHub
+-  API key solo en variables de entorno
+-  Render marca `ZAI_API_KEY` como secreta (encriptada)
 
-### ⚠️ NUNCA hacer esto:
+###  NUNCA hacer esto:
 
-- ❌ Commitear archivo `.env`
-- ❌ Hardcodear la API key en el código
-- ❌ Compartir la API key públicamente
-- ❌ Subirla a issues o PRs de GitHub
+-  Commitear archivo `.env`
+-  Hardcodear la API key en el código
+-  Compartir la API key públicamente
+-  Subirla a issues o PRs de GitHub
 
-### 🔄 Si la API key se compromete:
+###  Si la API key se compromete:
 
 1. Ir a [z.ai/model-api](https://z.ai/model-api)
 2. Revocar la API key antigua
@@ -120,7 +120,7 @@ https://citrino-api.onrender.com/api/health
 
 ---
 
-## 💰 Costos de Z.AI
+##  Costos de Z.AI
 
 **Plan actual recomendado:** GLM Coding Plan
 
@@ -133,7 +133,7 @@ https://citrino-api.onrender.com/api/health
 
 ---
 
-## 🐛 Solución de Problemas
+##  Solución de Problemas
 
 ### Error: "API key no configurada"
 
@@ -167,7 +167,7 @@ Z.AI puede tardar 10-30 segundos. El timeout está configurado en 60s.
 
 ---
 
-## 📊 Monitoreo
+##  Monitoreo
 
 ### Logs en Render
 
@@ -185,7 +185,7 @@ En los logs del backend, buscar:
 
 ---
 
-## ✅ Checklist de Configuración
+##  Checklist de Configuración
 
 - [x] API key de Z.AI obtenida
 - [x] `.env` creado localmente
@@ -203,4 +203,4 @@ En los logs del backend, buscar:
 
 ---
 
-**¡Tu API key de Z.AI está segura y lista para usar!** 🎉
+**¡Tu API key de Z.AI está segura y lista para usar!** 

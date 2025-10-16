@@ -1,4 +1,4 @@
-# 🔌 API Reference de Citrino
+#  API Reference de Citrino
 
 ## Base URL
 

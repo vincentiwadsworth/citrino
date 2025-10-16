@@ -1,42 +1,42 @@
-# 🚀 Sprint: Migración Citrino a Producción - Hetzner Cloud
+#  Sprint: Migración Citrino a Producción - Hetzner Cloud
 
 **Documento de referencia para futuro deployment en producción**
 
 ---
 
-## 📋 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 ### Objetivo del Sprint
 Migrar Citrino desde desarrollo local a producción en Hetzner Cloud CPX11, manteniendo la arquitectura actual basada en PostgreSQL + PostGIS y todos los motores de recomendación ya desarrollados.
 
 ### Estado Actual del Proyecto
-- ✅ **ETL completado**: Datos migrados desde fuentes originales a PostgreSQL + PostGIS
-- ✅ **Motores de recomendación**: Funcionando con consultas nativas PostGIS
-- ✅ **API REST**: Flask con endpoints optimizados para base de datos relacional
-- ✅ **Chatbot UI**: Integrado y funcionando con datos estructurados
-- ❌ **Producción**: Requiere deployment en VPS para acceso externo
+-  **ETL completado**: Datos migrados desde fuentes originales a PostgreSQL + PostGIS
+-  **Motores de recomendación**: Funcionando con consultas nativas PostGIS
+-  **API REST**: Flask con endpoints optimizados para base de datos relacional
+-  **Chatbot UI**: Integrado y funcionando con datos estructurados
+-  **Producción**: Requiere deployment en VPS para acceso externo
 
 ### Arquitectura a Desplegar
 ```
 Hetzner Cloud CPX11 (€5.09/mes)
-├── Ubuntu 22.04 LTS
-├── PostgreSQL 15 + PostGIS 3.3
-│   ├── Tabla: propiedades (1,588 registros)
-│   ├── Tabla: servicios (4,777 registros)
-│   └── Índices GIST para consultas geoespaciales
-├── Python 3.11 + Flask 2.3.3
-│   ├── recommendation_engine.py
-│   ├── recommendation_engine_mejorado.py (con PostGIS)
-│   ├── property_catalog.py
-│   └── chatbot_completions.py
-├── Nginx (Reverse Proxy + SSL)
-├── Gunicorn (WSGI Server)
-└── Let's Encrypt (SSL gratuito)
+ Ubuntu 22.04 LTS
+ PostgreSQL 15 + PostGIS 3.3
+    Tabla: propiedades (1,588 registros)
+    Tabla: servicios (4,777 registros)
+    Índices GIST para consultas geoespaciales
+ Python 3.11 + Flask 2.3.3
+    recommendation_engine.py
+    recommendation_engine_mejorado.py (con PostGIS)
+    property_catalog.py
+    chatbot_completions.py
+ Nginx (Reverse Proxy + SSL)
+ Gunicorn (WSGI Server)
+ Let's Encrypt (SSL gratuito)
 ```
 
 ---
 
-## 🎯 Requerimientos del Sistema en Producción
+##  Requerimientos del Sistema en Producción
 
 ### Recursos del Servidor (Hetzner CPX11)
 - **CPU**: 2 vCPUs dedicados
@@ -50,7 +50,7 @@ PostgreSQL + PostGIS:     ~400-600 MB
 Python Flask + Gunicorn:  ~200-300 MB
 Nginx + Sistema operativo: ~200-300 MB
 Cache y queries activas:  ~200-400 MB
-Total estimado:           1.0-1.6 GB ✅
+Total estimado:           1.0-1.6 GB 
 ```
 
 ### Software Requerido
@@ -62,31 +62,31 @@ Total estimado:           1.0-1.6 GB ✅
 
 ---
 
-## 🏗️ Estructura del Deployment
+##  Estructura del Deployment
 
 ### Directorios en Producción
 ```
 /home/citrino/
-├── citrino/                    # Código fuente
-│   ├── api/
-│   │   └── server.py
-│   ├── src/
-│   │   ├── recommendation_engine.py
-│   │   ├── recommendation_engine_mejorado.py
-│   │   ├── property_catalog.py
-│   │   └── llm_integration.py
-│   ├── requirements.txt
-│   └── .env                    # Variables de entorno
-├── database/
-│   ├── backups/                # Backups automáticos
-│   └── logs/                   # Logs PostgreSQL
-├── nginx/
-│   ├── nginx.conf              # Configuración Nginx
-│   └── ssl/                    # Certificados SSL
-└── scripts/
-    ├── deploy.sh               # Script de deployment
-    ├── backup.sh               # Backup automático
-    └── monitor.sh              # Monitoreo básico
+ citrino/                    # Código fuente
+    api/
+       server.py
+    src/
+       recommendation_engine.py
+       recommendation_engine_mejorado.py
+       property_catalog.py
+       llm_integration.py
+    requirements.txt
+    .env                    # Variables de entorno
+ database/
+    backups/                # Backups automáticos
+    logs/                   # Logs PostgreSQL
+ nginx/
+    nginx.conf              # Configuración Nginx
+    ssl/                    # Certificados SSL
+ scripts/
+     deploy.sh               # Script de deployment
+     backup.sh               # Backup automático
+     monitor.sh              # Monitoreo básico
 ```
 
 ### Configuración de Base de Datos
@@ -109,7 +109,7 @@ CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
 ---
 
-## 📋 Plan de Sprint (8 Commits Estructurados)
+##  Plan de Sprint (8 Commits Estructurados)
 
 ### **Commit 1: Preparación del Entorno**
 - Crear branch `feature/hetzner-production`
@@ -161,7 +161,7 @@ CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
 ---
 
-## 🔧 Scripts Clave de Deployment
+##  Scripts Clave de Deployment
 
 ### Script de Deploy Principal
 ```bash
@@ -188,7 +188,7 @@ systemctl reload nginx
 # 4. Health check
 curl -f http://localhost:5001/api/health || exit 1
 
-echo "✅ Deployment completado exitosamente"
+echo " Deployment completado exitosamente"
 ```
 
 ### Script de Backup Automático
@@ -205,12 +205,12 @@ gzip $BACKUP_FILE
 # Mantener solo últimos 7 días
 find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
 
-echo "✅ Backup completado: $BACKUP_FILE.gz"
+echo " Backup completado: $BACKUP_FILE.gz"
 ```
 
 ---
 
-## 📊 Variables de Entorno de Producción
+##  Variables de Entorno de Producción
 
 ### .env Configuration
 ```bash
@@ -252,7 +252,7 @@ preload_app = True
 
 ---
 
-## 🔍 Configuración PostgreSQL Optimizada
+##  Configuración PostgreSQL Optimizada
 
 ### postgresql.conf (2GB RAM)
 ```ini
@@ -295,7 +295,7 @@ LIMIT 10;
 
 ---
 
-## 🛡️ Configuración de Seguridad
+##  Configuración de Seguridad
 
 ### Firewall Rules
 ```bash
@@ -323,7 +323,7 @@ echo "0 12 * * * /usr/bin/certbot renew --quiet" | crontab -
 
 ---
 
-## 📈 Monitoreo y Mantenimiento
+##  Monitoreo y Mantenimiento
 
 ### Health Checks
 ```bash
@@ -356,7 +356,7 @@ tail -f /var/log/nginx/error.log
 
 ---
 
-## 🚀 Procedimientos de Deployment
+##  Procedimientos de Deployment
 
 ### Deployment Inicial (Setup)
 ```bash
@@ -399,9 +399,9 @@ systemctl reload nginx
 
 ---
 
-## 📝 Checklist de Verificación Final
+##  Checklist de Verificación Final
 
-### ✅ Pre-Deployment
+###  Pre-Deployment
 - [ ] Servidor CPX11 creado y configurado
 - [ ] PostgreSQL + PostGIS instalado
 - [ ] Datos migrados y validados
@@ -410,7 +410,7 @@ systemctl reload nginx
 - [ ] Firewall configurado
 - [ ] Backups automáticos activados
 
-### ✅ Post-Deployment
+###  Post-Deployment
 - [ ] API responde correctamente
 - [ ] Motores de recomendación funcionan
 - [ ] Chatbot UI operativo
@@ -419,7 +419,7 @@ systemctl reload nginx
 - [ ] Logs configurados
 - [ ] Documentación completa
 
-### ✅ Rendimiento
+###  Rendimiento
 - [ ] Tiempo de respuesta <200ms
 - [ ] Uso RAM <80%
 - [ ] Uso CPU <50%
@@ -429,7 +429,7 @@ systemctl reload nginx
 
 ---
 
-## 🔄 Procedimientos de Emergency
+##  Procedimientos de Emergency
 
 ### Rollback Automático
 ```bash
@@ -454,7 +454,7 @@ gunzip -c /path/to/backup.sql.gz | psql citrino_prod
 
 ---
 
-## 💰 Costos Estimados Mensuales
+##  Costos Estimados Mensuales
 
 ### Hetzner Cloud CPX11
 - **Servidor**: €5.09/mes
@@ -470,7 +470,7 @@ gunzip -c /path/to/backup.sql.gz | psql citrino_prod
 
 ---
 
-## 📚 Referencias y Documentación
+##  Referencias y Documentación
 
 ### Enlaces Útiles
 - [Hetzner Cloud Docs](https://docs.hetzner.com/cloud)
@@ -496,7 +496,7 @@ curl -I https://citrino.yourdomain.com/api/health
 
 ---
 
-## 🎯 Próximos Pasos Futuros
+##  Próximos Pasos Futuros
 
 ### Mejoras Post-Deployment
 - Configurar CDN para assets estáticos
@@ -530,9 +530,9 @@ Este documento asume que:
 5. **Desarrollo local completo**: Solo requiere deployment
 
 **NO incluye**:
-- ❌ Procesamiento de archivos JSON
-- ❌ Scripts ETL
-- ❌ Migración desde archivos planos
-- ❌ Setup de motores desde cero
+-  Procesamiento de archivos JSON
+-  Scripts ETL
+-  Migración desde archivos planos
+-  Setup de motores desde cero
 
 El objetivo es un deployment puro de producción.

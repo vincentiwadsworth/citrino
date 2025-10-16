@@ -1,4 +1,4 @@
-# 🗺️ Roadmap de Citrino
+#  Roadmap de Citrino
 
 ## Prioridades 2025
 

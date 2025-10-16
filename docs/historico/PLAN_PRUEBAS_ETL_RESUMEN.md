@@ -1,51 +1,51 @@
-# 📊 Plan de Pruebas ETL y Mejora de Calidad de Datos - Citrino
+#  Plan de Pruebas ETL y Mejora de Calidad de Datos - Citrino
 
 **Fecha:** 10 de Enero de 2025  
 **Versión:** 1.0  
-**Estado del Proyecto:** 🔴 **EN PRODUCCIÓN con datos CRÍTICOS**
+**Estado del Proyecto:**  **EN PRODUCCIÓN con datos CRÍTICOS**
 
 ---
 
-## 🚨 Diagnóstico Inicial
+##  Diagnóstico Inicial
 
 ### Estado Actual (ANTES de mejoras)
 
 | Métrica | Valor | Estado |
 |---------|-------|--------|
-| **Score de Calidad General** | **6.0%** | 🔴 CRÍTICO |
-| Propiedades con zona válida | 6% (95 de 1,583) | 🔴 CRÍTICO |
-| Propiedades con precio | 14.4% (228) | 🔴 CRÍTICO |
-| Propiedades con superficie | 0% (0) | 🔴 CRÍTICO |
-| Propiedades con habitaciones/baños | 5.7% (91) | 🔴 CRÍTICO |
+| **Score de Calidad General** | **6.0%** |  CRÍTICO |
+| Propiedades con zona válida | 6% (95 de 1,583) |  CRÍTICO |
+| Propiedades con precio | 14.4% (228) |  CRÍTICO |
+| Propiedades con superficie | 0% (0) |  CRÍTICO |
+| Propiedades con habitaciones/baños | 5.7% (91) |  CRÍTICO |
 | Propiedades con coordenadas | 96% (1,520) | 🟢 BUENO |
 
 ### Problema Raíz Identificado
 
 **El campo `zona` NO contenía ubicaciones geográficas** - contenía la fuente de scraping:
-- ❌ "ULTRACASAS" (95 propiedades) = Competidor, NO una zona de Santa Cruz
-- ❌ Sistema de recomendaciones por zona **completamente roto**
-- ❌ Imposible filtrar por ubicación real
+-  "ULTRACASAS" (95 propiedades) = Competidor, NO una zona de Santa Cruz
+-  Sistema de recomendaciones por zona **completamente roto**
+-  Imposible filtrar por ubicación real
 
 ---
 
-## ✅ Implementaciones Realizadas
+##  Implementaciones Realizadas
 
 ### 1. Suite de Pruebas Completa
 
 **Archivos creados:**
-- ✅ `tests/conftest.py` - Configuración y fixtures de pytest
-- ✅ `tests/test_data_validation.py` - 25 pruebas de validación de datos
-- ✅ `tests/test_etl_pipeline.py` - 24 pruebas de funciones ETL
-- ✅ `pytest.ini` - Configuración de pytest con markers personalizados
+-  `tests/conftest.py` - Configuración y fixtures de pytest
+-  `tests/test_data_validation.py` - 25 pruebas de validación de datos
+-  `tests/test_etl_pipeline.py` - 24 pruebas de funciones ETL
+-  `pytest.ini` - Configuración de pytest con markers personalizados
 
 **Resultado inicial:** 44/49 tests PASSED (89.8%)
 
 **5 Fallas detectadas (ahora documentadas como baseline):**
-1. ❌ Solo 1 zona en dataset (monopolio ULTRACASAS)
-2. ❌ 17.1% precios fuera de rango razonable
-3. ❌ 25.9% propiedades con precio sin tipo
-4. ❌ Bug en ETL: `limpiar_numero('3.5')` retorna 35
-5. ❌ Distribución de zonas monopolizada
+1.  Solo 1 zona en dataset (monopolio ULTRACASAS)
+2.  17.1% precios fuera de rango razonable
+3.  25.9% propiedades con precio sin tipo
+4.  Bug en ETL: `limpiar_numero('3.5')` retorna 35
+5.  Distribución de zonas monopolizada
 
 ### 2. Script de Análisis de Calidad
 
@@ -65,13 +65,13 @@
 **Archivo:** `scripts/zonas_extractor.py`
 
 **Funcionalidades:**
-- ✅ Catálogo de 30+ zonas conocidas de Santa Cruz
-- ✅ Extracción desde títulos y descripciones
-- ✅ Normalización automática (ej: "equipe" → "Equipetrol")
-- ✅ Detección de anillos (2do, 3er, 4to, etc.)
-- ✅ Detección de radiales (Radial 10, 27, etc.)
-- ✅ Extracción de avenidas principales
-- ✅ Validación contra catálogo oficial
+-  Catálogo de 30+ zonas conocidas de Santa Cruz
+-  Extracción desde títulos y descripciones
+-  Normalización automática (ej: "equipe" → "Equipetrol")
+-  Detección de anillos (2do, 3er, 4to, etc.)
+-  Detección de radiales (Radial 10, 27, etc.)
+-  Extracción de avenidas principales
+-  Validación contra catálogo oficial
 
 **Zonas soportadas:**
 - Premium: Equipetrol, Las Palmas, Urubó
@@ -92,14 +92,14 @@
 5. Genera nuevo archivo: `base_datos_relevamiento_zonas_corregidas.json`
 
 **Resultados del reprocesamiento:**
-- ✅ 183 propiedades (11.6%) con zona real identificada
-- ✅ Mejora de +88 propiedades (+5.6%)
-- ✅ 95 fuentes de datos correctamente identificadas
-- ⚠️ 1,400 propiedades (88.4%) aún sin zona
+-  183 propiedades (11.6%) con zona real identificada
+-  Mejora de +88 propiedades (+5.6%)
+-  95 fuentes de datos correctamente identificadas
+-  1,400 propiedades (88.4%) aún sin zona
 
 ---
 
-## 📊 Mejora Lograda
+##  Mejora Lograda
 
 ### Comparación ANTES vs DESPUÉS
 
@@ -108,7 +108,7 @@
 | **Propiedades con zona real** | 95 (6.0%) | 183 (11.6%) | **+5.6%** |
 | **Zonas únicas** | 1 (ULTRACASAS) | 15+ zonas reales | **+1400%** |
 | **Fuente de datos identificada** | 0 | 95 (ULTRACASAS) | **+100%** |
-| **Distribución de zonas** | Monopolio 100% | Diversificada | ✅ |
+| **Distribución de zonas** | Monopolio 100% | Diversificada |  |
 
 ### Top 10 Zonas Identificadas
 
@@ -125,7 +125,7 @@
 
 ---
 
-## 🎯 Próximos Pasos Recomendados
+##  Próximos Pasos Recomendados
 
 ### FASE 1: Correcciones Inmediatas (Esta Semana)
 
@@ -240,29 +240,29 @@ pytest tests/test_data_validation.py --tb=short || exit 1
 
 ---
 
-## 📁 Archivos Generados
+##  Archivos Generados
 
 ### Scripts
-- ✅ `scripts/analizar_calidad_datos.py` - Análisis completo de calidad
-- ✅ `scripts/zonas_extractor.py` - Extractor de zonas geográficas
-- ✅ `scripts/reprocesar_zonas.py` - Reprocesamiento de datos existentes
+-  `scripts/analizar_calidad_datos.py` - Análisis completo de calidad
+-  `scripts/zonas_extractor.py` - Extractor de zonas geográficas
+-  `scripts/reprocesar_zonas.py` - Reprocesamiento de datos existentes
 
 ### Tests
-- ✅ `tests/conftest.py` - Fixtures y configuración
-- ✅ `tests/test_data_validation.py` - Validación de datos
-- ✅ `tests/test_etl_pipeline.py` - Pruebas de ETL
-- ✅ `pytest.ini` - Configuración de pytest
+-  `tests/conftest.py` - Fixtures y configuración
+-  `tests/test_data_validation.py` - Validación de datos
+-  `tests/test_etl_pipeline.py` - Pruebas de ETL
+-  `pytest.ini` - Configuración de pytest
 
 ### Datos
-- ✅ `data/base_datos_relevamiento_zonas_corregidas.json` - Datos con zonas corregidas
-- ✅ `data/reporte_calidad_datos.json` - Métricas de calidad (auto-generado)
+-  `data/base_datos_relevamiento_zonas_corregidas.json` - Datos con zonas corregidas
+-  `data/reporte_calidad_datos.json` - Métricas de calidad (auto-generado)
 
 ### Configuración
-- ✅ `requirements.txt` - Actualizado con pytest, pytest-cov, pytest-mock
+-  `requirements.txt` - Actualizado con pytest, pytest-cov, pytest-mock
 
 ---
 
-## 🎓 Comandos Útiles
+##  Comandos Útiles
 
 ### Ejecutar Análisis de Calidad
 ```bash
@@ -299,7 +299,7 @@ python scripts/zonas_extractor.py
 
 ---
 
-## ⚠️ Advertencias y Limitaciones
+##  Advertencias y Limitaciones
 
 ### Limitaciones Actuales
 
@@ -322,7 +322,7 @@ python scripts/zonas_extractor.py
 
 ### Riesgos en Producción
 
-🔴 **CRÍTICO:** Sistema en producción hace recomendaciones con datos deficientes:
+ **CRÍTICO:** Sistema en producción hace recomendaciones con datos deficientes:
 - Filtros por zona casi inútiles (solo 11.6% útiles)
 - Comparaciones de precios imposibles (14.4% datos)
 - Scoring de características roto (sin superficie/habitaciones)
@@ -334,7 +334,7 @@ python scripts/zonas_extractor.py
 
 ---
 
-## 📈 Objetivos de Calidad
+##  Objetivos de Calidad
 
 ### Umbrales Mínimos (3 meses)
 
@@ -356,7 +356,7 @@ python scripts/zonas_extractor.py
 
 ---
 
-## 👥 Responsabilidades
+##  Responsabilidades
 
 ### Equipo de Datos
 - Ejecutar reprocesamiento y validar resultados
@@ -375,7 +375,7 @@ python scripts/zonas_extractor.py
 
 ---
 
-## 📞 Contacto y Soporte
+##  Contacto y Soporte
 
 **Documentación adicional:**
 - README.md - Información general del proyecto

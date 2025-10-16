@@ -1,10 +1,10 @@
-# 💰 Citrino - Plataforma de Inteligencia de Inversión Inmobiliaria
+#  Citrino - Plataforma de Inteligencia de Inversión Inmobiliaria
 
 > **Herramienta interna de Citrino para análisis inteligente de propiedades de inversión en Santa Cruz de la Sierra, Bolivia**
 
 Citrino es el sistema interno que ayuda al equipo de Citrino a tomar mejores decisiones de inversión para sus clientes mediante análisis automático de propiedades y recomendaciones inteligentes basadas en datos de mercado.
 
-## 🔄 ¿Cómo Funciona Citrino?
+##  ¿Cómo Funciona Citrino?
 
 ### 1. **Relevamiento de Datos**
 El equipo de Citrino recopila información de propiedades exclusivamente en archivos Excel RAW ubicados en `data/raw/`. Estos archivos son la ÚNICA fuente de datos original del sistema.
@@ -12,9 +12,9 @@ El equipo de Citrino recopila información de propiedades exclusivamente en arch
 ### 2. **Validación y Procesamiento**
 Los archivos Excel RAW pasan por un proceso de validación estructurado:
 
-- **📝 Validación Individual**: Cada archivo se procesa individualmente generando archivos intermedios
+- ** Validación Individual**: Cada archivo se procesa individualmente generando archivos intermedios
 - **🤖 Revisión Humana**: El equipo Citrino valida manualmente los datos procesados
-- **📊 Control de Calidad**: Generación de reportes de calidad y métricas de validación
+- ** Control de Calidad**: Generación de reportes de calidad y métricas de validación
 
 ### 3. **Migración a PostgreSQL**
 Una vez validados, los datos se migran a PostgreSQL con PostGIS:
@@ -30,15 +30,15 @@ El sistema proporciona:
 - **Recomendaciones Inteligentes**: Evaluación según criterios de inversión
 - **Panel de Consulta**: Interface para explorar resultados con filtros avanzados
 
-## 🌟 Ventajas para el Equipo Citrino
+##  Ventajas para el Equipo Citrino
 
-- **🎯 Decisions Informadas**: Análisis objetivo basado en datos estructurados
-- **⚡ Procesamiento Rápido**: Automatización que ahorra horas de trabajo manual
-- **🗺️ Análisis Geográfico**: Evaluación precisa de ubicaciones y servicios cercanos
-- **💡 Recomendaciones Inteligentes**: Sistema que aprende de los criterios del equipo
-- **🔍 Calidad de Datos**: Validación automática y reportes de control
+- ** Decisions Informadas**: Análisis objetivo basado en datos estructurados
+- ** Procesamiento Rápido**: Automatización que ahorra horas de trabajo manual
+- ** Análisis Geográfico**: Evaluación precisa de ubicaciones y servicios cercanos
+- ** Recomendaciones Inteligentes**: Sistema que aprende de los criterios del equipo
+- ** Calidad de Datos**: Validación automática y reportes de control
 
-## 📊 Datos del Sistema
+##  Datos del Sistema
 
 ### Información Procesada
 - **1,578 propiedades** analizadas y estructuradas
@@ -59,7 +59,7 @@ El sistema proporciona:
 - **Migración automática** a PostgreSQL con PostGIS
 - **Consultas optimizadas** con índices espaciales (milisegundos)
 
-## 🎯 Características Principales
+##  Características Principales
 
 ### 🤖 Inteligencia Artificial para Inversores
 - **Motor de recomendación especializado** en análisis de oportunidades
@@ -67,27 +67,27 @@ El sistema proporciona:
 - **Análisis de ubicación** mediante coordenadas precisas
 - **Filtros por Unidad Vecinal y Manzana** para segmentación detallada
 
-### 🗺️ Geolocalización para Inversión
+###  Geolocalización para Inversión
 - **Fórmula de Haversine** para cálculo de distancias reales
 - **Índice espacial** para búsquedas optimizadas por zona
 - **Coordenadas exactas** para propiedades de relevamiento
 - **Filtros UV/Manzana** para análisis por ubicación precisa
 - **Cálculo de proximidad** a servicios que impactan plusvalía
 
-### 💬 Experiencias Asistidas con IA
+###  Experiencias Asistidas con IA
 - **🤖 Chatbot UI Profesional** - Interfaz conversacional con búsqueda natural de propiedades
 - **Citrino Reco** centraliza notas de exploración y devuelve recomendaciones al instante
 - **Citrino Chat** permite "chatear con la información" sin restricciones temáticas
 - **Extracción automática de criterios** desde conversaciones y formularios
 - **Arquitectura preparada** con sistema LLM redundante y alta disponibilidad
 
-### 💻 Panel de Inversor
+###  Panel de Inversor
 - **Diseño responsive** para visualización de propiedades
 - **Bootstrap 5** con componentes funcionales
 - **Filtros avanzados** por zona, precio y características
 - **Comparativas detalladas** de propiedades seleccionadas
 
-## 🏗️ Tecnologías y Arquitectura
+##  Tecnologías y Arquitectura
 
 ### Stack Principal
 
@@ -102,30 +102,30 @@ El sistema proporciona:
 ### Componentes del Sistema
 
 ```
-┌─────────────┐     HTTP/REST     ┌──────────────┐
-│  Frontend   │ ←───────────────→ │  API Flask   │
-│  (3 apps)   │                   │  (Backend)   │
-└─────────────┘                   └──────┬───────┘
-                                         │
-                               ┌─────────┴─────────┐
-                               │                   │
-                          ┌────▼────┐      ┌──────▼──────┐
-                          │ Motores │      │    LLM      │
-                          │  Reco   │      │ Integration │
-                          └─────────┘      └─────────────┘
-                                │
-                          ┌─────▼──────┐
-                          │ PostgreSQL │
-                          │ + PostGIS  │
-                          └────────────┘
+     HTTP/REST     
+  Frontend    ←→   API Flask   
+  (3 apps)                        (Backend)   
+                   
+                                         
+                               
+                                                  
+                                
+                           Motores           LLM      
+                            Reco          Integration 
+                                
+                                
+                          
+                           PostgreSQL 
+                           + PostGIS  
+                          
                                 ↑
-                        ┌───────┴───────┐
-                        │ Excel RAW     │
-                        │ data/raw/     │
-                        └───────────────┘
+                        
+                         Excel RAW     
+                         data/raw/     
+                        
 ```
 
-## 🚀 Instalación Rápida (5 minutos)
+##  Instalación Rápida (5 minutos)
 
 ### Opción 1: Sistema Principal
 
@@ -172,7 +172,7 @@ docker-compose -f docker-compose.dev.yml up
 
 **Producción:** Frontend en [GitHub Pages](https://vincentiwadsworth.github.io/citrino/)
 
-## 🎮 Uso del Sistema
+##  Uso del Sistema
 
 ### Flujo Principal de Usuario
 
@@ -190,7 +190,7 @@ docker-compose -f docker-compose.dev.yml up
    - Cruza datasets, genera insights conversacionales
    - Visualiza recomendaciones dentro del chat
 
-### 💡 Ejemplos de Uso
+###  Ejemplos de Uso
 
 ```
 • "Propiedades en zonas de alto desarrollo urbano"
@@ -207,54 +207,54 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 
 | Factor | Peso | Qué evalúa |
 |--------|------|------------|
-| 📍 Ubicación | 35% | Distancia a zonas preferidas, accesos |
-| 💵 Precio | 25% | Ajuste al presupuesto del cliente |
-| 🏢 Servicios | 20% | Proximidad a escuelas, hospitales, comercios |
-| 🏠 Características | 15% | Habitaciones, baños, amenities |
-| ✅ Disponibilidad | 5% | Estado actual en el mercado |
+|  Ubicación | 35% | Distancia a zonas preferidas, accesos |
+|  Precio | 25% | Ajuste al presupuesto del cliente |
+|  Servicios | 20% | Proximidad a escuelas, hospitales, comercios |
+|  Características | 15% | Habitaciones, baños, amenities |
+|  Disponibilidad | 5% | Estado actual en el mercado |
 
 ### Integración con Modelos de Lenguaje
 
 **Flujo de Datos ETL**
-- 📊 **Excel RAW** como única fuente de datos (data/raw/)
-- ✅ **Validación estructurada** con archivos intermedios
-- 🗄️ **Migración automática** a PostgreSQL + PostGIS
-- ⚡ **Consultas optimizadas** con índices espaciales (milisegundos)
+-  **Excel RAW** como única fuente de datos (data/raw/)
+-  **Validación estructurada** con archivos intermedios
+-  **Migración automática** a PostgreSQL + PostGIS
+-  **Consultas optimizadas** con índices espaciales (milisegundos)
 
-##  📚 Documentación
+##   Documentación
 
 | Documento | Descripción |
 |-----------|-------------|
-| [🚀 **PostgreSQL Migration Guide**](README_POSTGRES_MIGRATION.md) | Guía completa para migración a PostgreSQL + PostGIS |
-| [📊 **PostgreSQL Technical Deep Dive**](docs/POSTGRESQL_TECHNICAL_DEEP_DIVE.md) | Arquitectura detallada de implementación PostgreSQL |
-| [🗄️ **Arquitectura de Datos**](DATA_ARCHITECTURE.md) | Arquitectura actual y plan de migración |
-| [📊 **Reporte Mejoras ETL**](docs/REPORTE_MEJORAS_ETL.md) | Análisis completo y optimización ETL avanzada |
-| [⚡ **Sistema Híbrido Extracción**](docs/SISTEMA_HIBRIDO_EXTRACCION.md) | Cómo funciona el sistema Regex + LLM |
-| [🏗️ **Arquitectura Técnica**](docs/ARQUITECTURA_TECNICA.md) | Diagramas, stack, patrones de diseño |
-| [📖 **Guía de Desarrollo**](docs/GUIA_DESARROLLO.md) | Setup, comandos, testing, deployment |
+| [ **PostgreSQL Migration Guide**](README_POSTGRES_MIGRATION.md) | Guía completa para migración a PostgreSQL + PostGIS |
+| [ **PostgreSQL Technical Deep Dive**](docs/POSTGRESQL_TECHNICAL_DEEP_DIVE.md) | Arquitectura detallada de implementación PostgreSQL |
+| [ **Arquitectura de Datos**](DATA_ARCHITECTURE.md) | Arquitectura actual y plan de migración |
+| [ **Reporte Mejoras ETL**](docs/REPORTE_MEJORAS_ETL.md) | Análisis completo y optimización ETL avanzada |
+| [ **Sistema Híbrido Extracción**](docs/SISTEMA_HIBRIDO_EXTRACCION.md) | Cómo funciona el sistema Regex + LLM |
+| [ **Arquitectura Técnica**](docs/ARQUITECTURA_TECNICA.md) | Diagramas, stack, patrones de diseño |
+| [ **Guía de Desarrollo**](docs/GUIA_DESARROLLO.md) | Setup, comandos, testing, deployment |
 | [🤖 **CLAUDE.md**](CLAUDE.md) | Guía para trabajar con IA en este proyecto |
-| [📋 **Changelog**](docs/CHANGELOG.md) | Historial completo de cambios y versiones |
+| [ **Changelog**](docs/CHANGELOG.md) | Historial completo de cambios y versiones |
 
-## 📄 Licencia y Contacto
+##  Licencia y Contacto
 
 - **Licencia**: MIT License
 - **Equipo**: Citrino Santa Cruz, Bolivia
 - **Soporte**: [GitHub Issues](https://github.com/vincentiwadsworth/citrino/issues)
 - **Email**: soporte@citrino.com
 
-## 🗺️ Roadmap y Próximas Mejoras
+##  Roadmap y Próximas Mejoras
 
 Citrino tiene un plan de evolución claro enfocado en:
 
-🔄 **En Progreso - Excel RAW a PostgreSQL** - Migración completa a base de datos relacional
-📅 **Próximos - Validación mejorada** - Sistema automatizado de control de calidad
-📅 **Próximos - Consultas avanzadas** - Análisis geoespacial en tiempo real
+ **En Progreso - Excel RAW a PostgreSQL** - Migración completa a base de datos relacional
+ **Próximos - Validación mejorada** - Sistema automatizado de control de calidad
+ **Próximos - Consultas avanzadas** - Análisis geoespacial en tiempo real
 
 **Ver roadmap completo:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ---
 
-## 🛠️ Stack Tecnológico
+##  Stack Tecnológico
 
 - **Backend:** Python 3.8+, Flask 2.3.3, Pandas, NumPy
 - **Frontend:** HTML5, Bootstrap 5, JavaScript ES6+
@@ -267,7 +267,7 @@ Citrino tiene un plan de evolución claro enfocado en:
 
 ---
 
-## 📞 Contacto y Soporte
+##  Contacto y Soporte
 
 **Proyecto interno de Citrino** - Santa Cruz de la Sierra, Bolivia
 

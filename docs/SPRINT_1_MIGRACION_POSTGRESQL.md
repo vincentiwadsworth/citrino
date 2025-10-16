@@ -1,15 +1,15 @@
 # SPRINT 1: Migración Citrino a PostgreSQL + PostGIS
 
-## 🎯 **Objetivo del Sprint**
+##  **Objetivo del Sprint**
 
 Diseñar e implementar la arquitectura completa de migración desde archivos Excel crudos (`data/raw/`) hacia una base de datos PostgreSQL + PostGIS optimizada para análisis geoespacial inmobiliario.
 
-## 📅 **Periodo del Sprint**
+##  **Periodo del Sprint**
 - **Inicio**: 15 de octubre de 2025
 - **Duración Estimada**: 2-3 semanas
 - **Estado**: Planificación completa - Listo para ejecución
 
-## 🏗️ **Arquitectura de Datos Diseñada**
+##  **Arquitectura de Datos Diseñada**
 
 ### **Flujo Principal: Excel → Excel → PostgreSQL**
 
@@ -48,47 +48,47 @@ graph TB
     D3 --> E1
 ```
 
-## 📁 **Estructura de Directorios Final**
+##  **Estructura de Directorios Final**
 
 ```
 data/
-├── raw/                           # Entrada: archivos crudos del personal
-│   ├── guia/
-│   │   └── GUIA URBANA.xlsx
-│   ├── inteligencia/             # Futuro: datos históricos Citrino
-│   └── relevamiento/
-│       ├── 2025.08.15 05.xlsx
-│       ├── 2025.08.17 01.xlsx
-│       ├── 2025.08.29 01.xlsx
-│       ├── 2025.08.29 02.xlsx
-│       ├── 2025.08.29 03.xlsx
-│       ├── 2025.08.29 04.xlsx
-│       └── 2025.08.29 05.xlsx
-│
-├── intermedio/                    # Procesamiento: archivos intermedios Excel
-│   ├── procesados/               # Generados automáticamente
-│   │   ├── propiedades_2025.08.15_05_procesado.xlsx
-│   │   ├── propiedades_2025.08.17_01_procesado.xlsx
-│   │   ├── servicios_urbanos_procesado.xlsx
-│   │   └── agentes_normalizados.xlsx
-│   ├── validados/                # Aprobados por personal Citrino
-│   └── errores/                  # Logs de problemas detectados
-│
-├── postgres/                     # Base de datos y scripts
-│   ├── scripts/
-│   │   ├── 01_create_schema.sql
-│   │   ├── 02_insert_agentes.sql
-│   │   ├── 03_insert_propiedades.sql
-│   │   └── 04_insert_servicios.sql
-│   ├── logs/
-│   └── backups/
-│
-└── postgis/                       # Índices y funciones espaciales
-    ├── indexes.sql
-    └── functions.sql
+ raw/                           # Entrada: archivos crudos del personal
+    guia/
+       GUIA URBANA.xlsx
+    inteligencia/             # Futuro: datos históricos Citrino
+    relevamiento/
+        2025.08.15 05.xlsx
+        2025.08.17 01.xlsx
+        2025.08.29 01.xlsx
+        2025.08.29 02.xlsx
+        2025.08.29 03.xlsx
+        2025.08.29 04.xlsx
+        2025.08.29 05.xlsx
+
+ intermedio/                    # Procesamiento: archivos intermedios Excel
+    procesados/               # Generados automáticamente
+       propiedades_2025.08.15_05_procesado.xlsx
+       propiedades_2025.08.17_01_procesado.xlsx
+       servicios_urbanos_procesado.xlsx
+       agentes_normalizados.xlsx
+    validados/                # Aprobados por personal Citrino
+    errores/                  # Logs de problemas detectados
+
+ postgres/                     # Base de datos y scripts
+    scripts/
+       01_create_schema.sql
+       02_insert_agentes.sql
+       03_insert_propiedades.sql
+       04_insert_servicios.sql
+    logs/
+    backups/
+
+ postgis/                       # Índices y funciones espaciales
+     indexes.sql
+     functions.sql
 ```
 
-## 🗄️ **Diseño de Base de Datos PostgreSQL + PostGIS**
+##  **Diseño de Base de Datos PostgreSQL + PostGIS**
 
 ### **Tablas Principales**
 
@@ -198,7 +198,7 @@ CREATE INDEX idx_propiedades_tipo_zona ON propiedades (tipo_propiedad, zona);
 CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 ```
 
-## 🔧 **Scripts ETL a Desarrollar**
+##  **Scripts ETL a Desarrollar**
 
 ### **Fase 1: Procesamiento Excel → Excel**
 
@@ -254,7 +254,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
   - Verificación de relaciones
   - Pruebas de rendimiento
 
-## 📊 **Estructura de Archivos Intermedios Excel**
+##  **Estructura de Archivos Intermedios Excel**
 
 ### **propiedades_{filename}_procesado.xlsx**
 
@@ -277,7 +277,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 | **Transporte** | Paradas de bus, terminales | Infraestructura de transporte |
 | **Recreación** | Parques, plazas, centros deportivos | Áreas recreativas |
 
-## 🚀 **Flujo de Trabajo Operativo**
+##  **Flujo de Trabajo Operativo**
 
 ### **Proceso Automatizado**
 1. **Detección**: Sistema monitorea `data/raw/relevamiento/` en busca de nuevos archivos
@@ -294,7 +294,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 8. **Validación**: Genera reporte de validación y métricas
 9. **Confirmación**: Notifica éxito de la migración
 
-## 🔍 **Validaciones y Control de Calidad**
+##  **Validaciones y Control de Calidad**
 
 ### **Validaciones Automáticas**
 - **Coordenadas**: Verificar que estén dentro de bounds de Santa Cruz (-17.5 a -18.5, -63.0 a -63.5)
@@ -316,7 +316,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 - **Errores por tipo de campo**
 - **Tiempo de procesamiento por archivo**
 
-## 📈 **Beneficios Esperados**
+##  **Beneficios Esperados**
 
 ### **Rendimiento**
 - Consultas espaciales de segundos → milisegundos
@@ -338,7 +338,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 - Procesos automatizados con supervisión humana
 - Flexibilidad para corregir y re-procesar
 
-## 🎯 **Criterios de Éxito del Sprint**
+##  **Criterios de Éxito del Sprint**
 
 ### **Técnicos**
 - [ ] Todos los scripts ETL funcionando correctamente
@@ -358,7 +358,7 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 - [ ] Validación completa de integridad referencial
 - [ ] Reportes de calidad generados automáticamente
 
-## 🔄 **Siguientes Pasos**
+##  **Siguientes Pasos**
 
 ### **Sprint 2: Inteligencia Inmobiliaria**
 - Integración de datos históricos de Citrino
@@ -380,5 +380,5 @@ CREATE INDEX idx_servicios_tipo_zona ON servicios (tipo_servicio, zona);
 
 ---
 
-**Estado**: ✅ Planificación completada - Listo para ejecución
+**Estado**:  Planificación completada - Listo para ejecución
 **Próxima acción**: Implementar scripts ETL fase 1 (Excel → Excel)

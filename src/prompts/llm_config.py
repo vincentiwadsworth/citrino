@@ -282,4 +282,4 @@ if __name__ == "__main__":
     for component in ['chat', 'reco', 'general']:
         config = get_llm_config(component)
         is_valid = validate_config(config)
-        print(f"{component}: {'✅ VÁLIDA' if is_valid else '❌ INVÁLIDA'}")
+        print(f"{component}: {' VÁLIDA' if is_valid else ' INVÁLIDA'}")

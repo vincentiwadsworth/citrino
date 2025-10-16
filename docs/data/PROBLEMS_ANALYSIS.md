@@ -1,4 +1,4 @@
-# 🔍 Análisis de Problemas - Sistema Actual Citrino
+#  Análisis de Problemas - Sistema Actual Citrino
 
 **Fecha**: 2025-10-14
 **Prioridad**: Crítica
@@ -6,13 +6,13 @@
 
 ---
 
-## 📊 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 El sistema Citrino actual basado en JSON presenta **limitaciones críticas** que afectan directamente la experiencia del usuario y la capacidad de crecimiento del negocio. La migración a PostgreSQL + PostGIS no es una mejora opcional, sino una **necesidad urgente** para mantener la competitividad.
 
 ---
 
-## 🚨 Problemas Críticos (Nivel 1 - Bloqueantes)
+##  Problemas Críticos (Nivel 1 - Bloqueantes)
 
 ### 1. Performance Inaceptable
 **Problema**: Tiempos de respuesta de 5-30 segundos para consultas geoespaciales
@@ -56,7 +56,7 @@ Resultado: JSON corrupto, pérdida de datos
 
 ---
 
-## ⚠️ Problemas Serios (Nivel 2 - Afectan Operación)
+##  Problemas Serios (Nivel 2 - Afectan Operación)
 
 ### 4. Consumo Excesivo de Memoria
 **Problema**: Dataset completo cargado en memoria RAM
@@ -100,7 +100,7 @@ Resultado: JSON corrupto, pérdida de datos
 
 ---
 
-## 📉 Problemas de Crecimiento (Nivel 3 - Límites de Negocio)
+##  Problemas de Crecimiento (Nivel 3 - Límites de Negocio)
 
 ### 7. Escalabilidad Limitada
 **Problema**: Sistema no soporta crecimiento del negocio
@@ -134,7 +134,7 @@ Escenario: 10x más propiedades (15,880)
 
 ---
 
-## 💰 Impacto Económico
+##  Impacto Económico
 
 ### Costos Actuales (Problemas)
 - **Experiencia Usuario Pobre**: Pérdida de clientes potenciales
@@ -155,7 +155,7 @@ Escenario: 10x más propiedades (15,880)
 
 ---
 
-## 🎯 Matriz de Prioridades
+##  Matriz de Prioridades
 
 | Problema | Impacto Usuario | Urgencia | Complejidad Solución |
 |----------|-----------------|----------|----------------------|
@@ -168,7 +168,7 @@ Escenario: 10x más propiedades (15,880)
 
 ---
 
-## 📋 Solución Propuesta
+##  Solución Propuesta
 
 ### Migración a PostgreSQL + PostGIS
 **Beneficios Directos**:
@@ -188,7 +188,7 @@ Escenario: 10x más propiedades (15,880)
 
 ---
 
-## 🔚 Conclusión
+##  Conclusión
 
 La migración a PostgreSQL no es una opción técnica, sino una **necesidad de negocio**. El sistema actual está llegando a sus límites fundamentales y compromete tanto la experiencia del usuario como la capacidad de crecimiento de Citrino.
 

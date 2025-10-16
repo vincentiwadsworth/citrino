@@ -361,10 +361,10 @@ class CitrinoChatbotAPI:
 
 Soy el asistente especializado de Citrino y mi conocimiento se limita a:
 
-🏠 **Búsqueda de propiedades**: Según nuestras 1,578 propiedades registradas
-📊 **Análisis de mercado**: Precios y tendencias basados en datos reales
-🏘️ **Información de zonas**: Características de barrios donde tenemos propiedades
-💰 **Asesoría de inversión**: Oportunidades basadas en nuestra base de datos
+ **Búsqueda de propiedades**: Según nuestras 1,578 propiedades registradas
+ **Análisis de mercado**: Precios y tendencias basados en datos reales
+ **Información de zonas**: Características de barrios donde tenemos propiedades
+ **Asesoría de inversión**: Oportunidades basadas en nuestra base de datos
 
 ¿Te gustaría consultar sobre propiedades en alguna zona específica de Santa Cruz?"""
 
@@ -428,13 +428,13 @@ Responde ÚNICAMENTE con datos existentes en esta base de datos."""
                 # Respuesta fallback sin LLM
                 return """Soy el asistente inmobiliario de Citrino. Puedo ayudarte con:
 
-🏠 **Búsqueda de propiedades**: Dime qué buscas (zona, presupuesto, características)
+ **Búsqueda de propiedades**: Dime qué buscas (zona, presupuesto, características)
 
-📊 **Análisis de mercado**: Precios promedio por zona según nuestros datos
+ **Análisis de mercado**: Precios promedio por zona según nuestros datos
 
-🏘️ **Información de zonas**: Características basadas en propiedades registradas
+ **Información de zonas**: Características basadas en propiedades registradas
 
-💰 **Asesoría de inversión**: Oportunidades basadas en datos existentes
+ **Asesoría de inversión**: Oportunidades basadas en datos existentes
 
 Mi conocimiento se limita estrictamente a las propiedades registradas en nuestra base de datos de Santa Cruz de la Sierra.
 

@@ -1,6 +1,6 @@
 # PostgreSQL Technical Deep Dive - Sprint 1 Implementation
 
-## 📋 **Table of Contents**
+##  **Table of Contents**
 1. [Architecture Overview](#architecture-overview)
 2. [Database Schema Design](#database-schema-design)
 3. [ETL Pipeline Architecture](#etl-pipeline-architecture)
@@ -12,7 +12,7 @@
 9. [Security Considerations](#security-considerations)
 10. [Scalability Planning](#scalability-planning)
 
-## 🏗️ **Architecture Overview**
+##  **Architecture Overview**
 
 ### **System Design Principles**
 1. **Separation of Concerns**: Each ETL component has a single responsibility
@@ -23,20 +23,20 @@
 
 ### **Component Interaction**
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Raw Excel     │    │  Intermediate   │    │   PostgreSQL     │
-│   Files         │───▶│   Excel Files   │───▶│   + PostGIS     │
-│                 │    │  (Human Review) │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Error Logs    │    │   Validation    │    │   Spatial       │
-│   + Backups     │    │   Reports       │    │   Indexes       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+        
+   Raw Excel           Intermediate          PostgreSQL     
+   Files            Excel Files      + PostGIS     
+                       (Human Review)                      
+        
+                                                      
+                                                      
+        
+   Error Logs           Validation           Spatial       
+   + Backups            Reports              Indexes       
+        
 ```
 
-## 🗄️ **Database Schema Design**
+##  **Database Schema Design**
 
 ### **PostgreSQL Version Requirements**
 - **PostgreSQL**: 15.0+ (for performance improvements)
@@ -248,7 +248,7 @@ END;
 $$ LANGUAGE plpgsql;
 ```
 
-## 🔄 **ETL Pipeline Architecture**
+##  **ETL Pipeline Architecture**
 
 ### **Phase 1: Excel Processing**
 
@@ -488,7 +488,7 @@ def crear_respaldo_tabla(self, nombre_tabla: str) -> str:
     return str(backup_path)
 ```
 
-## 🗺️ **Spatial Data Processing**
+##  **Spatial Data Processing**
 
 ### **Coordinate Validation**
 ```python
@@ -565,7 +565,7 @@ WHERE desviacion_precio IS NOT NULL
 ORDER BY indice_variabilidad DESC;
 ```
 
-## ⚡ **Performance Optimizations**
+##  **Performance Optimizations**
 
 ### **PostgreSQL Configuration**
 ```sql
@@ -653,7 +653,7 @@ def memory_efficient_processing(self, file_path: str):
         gc.collect()  # Force garbage collection
 ```
 
-## 🔍 **Data Quality Management**
+##  **Data Quality Management**
 
 ### **Quality Metrics Framework**
 ```python
@@ -742,7 +742,7 @@ def detectar_anomalias_precio(self, datos: List[Dict]) -> List[Dict]:
     return anomalias
 ```
 
-## 🛡️ **Error Handling & Recovery**
+##  **Error Handling & Recovery**
 
 ### **Comprehensive Error Logging**
 ```python
@@ -825,7 +825,7 @@ class RecoveryManager:
                 self._log_para_revision_manual(record)
 ```
 
-## 📊 **Monitoring & Validation**
+##  **Monitoring & Validation**
 
 ### **Real-time Monitoring**
 ```python
@@ -909,7 +909,7 @@ class MigrationValidator:
         }
 ```
 
-## 🔐 **Security Considerations**
+##  **Security Considerations**
 
 ### **Database Security**
 ```sql
@@ -951,7 +951,7 @@ class SecureDataHandler:
         return decrypted_data.decode()
 ```
 
-## 📈 **Scalability Planning**
+##  **Scalability Planning**
 
 ### **Horizontal Scaling Preparation**
 ```sql
@@ -1031,7 +1031,7 @@ class SpatialQueryCache:
         pass
 ```
 
-## 🎯 **Performance Benchmarks**
+##  **Performance Benchmarks**
 
 ### **Expected Performance Improvements**
 | Operation | Current (JSON) | Target (PostgreSQL) | Improvement |
@@ -1071,7 +1071,7 @@ ORDER BY total_propiedades DESC;
 
 ---
 
-## 📝 **Implementation Checklist**
+##  **Implementation Checklist**
 
 ### **Pre-Migration**
 - [ ] PostgreSQL 15+ installed with PostGIS 3.3+

@@ -2,7 +2,7 @@
 
 Sistema completo de ETL para migrar los datos de Citrino desde archivos Excel a PostgreSQL con PostGIS para análisis geoespacial de alto rendimiento.
 
-## 🎯 Objetivo
+##  Objetivo
 
 Transformar el sistema actual basado en archivos Excel a una base de datos PostgreSQL + PostGIS que permita:
 - Consultas espaciales en milisegundos (vs segundos actualmente)
@@ -10,7 +10,7 @@ Transformar el sistema actual basado en archivos Excel a una base de datos Postg
 - Mejor escalabilidad y concurrencia
 - Queries SQL optimizadas para el equipo de Citrino
 
-## 📊 Fuentes de Datos
+##  Fuentes de Datos
 
 ### Propiedades
 - **8 archivos Excel** en `data/raw/relevamiento/`
@@ -22,18 +22,18 @@ Transformar el sistema actual basado en archivos Excel a una base de datos Postg
 - Categorías: educación, salud, comercio, transporte, etc.
 - Coordenadas para análisis espacial
 
-## 🏗️ Arquitectura
+##  Arquitectura
 
 ```
 PostgreSQL + PostGIS
-├── propiedades (coordenadas GEOGRAPHY + índice GIST)
-├── servicios (coordenadas GEOGRAPHY + índice GIST)
-├── agentes (deduplicados)
-├── categorias_servicios
-└── proximidad_cache (optimización)
+ propiedades (coordenadas GEOGRAPHY + índice GIST)
+ servicios (coordenadas GEOGRAPHY + índice GIST)
+ agentes (deduplicados)
+ categorias_servicios
+ proximidad_cache (optimización)
 ```
 
-## 🚀 Instalación y Ejecución
+##  Instalación y Ejecución
 
 ### Prerequisitos
 ```bash
@@ -77,7 +77,7 @@ python migration/scripts/etl_servicios_from_excel.py
 python migration/scripts/validate_migration.py
 ```
 
-## 📈 Scripts Disponibles
+##  Scripts Disponibles
 
 ### Scripts Principales
 - `run_migration.py` - Orquestador completo
@@ -88,28 +88,28 @@ python migration/scripts/validate_migration.py
 ### Base de Datos
 - `02_create_schema_postgis.sql` - Esquema completo con PostGIS
 
-## 🔧 Características Implementadas
+##  Características Implementadas
 
 ### ETL Avanzado
-- ✅ Limpieza automática de precios y coordenadas
-- ✅ Deduplicación de agentes inmobiliarios
-- ✅ Normalización de categorías de servicios
-- ✅ Validación de coordenadas (rango Santa Cruz)
-- ✅ Procesamiento en batches para mejor rendimiento
+-  Limpieza automática de precios y coordenadas
+-  Deduplicación de agentes inmobiliarios
+-  Normalización de categorías de servicios
+-  Validación de coordenadas (rango Santa Cruz)
+-  Procesamiento en batches para mejor rendimiento
 
 ### PostGIS + Geoespacial
-- ✅ Coordenadas `GEOGRAPHY(POINT, 4326)`
-- ✅ Índices espaciales `GIST` para consultas rápidas
-- ✅ Funciones de distancia y proximidad
-- ✅ Vistas optimizadas para análisis de negocio
+-  Coordenadas `GEOGRAPHY(POINT, 4326)`
+-  Índices espaciales `GIST` para consultas rápidas
+-  Funciones de distancia y proximidad
+-  Vistas optimizadas para análisis de negocio
 
 ### Optimización
-- ✅ `servicios_cercanos()` - búsqueda por radio
-- ✅ `proximidad_cache` - cache de consultas frecuentes
-- ✅ Índices compuestos (precio, zona, coordenadas)
-- ✅ Vistas materializadas para análisis por zona
+-  `servicios_cercanos()` - búsqueda por radio
+-  `proximidad_cache` - cache de consultas frecuentes
+-  Índices compuestos (precio, zona, coordenadas)
+-  Vistas materializadas para análisis por zona
 
-## 📊 Métricas de Rendimiento
+##  Métricas de Rendimiento
 
 ### Antes (Excel + Python)
 - Búsqueda espacial: 3-10 segundos
@@ -140,14 +140,14 @@ Servicios: 4,938 (23.1% con coordenadas)
 Agentes únicos: 127
 
 === VALIDACIÓN COMPLETADA EXITOSAMENTE ===
-✓ Estructura BD: 4 tablas, 2 índices GIST, PostGIS activo
-✓ Datos básicos: 476 propiedades, 4,938 servicios
-✓ Consultas espaciales: ST_Distance, ST_DWithin funcionando
-✓ Rendimiento: 85% consultas bajo umbrales
-✓ Consistencia: 0 problemas críticos
+ Estructura BD: 4 tablas, 2 índices GIST, PostGIS activo
+ Datos básicos: 476 propiedades, 4,938 servicios
+ Consultas espaciales: ST_Distance, ST_DWithin funcionando
+ Rendimiento: 85% consultas bajo umbrales
+ Consistencia: 0 problemas críticos
 ```
 
-## 🔍 Consultas de Ejemplo
+##  Consultas de Ejemplo
 
 ### Búsqueda por zona y precio
 ```sql
@@ -181,7 +181,7 @@ GROUP BY p.zona
 ORDER BY total_propiedades DESC;
 ```
 
-## 🚨 Solución de Problemas
+##  Solución de Problemas
 
 ### Error: "No se puede conectar a PostgreSQL"
 ```bash
@@ -210,14 +210,14 @@ psql -d citrino -c "\d+ propiedades"
 python migration/scripts/run_migration.py
 ```
 
-## 📝 Logs y Reportes
+##  Logs y Reportes
 
 - `migration/logs/migration.log` - Log del proceso ETL
 - `migration/logs/validation.log` - Log de validación
 - `migration/logs/migration_report.json` - Reporte final
 - `migration/logs/validation_results.json` - Resultados detallados
 
-## 🔄 Integración con API Existente
+##  Integración con API Existente
 
 Para conectar la API existente:
 
@@ -251,7 +251,7 @@ def search_properties():
     return jsonify(results)
 ```
 
-## 🎉 Beneficios Logrados
+##  Beneficios Logrados
 
 1. **Rendimiento 100x más rápido** en consultas espaciales
 2. **Escalabilidad** para manejar más datos y usuarios
@@ -262,6 +262,6 @@ def search_properties():
 
 ---
 
-**Estado**: ✅ Completo y probado
+**Estado**:  Completo y probado
 **Última actualización**: Octubre 2024
 **Mantenimiento**: Scripts automatizados con logging completo

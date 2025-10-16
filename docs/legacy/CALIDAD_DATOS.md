@@ -1,4 +1,4 @@
-# 📊 Calidad de Datos y Testing
+#  Calidad de Datos y Testing
 
 ## Estado Actual de Calidad
 
@@ -9,17 +9,17 @@
 | **Score General** | 14.4% | >40% |
 | **Con Zona** | 38.1% | >90% |
 | **Con Precio** | 14.4% | >50% |
-| **Con Coordenadas** | 96.0% | 96%+ ✅ |
+| **Con Coordenadas** | 96.0% | 96%+  |
 | **Con Características** | ~16% | >60% |
 
 ### Mejoras Implementadas
 
-- ✅ **Sistema de extracción de zonas** desde títulos/descripciones (50+ zonas conocidas)
-- ✅ **Geocodificación inversa** desde coordenadas (+420 zonas identificadas)
-- ✅ **Extracción regex** de habitaciones, baños, garajes (+171 propiedades enriquecidas)
-- ✅ **Detección multi-criterio** de duplicados (URL → Coords → Título)
-- ✅ **Análisis por proveedor** y mapeo de esquemas inconsistentes
-- ✅ **Sistema híbrido Regex+LLM** (80% sin LLM, 90% reducción tokens)
+-  **Sistema de extracción de zonas** desde títulos/descripciones (50+ zonas conocidas)
+-  **Geocodificación inversa** desde coordenadas (+420 zonas identificadas)
+-  **Extracción regex** de habitaciones, baños, garajes (+171 propiedades enriquecidas)
+-  **Detección multi-criterio** de duplicados (URL → Coords → Título)
+-  **Análisis por proveedor** y mapeo de esquemas inconsistentes
+-  **Sistema híbrido Regex+LLM** (80% sin LLM, 90% reducción tokens)
 
 ---
 
@@ -187,10 +187,10 @@ BOB: 70,000 - 350,000,000
 
 ### Métricas Observadas
 
-- **📈 Tiempo de respuesta API**: ~300ms promedio
-- **🎯 Tasa de éxito**: 99.5%
-- **💾 Cache hit ratio**: ~85%
-- **🌐 Disponibilidad LLM**: 99%+ (con fallback)
+- ** Tiempo de respuesta API**: ~300ms promedio
+- ** Tasa de éxito**: 99.5%
+- ** Cache hit ratio**: ~85%
+- ** Disponibilidad LLM**: 99%+ (con fallback)
 
 ### Logging
 

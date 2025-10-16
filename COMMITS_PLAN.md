@@ -1,11 +1,11 @@
-# 📋 Plan Detallado de Commits - Sprint 1
+#  Plan Detallado de Commits - Sprint 1
 
 **Workflow**: Trabajo por commits con documentación y validación
 **Sprint**: Organización y Limpieza del Repositorio
 
 ---
 
-## 🎯 Metodología de Trabajo
+##  Metodología de Trabajo
 
 ### Flujo por Commit
 1. **Planificación** → Documentar en COMMITS_PLAN.md
@@ -21,21 +21,21 @@
 
 ---
 
-## 📝 Commits Planificados
+##  Commits Planificados
 
-### ✅ Commit 1: Sistema de Documentación Estructurada
+###  Commit 1: Sistema de Documentación Estructurada
 
-**Status**: 🔄 In Progress (2/6 tareas completadas)
+**Status**:  In Progress (2/6 tareas completadas)
 
 **Objetivo**: Crear base documental para gestión estructurada del proyecto
 
 **Archivos a Crear/Modificar**:
-- [x] `CHANGELOG.md` ✅ Registro histórico de versiones
-- [x] `SCRUM_BOARD.md` ✅ Tablero de trabajo sprint
-- [ ] `COMMITS_PLAN.md` 🔄 Planificación detallada (actual)
-- [ ] `WORKFLOW.md` 📖 Guía de flujo por commits
-- [ ] `DATA_ARCHITECTURE.md` 🏗️ Plan transición arquitectura
-- [ ] `CLAUDE.md` ✏️ Actualizar con nuevas referencias
+- [x] `CHANGELOG.md`  Registro histórico de versiones
+- [x] `SCRUM_BOARD.md`  Tablero de trabajo sprint
+- [ ] `COMMITS_PLAN.md`  Planificación detallada (actual)
+- [ ] `WORKFLOW.md`  Guía de flujo por commits
+- [ ] `DATA_ARCHITECTURE.md`  Plan transición arquitectura
+- [ ] `CLAUDE.md`  Actualizar con nuevas referencias
 
 **Validación**:
 - [ ] Estructura de docs/ funcional
@@ -58,9 +58,9 @@ Refs: #sprint-1-story-1
 
 ---
 
-### 📋 Commit 2: Limpieza de Archivos Temporales
+###  Commit 2: Limpieza de Archivos Temporales
 
-**Status**: 📋 To Do
+**Status**:  To Do
 
 **Objetivo**: Eliminar archivos temporales, pruebas y debug que contaminan el repositorio
 
@@ -108,33 +108,33 @@ Refs: #sprint-1-story-2
 
 ---
 
-### 📋 Commit 3: Reorganización de Directorios
+###  Commit 3: Reorganización de Directorios
 
-**Status**: 📋 To Do
+**Status**:  To Do
 
 **Objetivo**: Crear estructura lógica de directorios para mejor mantenibilidad
 
 **Nueva Estructura**:
 ```
 scripts/
-├── etl/                    # Procesamiento de datos
-│   ├── build_relevamiento_dataset.py
-│   ├── build_urban_services_dataset.py
-│   └── integrar_datos_proveedor02.py
-├── analysis/               # Análisis y reporting
-│   ├── analizar_por_proveedor.py
-│   ├── test_regex_vs_llm.py
-│   └── demo_feedback.py
-├── maintenance/            # Mantenimiento y utilidades
-│   └── build_sample_inventory.py
-└── legacy/                 # Código obsoleto a archivar
-    └── [scripts viejos]
+ etl/                    # Procesamiento de datos
+    build_relevamiento_dataset.py
+    build_urban_services_dataset.py
+    integrar_datos_proveedor02.py
+ analysis/               # Análisis y reporting
+    analizar_por_proveedor.py
+    test_regex_vs_llm.py
+    demo_feedback.py
+ maintenance/            # Mantenimiento y utilidades
+    build_sample_inventory.py
+ legacy/                 # Código obsoleto a archivar
+     [scripts viejos]
 
 docs/
-├── legacy/                 # Documentación histórica
-│   └── [docs viejas]
-└── data/                   # Arquitectura de datos
-    └── [especificaciones]
+ legacy/                 # Documentación histórica
+    [docs viejas]
+ data/                   # Arquitectura de datos
+     [especificaciones]
 ```
 
 **Tareas**:
@@ -165,9 +165,9 @@ Refs: #sprint-1-story-3
 
 ---
 
-### 📋 Commit 4: Documentación de Arquitectura
+###  Commit 4: Documentación de Arquitectura
 
-**Status**: 📋 To Do
+**Status**:  To Do
 
 **Objetivo**: Documentar estado actual y plan de transición de arquitectura de datos
 
@@ -198,25 +198,25 @@ Refs: #sprint-1-story-4
 
 ---
 
-### ✅ Commit 5: Preparación para Nueva Arquitectura PostgreSQL
+###  Commit 5: Preparación para Nueva Arquitectura PostgreSQL
 
-**Status**: ✅ Completed
+**Status**:  Completed
 
 **Objetivo**: Crear estructura base para migración a PostgreSQL + PostGIS
 
 **Directorios Creados**:
 ```
 migration/
-├── scripts/                    # Scripts ETL completos
-│   ├── 01_etl_agentes.py      # Deduplicación de agentes
-│   ├── 02_etl_propiedades.py  # Migración con coordenadas PostGIS
-│   ├── 03_etl_servicios.py    # Servicios urbanos
-│   └── 04_validate_migration.py # Validación completa
-├── database/                   # DDL y configuración SQL
-│   ├── 01_create_schema.sql   # Esquema PostgreSQL + PostGIS
-│   └── 02_create_indexes.sql  # Índices GIST y B-Tree
-└── config/                     # Configuración conexión
-    └── database_config.py     # Manejo de conexión y config
+ scripts/                    # Scripts ETL completos
+    01_etl_agentes.py      # Deduplicación de agentes
+    02_etl_propiedades.py  # Migración con coordenadas PostGIS
+    03_etl_servicios.py    # Servicios urbanos
+    04_validate_migration.py # Validación completa
+ database/                   # DDL y configuración SQL
+    01_create_schema.sql   # Esquema PostgreSQL + PostGIS
+    02_create_indexes.sql  # Índices GIST y B-Tree
+ config/                     # Configuración conexión
+     database_config.py     # Manejo de conexión y config
 ```
 
 **Archivos Creados**:
@@ -251,16 +251,16 @@ Refs: #sprint-1-story-5
 
 ---
 
-## 🔄 Progreso del Sprint
+##  Progreso del Sprint
 
 ### Commits Completados
-- **Commit 1**: ✅ Completado - Sistema de documentación estructurada
-- **Commit 2**: ✅ Completado - Limpieza de archivos temporales
-- **Commit 3**: ✅ Completado - Reorganización de directorios
-- **Commit 4**: ✅ Completado - Documentación de arquitectura
-- **Commit 5**: ✅ Completado - Preparación estructura PostgreSQL
+- **Commit 1**:  Completado - Sistema de documentación estructurada
+- **Commit 2**:  Completado - Limpieza de archivos temporales
+- **Commit 3**:  Completado - Reorganización de directorios
+- **Commit 4**:  Completado - Documentación de arquitectura
+- **Commit 5**:  Completado - Preparación estructura PostgreSQL
 
-### Sprint Status: COMPLETADO 🎉
+### Sprint Status: COMPLETADO 
 **Total**: 5/5 commits completados (100%)
 
 ### Logros del Sprint
@@ -279,7 +279,7 @@ Refs: #sprint-1-story-5
 
 ---
 
-## 📋 Checklist de Validación por Commit
+##  Checklist de Validación por Commit
 
 ### Antes de cada Commit:
 - [ ] **Funcionalidad**: Tests pasan correctamente
@@ -295,7 +295,7 @@ Refs: #sprint-1-story-5
 
 ---
 
-## 🎯 Criterios de Éxito del Sprint
+##  Criterios de Éxito del Sprint
 
 - [ ] **5 commits** completados con validación
 - [ ] **Repositorio limpio** de archivos temporales

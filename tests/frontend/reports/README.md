@@ -2,24 +2,24 @@
 
 Este directorio contiene los reportes generados por la suite de testing del frontend de Citrino.
 
-## 📁 Estructura de Reportes
+##  Estructura de Reportes
 
 ```
 reports/
-├── html/                   # Reportes HTML visuales
-│   ├── test-report-2025-10-09-T14-30-00.html
-│   └── test-report-2025-10-09-T15-45-12.html
-├── json/                   # Datos estructurados de tests
-│   ├── test-results-2025-10-09-T14-30-00.json
-│   └── test-results-2025-10-09-T15-45-12.json
-├── screenshots/            # Capturas de pantalla (automáticas)
-│   ├── reco-form-validation.png
-│   ├── chat-interaction.png
-│   └── mobile-responsive.png
-└── README.md               # Este archivo
+ html/                   # Reportes HTML visuales
+    test-report-2025-10-09-T14-30-00.html
+    test-report-2025-10-09-T15-45-12.html
+ json/                   # Datos estructurados de tests
+    test-results-2025-10-09-T14-30-00.json
+    test-results-2025-10-09-T15-45-12.json
+ screenshots/            # Capturas de pantalla (automáticas)
+    reco-form-validation.png
+    chat-interaction.png
+    mobile-responsive.png
+ README.md               # Este archivo
 ```
 
-## 📊 Tipos de Reportes
+##  Tipos de Reportes
 
 ### 1. Reportes HTML
 - **Formato**: Visual e interactivo
@@ -39,7 +39,7 @@ reports/
 - **Uso**: Documentación visual, evidencia de bugs, regresión visual
 - **Ubicación**: `reports/screenshots/`
 
-## 📈 Métricas Incluidas
+##  Métricas Incluidas
 
 ### Performance Metrics
 - **First Contentful Paint (FCP)**: Tiempo hasta primer contenido visible
@@ -61,7 +61,7 @@ reports/
 - **Coverage**: Porcentaje de funcionalidad cubierta
 - **Execution Time**: Tiempo total de ejecución
 
-## 🔍 Nomenclatura de Archivos
+##  Nomenclatura de Archivos
 
 ### Reportes HTML
 ```
@@ -84,7 +84,7 @@ Ejemplos:
 - `chat-interaction-2025-10-09T14-30-00.png`
 - `mobile-responsive-2025-10-09T14-30-00.png`
 
-## 📋 Contenido de Reportes
+##  Contenido de Reportes
 
 ### Estructura JSON
 ```json
@@ -140,7 +140,7 @@ El reporte HTML incluye:
 - **Timeline**: Ejecución de tests en el tiempo
 - **Error Details**: Stack traces y soluciones
 
-## 🚀 Generación Automática
+##  Generación Automática
 
 ### Manual
 1. Abrir `test_runner.html`
@@ -181,7 +181,7 @@ driver.quit()
 "
 ```
 
-## 📅 Historial y Tendencias
+##  Historial y Tendencias
 
 ### Tracking de Métricas
 Los reportes se guardan históricamente para:
@@ -197,7 +197,7 @@ python scripts/compare_reports.py \
   --after reports/json/test-results-2025-10-09.json
 ```
 
-## 🐛 Debugging con Reportes
+##  Debugging con Reportes
 
 ### Análisis de Errores
 1. **Identificar Test Fallido**: Revisar reporte HTML
@@ -218,7 +218,7 @@ python scripts/compare_reports.py \
 }
 ```
 
-## 📊 Análisis y Reporting
+##  Análisis y Reporting
 
 ### KPIs Principales
 - **Test Success Rate**: % de tests exitosos (meta: >95%)
@@ -239,7 +239,7 @@ function generateCustomReport(testResults, filters) {
 }
 ```
 
-## 🔧 Mantenimiento
+##  Mantenimiento
 
 ### Limpieza Automática
 ```bash
@@ -255,7 +255,7 @@ find reports/ -name "*.png" -mtime +30 -delete
 tar -czf reports/monthly/2025-10.tar.gz reports/2025-10/
 ```
 
-## 📞 Soporte
+##  Soporte
 
 Para problemas con reportes:
 

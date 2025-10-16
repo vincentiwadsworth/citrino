@@ -46,7 +46,7 @@ def test_fallback():
         print("Intentando consulta con fallback...")
         resultado = llm.consultar_con_fallback(prompt, use_fallback=True)
 
-        print("✅ ÉXITO:")
+        print(" ÉXITO:")
         print(f"  Provider usado: {resultado['provider_usado']}")
         print(f"  Model usado: {resultado['model_usado']}")
         print(f"  Fallback activado: {resultado['fallback_activado']}")
@@ -54,7 +54,7 @@ def test_fallback():
         print(f"  Respuesta: {resultado['respuesta'][:100]}...")
 
     except Exception as e:
-        print(f"❌ ERROR: {e}")
+        print(f" ERROR: {e}")
         print("Todos los providers fallaron")
 
 if __name__ == "__main__":

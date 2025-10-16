@@ -1,10 +1,10 @@
-# 🚀 Plan de Migración a PostgreSQL + PostGIS
+#  Plan de Migración a PostgreSQL + PostGIS
 
 **Documentación completa para la migración desde Excel RAW a PostgreSQL + PostGIS. Los datos ORIGINALES provienen EXCLUSIVAMENTE de archivos Excel en data/raw/.**
 
 ---
 
-## 📋 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 ### Objetivo Principal
 Establecer el flujo completo desde archivos Excel RAW hasta PostgreSQL + PostGIS con validación estructurada y revisión humana obligatoria para garantizar la calidad de datos.
@@ -24,24 +24,24 @@ Establecer el flujo completo desde archivos Excel RAW hasta PostgreSQL + PostGIS
 
 ---
 
-## 🗄️ Arquitectura Actual vs Destino
+##  Arquitectura Actual vs Destino
 
 ### Flujo Actual (Excel RAW → PostgreSQL)
 ```
 /data/
-├── raw/                           # Archivos Excel ORIGINALES
-│   ├── relevamiento/*.xlsx        # Propiedades
-│   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
-├── processed/                     # Archivos intermedios validados
-│   ├── *_intermedio.xlsx         # Para revisión humana
-│   └── *_reporte.json           # Reportes de calidad
-└── final/                        # Datos aprobados
+ raw/                           # Archivos Excel ORIGINALES
+    relevamiento/*.xlsx        # Propiedades
+    guia/GUIA URBANA.xlsx     # Servicios urbanos
+ processed/                     # Archivos intermedios validados
+    *_intermedio.xlsx         # Para revisión humana
+    *_reporte.json           # Reportes de calidad
+ final/                        # Datos aprobados
 
 PostgreSQL (base de datos principal):
-├── agentes (tabla normalizada)
-├── propiedades (con PostGIS)
-├── servicios (índices espaciales)
-└── trazabilidad (archivo_origen)
+ agentes (tabla normalizada)
+ propiedades (con PostGIS)
+ servicios (índices espaciales)
+ trazabilidad (archivo_origen)
 
 Ventajas:
 - Validación humana obligatoria
@@ -52,7 +52,7 @@ Ventajas:
 
 ---
 
-## 🗄️ Esquema Completo de Base de Datos
+##  Esquema Completo de Base de Datos
 
 ### DDL Completo (Data Definition Language)
 
@@ -206,40 +206,40 @@ ORDER BY total_servicios DESC;
 
 ---
 
-## 🔄 Proceso ETL Detallado
+##  Proceso ETL Detallado
 
 ### Estructura de Directorios del Flujo Completo
 ```
-├── data/
-│   ├── raw/                           # Archivos Excel ORIGINALES
-│   │   ├── relevamiento/             # Propiedades por fecha
-│   │   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
-│   ├── processed/                     # Archivos intermedios
-│   │   ├── *_intermedio.xlsx         # Validados para revisión
-│   │   └── *_reporte.json           # Reportes de calidad
-│   └── final/                        # Datos aprobados
-│
-├── scripts/validation/               # Validación Excel RAW
-│   ├── validate_raw_to_intermediate.py  # Procesamiento individual
-│   ├── process_all_raw.py               # Batch processing
-│   ├── generate_validation_report.py    # Reportes
-│   └── approve_processed_data.py        # Aprobación a producción
-│
-├── migration/                       # Migración a PostgreSQL
-│   ├── scripts/
-│   │   ├── 01_etl_agentes.py          # Deduplicación agentes
-│   │   ├── 02_etl_propiedades.py      # Migración propiedades
-│   │   ├── 03_etl_servicios.py        # Migración servicios
-│   │   └── 04_validate_migration.py   # Validación final
-│   ├── database/
-│   │   └── 01_create_schema.sql       # DDL completo
-│   └── config/
-│       └── database_config.py         # Configuración conexión
-│
-└── logs/
-    ├── validation/                     # Logs de validación
-    ├── migration/                      # Logs de migración
-    └── etl_*.log                     # Logs específicos
+ data/
+    raw/                           # Archivos Excel ORIGINALES
+       relevamiento/             # Propiedades por fecha
+       guia/GUIA URBANA.xlsx     # Servicios urbanos
+    processed/                     # Archivos intermedios
+       *_intermedio.xlsx         # Validados para revisión
+       *_reporte.json           # Reportes de calidad
+    final/                        # Datos aprobados
+
+ scripts/validation/               # Validación Excel RAW
+    validate_raw_to_intermediate.py  # Procesamiento individual
+    process_all_raw.py               # Batch processing
+    generate_validation_report.py    # Reportes
+    approve_processed_data.py        # Aprobación a producción
+
+ migration/                       # Migración a PostgreSQL
+    scripts/
+       01_etl_agentes.py          # Deduplicación agentes
+       02_etl_propiedades.py      # Migración propiedades
+       03_etl_servicios.py        # Migración servicios
+       04_validate_migration.py   # Validación final
+    database/
+       01_create_schema.sql       # DDL completo
+    config/
+        database_config.py         # Configuración conexión
+
+ logs/
+     validation/                     # Logs de validación
+     migration/                      # Logs de migración
+     etl_*.log                     # Logs específicos
 ```
 
 ### Script 1: ETL de Agentes (Deduplicación)
@@ -669,9 +669,9 @@ class MigrationValidator:
 
         for nombre, original, pg in validaciones:
             if original == pg:
-                logger.info(f"✅ {nombre}: {original} == {pg}")
+                logger.info(f" {nombre}: {original} == {pg}")
             else:
-                error_msg = f"❌ {nombre}: {original} != {pg} (diferencia: {abs(original-pg)})"
+                error_msg = f" {nombre}: {original} != {pg} (diferencia: {abs(original-pg)})"
                 logger.error(error_msg)
                 self.errores.append(error_msg)
 
@@ -696,9 +696,9 @@ class MigrationValidator:
         invalid_serv = self.cursor.fetchone()[0]
 
         if invalid_props == 0 and invalid_serv == 0:
-            logger.info("✅ Todas las coordenadas son válidas")
+            logger.info(" Todas las coordenadas son válidas")
         else:
-            error_msg = f"❌ Coordenadas inválidas: {invalid_props} propiedades, {invalid_serv} servicios"
+            error_msg = f" Coordenadas inválidas: {invalid_props} propiedades, {invalid_serv} servicios"
             logger.error(error_msg)
             self.errores.append(error_msg)
 
@@ -725,11 +725,11 @@ class MigrationValidator:
         tiempo_ms = (end_time - start_time).total_seconds() * 1000
 
         if tiempo_ms < 100:  # Menos de 100ms
-            logger.info(f"✅ Rendimiento excelente: {tiempo_ms:.2f}ms ({resultado} propiedades)")
+            logger.info(f" Rendimiento excelente: {tiempo_ms:.2f}ms ({resultado} propiedades)")
         elif tiempo_ms < 500:
-            logger.info(f"⚠️ Rendimiento aceptable: {tiempo_ms:.2f}ms")
+            logger.info(f" Rendimiento aceptable: {tiempo_ms:.2f}ms")
         else:
-            error_msg = f"❌ Rendimiento pobre: {tiempo_ms:.2f}ms (debe ser <100ms)"
+            error_msg = f" Rendimiento pobre: {tiempo_ms:.2f}ms (debe ser <100ms)"
             logger.error(error_msg)
             self.errores.append(error_msg)
 
@@ -772,12 +772,12 @@ class MigrationValidator:
             self.validar_relaciones()
 
             if self.errores:
-                logger.error(f"\n❌ VALIDACIÓN FALLIDA con {len(self.errores)} errores:")
+                logger.error(f"\n VALIDACIÓN FALLIDA con {len(self.errores)} errores:")
                 for error in self.errores:
                     logger.error(f"  - {error}")
                 return False
             else:
-                logger.info("\n✅ VALIDACIÓN EXITOSA - Todos los tests pasaron")
+                logger.info("\n VALIDACIÓN EXITOSA - Todos los tests pasaron")
                 return True
 
         except Exception as e:
@@ -795,7 +795,7 @@ if __name__ == "__main__":
 
 ---
 
-## 🔄 Sistema de Configuración y Rollback
+##  Sistema de Configuración y Rollback
 
 ### Configuración de Conexión
 ```python
@@ -867,7 +867,7 @@ propiedades = data_source.get_propiedades()
 
 ---
 
-## 📋 Plan de Ejecución
+##  Plan de Ejecución
 
 ### Secuencia de Ejecución
 1. **Preparación** (30 min)
@@ -928,7 +928,7 @@ python api/server.py
 
 ---
 
-## 🛡️ Plan de Rollback
+##  Plan de Rollback
 
 ### Procedimiento de Emergencia
 1. **Detectar Problema** (Monitoreo 24-48 hrs)
@@ -948,7 +948,7 @@ python api/server.py
 
 ---
 
-## 📊 Métricas de Éxito
+##  Métricas de Éxito
 
 ### Métricas Técnicas
 - **Migration Success**: 100% registros migrados

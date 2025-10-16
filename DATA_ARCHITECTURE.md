@@ -1,10 +1,10 @@
-# 🏗️ Arquitectura de Datos - Excel RAW a PostgreSQL + PostGIS
+#  Arquitectura de Datos - Excel RAW a PostgreSQL + PostGIS
 
 Documentación completa del flujo de datos desde archivos Excel RAW hasta PostgreSQL + PostGIS. Los datos ORIGINALES provienen EXCLUSIVAMENTE de archivos Excel en data/raw/.
 
 ---
 
-## 🎯 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 **Decisión Estratégica**: Flujo Excel RAW → PostgreSQL + PostGIS
 **Fuente de Datos**: Exclusivamente archivos Excel en data/raw/ (NO JSON)
@@ -20,23 +20,23 @@ Documentación completa del flujo de datos desde archivos Excel RAW hasta Postgr
 
 ---
 
-## 📊 Estado Actual vs Propuesto
+##  Estado Actual vs Propuesto
 
 ### Arquitectura Actual (Excel RAW → PostgreSQL)
 ```
 data/
-├── raw/                           # Archivos Excel ORIGINALES
-│   ├── relevamiento/*.xlsx        # Propiedades
-│   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
-├── processed/                     # Archivos intermedios
-│   ├── *_intermedio.xlsx         # Para revisión humana
-│   └── *_reporte.json           # Reportes de calidad
-└── final/                        # Datos listos para PostgreSQL
+ raw/                           # Archivos Excel ORIGINALES
+    relevamiento/*.xlsx        # Propiedades
+    guia/GUIA URBANA.xlsx     # Servicios urbanos
+ processed/                     # Archivos intermedios
+    *_intermedio.xlsx         # Para revisión humana
+    *_reporte.json           # Reportes de calidad
+ final/                        # Datos listos para PostgreSQL
 
 PostgreSQL (base de datos principal):
-├── agentes (tabla normalizada)
-├── propiedades (con PostGIS)
-└── servicios (con índices espaciales)
+ agentes (tabla normalizada)
+ propiedades (con PostGIS)
+ servicios (con índices espaciales)
 ```
 
 **Ventajas Actuales**:
@@ -72,7 +72,7 @@ API REST (api/server.py)
 
 ---
 
-## 🗄️ Esquema de Base de Datos (PostgreSQL + PostGIS)
+##  Esquema de Base de Datos (PostgreSQL + PostGIS)
 
 ### Estructura de Tablas
 
@@ -142,7 +142,7 @@ CREATE INDEX idx_servicios_tipo ON servicios(tipo_servicio);
 
 ---
 
-## 🔄 Transformación de Consultas Críticas
+##  Transformación de Consultas Críticas
 
 ### Consulta Actual (Lógica en Aplicación)
 ```python
@@ -203,7 +203,7 @@ WHERE
 
 ---
 
-## 🔄 Flujo ETL Completo (Excel RAW → PostgreSQL)
+##  Flujo ETL Completo (Excel RAW → PostgreSQL)
 
 ### Fase 1: Validación de Archivos Excel RAW
 1. **Procesamiento Individual**: Cada archivo Excel se procesa por separado
@@ -308,7 +308,7 @@ ORDER BY propiedades_por_archivo DESC;
 
 ---
 
-## 🔧 Refactorización de la Aplicación
+##  Refactorización de la Aplicación
 
 ### Motor de Recomendación Actualizado
 ```python
@@ -345,7 +345,7 @@ class RecommendationEnginePostGIS:
 
 ---
 
-## 🛡️ Plan de Rollback
+##  Plan de Rollback
 
 ### Estrategia de Seguridad
 1. **Mantener Excel RAW**: Nunca modificar archivos originales en data/raw/
@@ -370,7 +370,7 @@ else:
 
 ---
 
-## 📈 Métricas de Éxito y Validación
+##  Métricas de Éxito y Validación
 
 ### Métricas Técnicas
 - **Performance**: Consultas geoespaciales <100ms (vs segundos actuales)
@@ -416,44 +416,44 @@ def validate_migration():
 
 ---
 
-## 📁 Nueva Estructura del Proyecto
+##  Nueva Estructura del Proyecto
 
 ```
 citrino-clean/
-├── docs/
-│   ├── CHANGELOG.md ✅
-│   ├── SCRUM_BOARD.md ✅
-│   ├── COMMITS_PLAN.md ✅
-│   ├── WORKFLOW.md ✅
-│   ├── DATA_ARCHITECTURE.md ✅ (actualizado)
-│   └── MIGRATION_PLAN.md (nuevo)
-├── migration/
-│   ├── scripts/
-│   │   ├── etl_agentes.py
-│   │   ├── etl_propiedades.py
-│   │   ├── etl_servicios.py
-│   │   └── validate_migration.py
-│   ├── database/
-│   │   ├── 01_create_schema.sql
-│   │   ├── 02_create_indexes.sql
-│   │   └── 03_sample_queries.sql
-│   └── config/
-│       └── database_config.py
-├── src/
-│   ├── recommendation_engine_postgis.py
-│   ├── database_connector.py
-│   └── [archivos existentes actualizados]
-└── data/
-    ├── raw/                           # Archivos Excel ORIGINALES (nunca modificados)
-    ├── processed/                     # Archivos intermedios para validación
-    └── final/                         # Datos aprobados para migración
+ docs/
+    CHANGELOG.md 
+    SCRUM_BOARD.md 
+    COMMITS_PLAN.md 
+    WORKFLOW.md 
+    DATA_ARCHITECTURE.md  (actualizado)
+    MIGRATION_PLAN.md (nuevo)
+ migration/
+    scripts/
+       etl_agentes.py
+       etl_propiedades.py
+       etl_servicios.py
+       validate_migration.py
+    database/
+       01_create_schema.sql
+       02_create_indexes.sql
+       03_sample_queries.sql
+    config/
+        database_config.py
+ src/
+    recommendation_engine_postgis.py
+    database_connector.py
+    [archivos existentes actualizados]
+ data/
+     raw/                           # Archivos Excel ORIGINALES (nunca modificados)
+     processed/                     # Archivos intermedios para validación
+     final/                         # Datos aprobados para migración
 ```
 
 ---
 
-## 🎯 Próximos Pasos del Sprint
+##  Próximos Pasos del Sprint
 
-1. **Commit 1**: Completar documentación actualizada ✓
+1. **Commit 1**: Completar documentación actualizada 
 2. **Commit 2**: Limpieza y preparación para migración
 3. **Commit 3**: Implementar scripts ETL básicos
 4. **Commit 4**: Crear DDL completo de PostgreSQL
@@ -463,7 +463,7 @@ citrino-clean/
 
 ---
 
-## 🔄 Impacto en el Sistema Actual
+##  Impacto en el Sistema Actual
 
 ### Cambios Inmediatos
 - **Recomendation Engine**: Migración de Haversine Python a PostGIS

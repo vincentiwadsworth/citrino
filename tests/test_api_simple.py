@@ -71,16 +71,16 @@ def test_api_basico():
                 print("   ...")
                 print("   === FIN BRIEFING ===\n")
 
-        print("✅ Todas las pruebas completadas con éxito!")
+        print(" Todas las pruebas completadas con éxito!")
         return True
 
     except requests.exceptions.ConnectionError:
-        print("❌ Error: No se pudo conectar al servidor")
+        print(" Error: No se pudo conectar al servidor")
         print("   Asegúrate de que el servidor esté corriendo en http://localhost:5000")
         print("   Ejecuta: python api/server.py")
         return False
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f" Error inesperado: {e}")
         return False
 
 if __name__ == "__main__":

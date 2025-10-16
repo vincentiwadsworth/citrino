@@ -446,7 +446,7 @@ def main():
         'id': 'test_1',
         'Precio': '0.00 BOB',
         'titulo': 'TERRENO EN VENTA EN ZONA NORTE',
-        'descripcion': 'TERRENO EN VENTA EN ZONA NORTE\nURBANIZACIÓN CATALUÑA\nIDEAL PARA INVERSIONISTAS\n📍 Superficie: 2.500 m2\nZona Norte entre Beni y Banzer\nPrecio: $us 400.000.-',
+        'descripcion': 'TERRENO EN VENTA EN ZONA NORTE\nURBANIZACIÓN CATALUÑA\nIDEAL PARA INVERSIONISTAS\n Superficie: 2.500 m2\nZona Norte entre Beni y Banzer\nPrecio: $us 400.000.-',
         'Amenities': ''
     }
 

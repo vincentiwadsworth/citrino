@@ -497,25 +497,25 @@ class MigrationValidator:
         report.append("=" * 60)
 
         # Data Integrity Section
-        report.append("\n📊 DATA INTEGRITY")
+        report.append("\n DATA INTEGRITY")
         report.append("-" * 30)
         if 'properties' in self.validation_results['data_integrity']:
             props = self.validation_results['data_integrity']['properties']
-            status = "✅ PASS" if props['match'] else "❌ FAIL"
+            status = " PASS" if props['match'] else " FAIL"
             report.append(f"Properties Count: JSON={props['json_count']}, PostgreSQL={props['postgresql_count']} {status}")
 
         if 'services' in self.validation_results['data_integrity']:
             servs = self.validation_results['data_integrity']['services']
-            status = "✅ PASS" if servs['match'] else "❌ FAIL"
+            status = " PASS" if servs['match'] else " FAIL"
             report.append(f"Services Count: JSON={servs['json_count']}, PostgreSQL={servs['postgresql_count']} {status}")
 
         if 'property_duplicates' in self.validation_results['data_integrity']:
             dup_count = self.validation_results['data_integrity']['property_duplicates']
-            status = "✅ PASS" if dup_count == 0 else "⚠️ WARNING"
+            status = " PASS" if dup_count == 0 else " WARNING"
             report.append(f"Property Duplicates: {dup_count} {status}")
 
         # Coordinate Validation Section
-        report.append("\n🗺️ COORDINATE VALIDATION")
+        report.append("\n COORDINATE VALIDATION")
         report.append("-" * 30)
         if 'properties' in self.validation_results['coordinate_validation']:
             props = self.validation_results['coordinate_validation']['properties']
@@ -529,7 +529,7 @@ class MigrationValidator:
 
         # Performance Metrics Section
         if self.validation_results['performance_metrics']:
-            report.append("\n⚡ PERFORMANCE METRICS")
+            report.append("\n PERFORMANCE METRICS")
             report.append("-" * 30)
             metrics = self.validation_results['performance_metrics']
             if 'count_properties_ms' in metrics:
@@ -540,15 +540,15 @@ class MigrationValidator:
                 report.append(f"Complex Query: {metrics['complex_query_ms']:.2f}ms")
 
         # Overall Assessment
-        report.append("\n🎯 OVERALL ASSESSMENT")
+        report.append("\n OVERALL ASSESSMENT")
         report.append("-" * 30)
 
         errors = len(self.validation_results['errors'])
         if errors == 0:
-            report.append("✅ MIGRATION VALIDATION: PASSED")
+            report.append(" MIGRATION VALIDATION: PASSED")
             report.append("All checks completed successfully. Migration is ready for production.")
         else:
-            report.append(f"❌ MIGRATION VALIDATION: FAILED")
+            report.append(f" MIGRATION VALIDATION: FAILED")
             report.append(f"Found {errors} critical issues that must be resolved.")
             report.append("Issues:")
             for error in self.validation_results['errors']:

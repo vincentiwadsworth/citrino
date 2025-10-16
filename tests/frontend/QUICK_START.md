@@ -1,8 +1,8 @@
-# 🚀 Guía Rápida - Citrino Frontend Testing
+#  Guía Rápida - Citrino Frontend Testing
 
 Inicio rápido para ejecutar tests del frontend de Citrino.
 
-## ⚡ Ejecución Inmediata (5 minutos)
+##  Ejecución Inmediata (5 minutos)
 
 ### 1. Iniciar Servidor Local
 ```bash
@@ -20,40 +20,40 @@ http://localhost:8080/tests/frontend/test_runner.html
 - Espera resultados (~30 segundos)
 - Revisa métricas y resultados
 
-## 🎯 Tests Específicos
+##  Tests Específicos
 
 ### Citrino Reco Tests
 ```
 http://localhost:8080/tests/frontend/test_reco.html
 ```
 **Qué prueba:**
-- ✅ Validación de formularios
-- ✅ Generación de recomendaciones
-- ✅ Persistencia en localStorage
-- ✅ UI/UX responsive
+-  Validación de formularios
+-  Generación de recomendaciones
+-  Persistencia en localStorage
+-  UI/UX responsive
 
 ### Citrino Chat Tests
 ```
 http://localhost:8080/tests/frontend/test_chat.html
 ```
 **Qué prueba:**
-- ✅ Interface de chat conversacional
-- ✅ Mock LLM API responses
-- ✅ Manejo de errores y fallbacks
-- ✅ Visualización de recomendaciones
+-  Interface de chat conversacional
+-  Mock LLM API responses
+-  Manejo de errores y fallbacks
+-  Visualización de recomendaciones
 
 ### Integration & Quality Tests
 ```
 http://localhost:8080/tests/frontend/test_integration.html
 ```
 **Qué prueba:**
-- ✅ Performance (Core Web Vitals)
-- ✅ Accesibilidad WCAG AA
-- ✅ Cross-browser compatibility
-- ✅ Responsive design
-- ✅ Security best practices
+-  Performance (Core Web Vitals)
+-  Accesibilidad WCAG AA
+-  Cross-browser compatibility
+-  Responsive design
+-  Security best practices
 
-## 🔧 Configuración Rápida
+##  Configuración Rápida
 
 ### Mock API (Recomendado para desarrollo)
 ```javascript
@@ -73,27 +73,27 @@ document.getElementById('mockAPI').checked = false;
 document.getElementById('verboseLogging').checked = true;
 ```
 
-## 📊 Métricas Clave
+##  Métricas Clave
 
-### ✅Buenos Resultados
+### Buenos Resultados
 - **Success Rate**: >95%
 - **Performance**: <3s load time
 - **Accessibility**: WCAG AA compliance
 - **Lighthouse Score**: >85
 
-### ⚠️Requiere Atención
+### Requiere Atención
 - **Success Rate**: 80-95%
 - **Performance**: 3-5s load time
 - **Accessibility**: Algunos checks fallidos
 - **Lighthouse Score**: 70-85
 
-### ❌Crítico
+### Crítico
 - **Success Rate**: <80%
 - **Performance**: >5s load time
 - **Accessibility**: Múltiples fallos WCAG
 - **Lighthouse Score**: <70
 
-## 🎛️ Atajos de Teclado
+##  Atajos de Teclado
 
 ### Test Runner Principal
 - `Ctrl + Enter`: Ejecutar todos los tests
@@ -107,7 +107,7 @@ document.getElementById('verboseLogging').checked = true;
 - `Ctrl + 4`: Tests de performance
 - `Ctrl + 5`: Tests de accesibilidad
 
-## 🐛 Problemas Comunes
+##  Problemas Comunes
 
 ### "Tests no cargan"
 ```bash
@@ -128,7 +128,7 @@ document.getElementById('mockAPI').checked = true;
 "testTimeout": 5000
 ```
 
-## 📈 Reportes
+##  Reportes
 
 ### Generar Reporte
 1. Ejecutar tests
@@ -137,12 +137,12 @@ document.getElementById('mockAPI').checked = true;
 
 ### Ver Reporte HTML
 El dashboard se actualiza automáticamente con:
-- 📊 Métricas de performance
-- 🎯 Resultados detallados
-- ♿ Checks de accesibilidad
-- 🌐 Compatibilidad cross-browser
+-  Métricas de performance
+-  Resultados detallados
+-  Checks de accesibilidad
+-  Compatibilidad cross-browser
 
-## 🔄 Integración CI/CD
+##  Integración CI/CD
 
 ### GitHub Actions (Ejemplo)
 ```yaml
@@ -167,7 +167,7 @@ jobs:
           npm run test:frontend:ci
 ```
 
-## 📚 Referencias Rápidas
+##  Referencias Rápidas
 
 ### Archivos Clave
 - `test_runner.html` - Interface principal
@@ -186,7 +186,7 @@ describe('Suite Name', () => {
 });
 ```
 
-## 🆘 Ayuda Rápida
+##  Ayuda Rápida
 
 ### Comandos Útiles
 ```bash
@@ -202,9 +202,9 @@ localStorage.setItem('debug', 'true');
 ```
 
 ### Contacto y Soporte
-- 📖 **Docs**: `tests/frontend/README.md`
-- 🐛 **Issues**: GitHub repository
-- 💬 **Chat**: Equipo de desarrollo Citrino
+-  **Docs**: `tests/frontend/README.md`
+-  **Issues**: GitHub repository
+-  **Chat**: Equipo de desarrollo Citrino
 
 ---
 
@@ -212,4 +212,4 @@ localStorage.setItem('debug', 'true');
 **Tiempo estimado de ejecución completa**: 30-60 segundos
 **Requerimientos**: Navegador moderno, Python 3.x para servidor local
 
-**Listo para empezar! 🚀**
+**Listo para empezar! **

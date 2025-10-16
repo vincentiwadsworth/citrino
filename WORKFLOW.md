@@ -1,10 +1,10 @@
-# 🔄 Workflow de Trabajo por Commits
+#  Workflow de Trabajo por Commits
 
 Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 
 ---
 
-## 🎯 Filosofía del Workflow
+##  Filosofía del Workflow
 
 ### Principios
 - **Excel RAW como fuente**: Datos ORIGINALES exclusivamente en data/raw/
@@ -24,9 +24,9 @@ Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 
 ---
 
-## 📋 Ciclo de Vida de un Commit
+##  Ciclo de Vida de un Commit
 
-### 1. Planificación 📝
+### 1. Planificación 
 ```bash
 # Antes de empezar
 1. Revisar COMMITS_PLAN.md para el commit actual
@@ -36,7 +36,7 @@ Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 5. Verificar impacto en flujo Excel RAW → PostgreSQL
 ```
 
-### 2. Ejecución 🛠️
+### 2. Ejecución 
 ```bash
 # Durante el desarrollo
 1. Realizar cambios específicos del commit
@@ -46,7 +46,7 @@ Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 5. Testear a medida que se avanza
 ```
 
-### 3. Validación ✅
+### 3. Validación 
 ```bash
 # Antes de commitear
 1. Ejecutar tests básicos del sistema
@@ -56,7 +56,7 @@ Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 5. Verificar flujo de datos PostgreSQL funciona
 ```
 
-### 4. Documentación 📚
+### 4. Documentación 
 ```bash
 # Actualizar documentación
 1. Actualizar CHANGELOG.md con cambios realizados
@@ -66,7 +66,7 @@ Guía de flujo de trabajo para desarrollo estructurado y mantenible en Citrino.
 5. Actualizar DATA_ARCHITECTURE.md si hay cambios en flujo
 ```
 
-### 5. Commit ✨
+### 5. Commit 
 ```bash
 # Mensaje de commit estándar
 tipo: descripción concisa
@@ -81,7 +81,7 @@ Refs: #sprint-x-story-y
 
 ---
 
-## 🏗️ Estructura de Commits
+##  Estructura de Commits
 
 ### Tipos de Commits
 - **feat**: Nueva funcionalidad
@@ -139,7 +139,7 @@ Refs: #sprint-1-story-3
 
 ---
 
-## 🔄 Gestión de Contexto
+##  Gestión de Contexto
 
 ### Manejo de Sesiones
 ```bash
@@ -169,7 +169,7 @@ Refs: #sprint-1-story-3
 
 ---
 
-## 📊 Validación por Tipo de Cambio
+##  Validación por Tipo de Cambio
 
 ### Cambios en Scripts/Python
 ```bash
@@ -234,7 +234,7 @@ python scripts/validation/process_all_raw.py --input-dir "data/raw/" --dry-run
 
 ---
 
-## 🚨 Manejo de Errores y Rollbacks
+##  Manejo de Errores y Rollbacks
 
 ### Si Algo Sale Mal
 ```bash
@@ -260,7 +260,7 @@ git reset --soft HEAD~1
 
 ---
 
-## 📈 Métricas y Seguimiento
+##  Métricas y Seguimiento
 
 ### Por Sprint
 - **Commits completados**: Total vs planeado
@@ -276,7 +276,7 @@ git reset --soft HEAD~1
 
 ---
 
-## 🎯 Mejores Prácticas
+##  Mejores Prácticas
 
 ### Antes de Escribir Código
 1. **Leer el plan**: Entender exactamente qué se debe hacer
@@ -300,7 +300,7 @@ git reset --soft HEAD~1
 
 ---
 
-## 🔄 Herramientas y Comandos Útiles
+##  Herramientas y Comandos Útiles
 
 ### Git Commands
 ```bash
@@ -345,9 +345,9 @@ grep -r "REFS:" .
 
 ---
 
-## 📋 Checklist Final por Commit
+##  Checklist Final por Commit
 
-### ✅ Pre-Commit Checklist
+###  Pre-Commit Checklist
 - [ ] **Objetivo claro**: Sé exactamente qué estoy commiteando
 - [ ] **Cambios específicos**: Solo lo planificado
 - [ ] **Validación completa**: Tests y verificaciones funcionan
@@ -357,7 +357,7 @@ grep -r "REFS:" .
 - [ ] **Excel RAW intactos**: Archivos originales no modificados
 - [ ] **Flujo validado**: Excel RAW → PostgreSQL funciona
 
-### ✅ Post-Commit Checklist
+###  Post-Commit Checklist
 - [ ] **Verificación**: `git status` limpio
 - [ ] **Progreso actualizado**: SCRUM_BOARD.md al día
 - [ ] **Siguiente paso**: COMMITS_PLAN.md claro para siguiente trabajo

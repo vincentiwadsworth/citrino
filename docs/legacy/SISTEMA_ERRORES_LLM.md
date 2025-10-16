@@ -1,10 +1,10 @@
-# 🚨 Sistema de Reporte Detallado de Errores LLM
+#  Sistema de Reporte Detallado de Errores LLM
 
 ## Descripción General
 
 El **Sistema de Reporte Detallado de Errores LLM** proporciona información específica y útil cuando los servicios de Z.AI o OpenRouter no están disponibles, reemplazando los mensajes genéricos anteriores con diagnósticos precisos y recomendaciones de resolución.
 
-## 🎯 Problema Solucionado
+##  Problema Solucionado
 
 **Antes (Mensaje genérico):**
 ```
@@ -16,20 +16,20 @@ El **Sistema de Reporte Detallado de Errores LLM** proporciona información espe
 "Sistema LLM con limite de velocidad temporal. Usando analisis local inteligente. El sistema se recuperara automaticamente en breve."
 ```
 
-## 🏗️ Arquitectura del Sistema
+##  Arquitectura del Sistema
 
 ### Componentes Principales
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API    │    │   LLM Module    │
-│   (chat.html)   │◄──►│   (server.py)    │◄──►│   (llm_integration.py)
-│                 │    │                  │    │                 │
-│ • Mensajes      │    │ • Clasificación  │    │ • Captura de    │
-│   contextuales  │    │   automática     │    │   errores       │
-│ • Debug info    │    │ • Estructura     │    │ • Fallback       │
-│ • Toasts        │    │   error_details  │    │   automático     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+        
+   Frontend             Backend API           LLM Module    
+   (chat.html)      (server.py)       (llm_integration.py)
+                                                            
+ • Mensajes           • Clasificación       • Captura de    
+   contextuales         automática            errores       
+ • Debug info         • Estructura          • Fallback       
+ • Toasts               error_details         automático     
+        
 ```
 
 ### Flujo de Procesamiento de Errores
@@ -40,7 +40,7 @@ El **Sistema de Reporte Detallado de Errores LLM** proporciona información espe
 4. **Debug Info**: Información técnica para desarrolladores
 5. **Respuesta API**: Estructura completa con `error_details`
 
-## 📊 Clasificación de Errores
+##  Clasificación de Errores
 
 ### Tipos de Error Soportados
 
@@ -78,7 +78,7 @@ def analizar_error_llm(error_msg: str) -> dict:
     }
 ```
 
-## 🔧 Implementación Técnica
+##  Implementación Técnica
 
 ### Backend (server.py)
 
@@ -144,7 +144,7 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
 }
 ```
 
-## 📈 Beneficios y Métricas
+##  Beneficios y Métricas
 
 ### Para Usuarios Finales
 - **Claridad**: Mensajes específicos sobre qué está pasando
@@ -177,13 +177,13 @@ test_cases = [
 
 ### Validación de Respuesta API
 
-- ✅ Estructura `error_details` completa
-- ✅ Campos requeridos presentes
-- ✅ Tipos de error clasificados correctamente
-- ✅ Mensajes contextuales apropiados
-- ✅ Información de debug en modo desarrollo
+-  Estructura `error_details` completa
+-  Campos requeridos presentes
+-  Tipos de error clasificados correctamente
+-  Mensajes contextuales apropiados
+-  Información de debug en modo desarrollo
 
-## 🚀 Ejemplos de Uso
+##  Ejemplos de Uso
 
 ### Rate Limit Detectado
 ```
@@ -209,7 +209,7 @@ Sistema: "Configuracion LLM requiere actualizacion. Usando analisis local. Conta
 [DEBUG] Providers intentados: [] | Codigos HTTP: [] | Recomendacion: Revisar configuracion de API keys...
 ```
 
-## 🔧 Configuración
+##  Configuración
 
 ### Variables de Entorno Requeridas
 
@@ -232,7 +232,7 @@ El sistema automáticamente detecta entornos de desarrollo:
 
 En estos entornos, se muestra información adicional de debug.
 
-## 📊 Monitoreo y Métricas
+##  Monitoreo y Métricas
 
 ### Tipos de Error Más Comunes
 
@@ -248,7 +248,7 @@ En estos entornos, se muestra información adicional de debug.
 - **Satisfacción Usuario**: 90%+ de usuarios entienden los mensajes
 - **Debugging Efficiency**: 80%+ reducción en tiempo de troubleshooting
 
-## 🔄 Próximas Mejoras
+##  Próximas Mejoras
 
 ### Funcionalidades Planificadas
 
@@ -267,7 +267,7 @@ En estos entornos, se muestra información adicional de debug.
 
 ---
 
-## 📞 Soporte y Contacto
+##  Soporte y Contacto
 
 Para soporte técnico relacionado con el sistema de errores LLM:
 
@@ -277,4 +277,4 @@ Para soporte técnico relacionado con el sistema de errores LLM:
 
 ---
 
-**Implementado en Octubre 2025** | **Versión 1.0** | **Estado: ✅ Completo**
+**Implementado en Octubre 2025** | **Versión 1.0** | **Estado:  Completo**

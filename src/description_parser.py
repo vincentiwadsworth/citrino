@@ -358,7 +358,7 @@ JSON:"""
             # Criterio: si tenemos precio Y (zona O superficie), es suficiente
             if tiene_precio and (tiene_zona or tiene_superficie):
                 self.stats["regex_only_success"] += 1
-                logger.info("✓ Regex fue suficiente, no se necesita LLM")
+                logger.info(" Regex fue suficiente, no se necesita LLM")
                 
                 # Agregar metadatos
                 regex_data["_extraction_method"] = "regex_only"

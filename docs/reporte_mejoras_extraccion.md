@@ -10,31 +10,31 @@
 |---------|-------------|---------------|--------|
 | Total propiedades | 1,578 | 1,578 | +0 |
 | Tasa de éxito | 78.5% | 78.5% | +0.0% |
-| Meta 95% (1909+) | ❌ | ❌ | NO ALCANZADA |
+| Meta 95% (1909+) |  |  | NO ALCANZADA |
 
 ## Análisis por Proveedor
 
-### Proveedor 01 ➡️
+### Proveedor 01 
 - **Antes:** 177 propiedades
 - **Después:** 177 propiedades
 - **Mejora:** +0 (+0.0%)
 
-### Proveedor 02 ➡️
+### Proveedor 02 
 - **Antes:** 1,202 propiedades
 - **Después:** 1,202 propiedades
 - **Mejora:** +0 (+0.0%)
 
-### Proveedor 03 ➡️
+### Proveedor 03 
 - **Antes:** 13 propiedades
 - **Después:** 13 propiedades
 - **Mejora:** +0 (+0.0%)
 
-### Proveedor 04 ➡️
+### Proveedor 04 
 - **Antes:** 95 propiedades
 - **Después:** 95 propiedades
 - **Mejora:** +0 (+0.0%)
 
-### Proveedor 05 ➡️
+### Proveedor 05 
 - **Antes:** 91 propiedades
 - **Después:** 91 propiedades
 - **Mejora:** +0 (+0.0%)
@@ -64,7 +64,7 @@
 
 - **Propiedades recuperadas:** 0
 - **Porcentaje de mejora:** 0.0%
-- **Meta alcanzada:** NO ❌
+- **Meta alcanzada:** NO 
 - **Próximos pasos:** Continuar con optimización de LLM
 
 ---

@@ -1,18 +1,18 @@
-# 🔧 Sistema Híbrido de Extracción: Regex + LLM
+#  Sistema Híbrido de Extracción: Regex + LLM
 
-## 📋 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 El **Sistema Híbrido de Extracción** combina patrones regex (rápidos y gratuitos) con modelos de lenguaje (inteligentes pero costosos) para procesar descripciones de propiedades del Proveedor 02.
 
 ### Resultados Clave
-- ✅ **80% de propiedades** procesadas solo con regex (sin LLM)
-- ✅ **90% reducción de tokens** LLM necesarios
-- ✅ **631,600 tokens ahorrados** en dataset completo (1,579 propiedades)
-- ✅ **~$0.63 de ahorro estimado** en costos de API
+-  **80% de propiedades** procesadas solo con regex (sin LLM)
+-  **90% reducción de tokens** LLM necesarios
+-  **631,600 tokens ahorrados** en dataset completo (1,579 propiedades)
+-  **~$0.63 de ahorro estimado** en costos de API
 
 ---
 
-## 🎯 Problema que Resuelve
+##  Problema que Resuelve
 
 ### Situación Anterior
 El **Proveedor 02** entrega datos en **texto libre** (descripciones largas sin estructura):
@@ -29,47 +29,47 @@ Precio: $us 400.000.-"
 **Desafío:** Extraer precio, superficie, zona, habitaciones, etc. de 1,579 descripciones.
 
 **Solución anterior:** Usar LLM para cada propiedad
-- ❌ **Costoso**: ~500 tokens por propiedad × 1,579 = 789,500 tokens
-- ❌ **Lento**: 2-3 segundos por propiedad
-- ❌ **Dependiente**: Si LLM falla, todo el proceso falla
+-  **Costoso**: ~500 tokens por propiedad × 1,579 = 789,500 tokens
+-  **Lento**: 2-3 segundos por propiedad
+-  **Dependiente**: Si LLM falla, todo el proceso falla
 
 ---
 
-## ⚡ Solución: Sistema Híbrido
+##  Solución: Sistema Híbrido
 
 ### Estrategia de 3 Pasos
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  PASO 1: EXTRACCIÓN CON REGEX (instantánea, gratis)        │
-│  ────────────────────────────────────────────────────       │
-│  • Busca patrones conocidos: "$us 400.000", "2.500 m2"     │
-│  • Identifica zonas: "Zona Norte", "Equipetrol", etc.       │
-│  • Extrae habitaciones, baños, amenities                    │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                ┌───────────┴──────────┐
-                │                      │
+
+  PASO 1: EXTRACCIÓN CON REGEX (instantánea, gratis)        
+         
+  • Busca patrones conocidos: "$us 400.000", "2.500 m2"     
+  • Identifica zonas: "Zona Norte", "Equipetrol", etc.       
+  • Extrae habitaciones, baños, amenities                    
+
+                            
+                
+                                      
           ¿DATOS SUFICIENTES?    ¿FALTAN DATOS?
         (precio + zona/sup)     (datos críticos)
-                │                      │
-                ▼                      ▼
-    ┌─────────────────────┐  ┌──────────────────────────┐
-    │ PASO 2A: RETORNAR   │  │ PASO 2B: LLAMAR AL LLM   │
-    │  Solo usa datos     │  │  Con prompt optimizado   │
-    │  de regex           │  │  Solo pide lo faltante   │
-    │  ✓ SIN COSTO        │  │  • Reduce tokens 50%     │
-    └─────────────────────┘  └──────────────────────────┘
-                │                      │
-                └──────────┬───────────┘
-                           ▼
-          ┌────────────────────────────────────┐
-          │  PASO 3: COMBINAR RESULTADOS       │
-          │  ──────────────────────────────    │
-          │  • Regex tiene prioridad           │
-          │  • LLM completa lo faltante        │
-          │  • Si LLM falla, usar solo regex   │
-          └────────────────────────────────────┘
+                                      
+                                      
+      
+     PASO 2A: RETORNAR      PASO 2B: LLAMAR AL LLM   
+      Solo usa datos         Con prompt optimizado   
+      de regex               Solo pide lo faltante   
+       SIN COSTO            • Reduce tokens 50%     
+      
+                                      
+                
+                           
+          
+            PASO 3: COMBINAR RESULTADOS       
+                
+            • Regex tiene prioridad           
+            • LLM completa lo faltante        
+            • Si LLM falla, usar solo regex   
+          
 ```
 
 ---
@@ -174,7 +174,7 @@ def extract_from_description(descripcion, titulo):
 
 ---
 
-## 📊 Resultados Medidos
+##  Resultados Medidos
 
 ### Test con Muestra de 10 Propiedades
 
@@ -186,16 +186,16 @@ python scripts/test_regex_vs_llm.py
 
 | Propiedad | Tipo | Regex Extrajo | ¿Necesita LLM? |
 |-----------|------|---------------|----------------|
-| 1 | Terreno Comercial | Precio, Superficie, Zona (4 campos) | ❌ NO |
-| 2 | Terreno | Precio, Superficie, Zona (4 campos) | ❌ NO |
-| 3 | Habitación | Precio, Habitaciones, Baños, Superficie (5 campos) | ❌ NO |
-| 4 | Departamento | Precio, Habitaciones, Superficie (4 campos) | ❌ NO |
-| 5 | Bodega | Precio, Baños, Superficie, Zona, 2 Amenities (6 campos) | ❌ NO |
-| 6 | Comercial/Negocio | Baños, Zona (2 campos) | ✅ SÍ (falta precio) |
-| 7 | Comercial/Negocio | Baños, Zona (2 campos) | ✅ SÍ (falta precio) |
-| 8 | Habitación | Precio, Habitaciones, Baños, Superficie, Zona, 1 Amenity (8 campos) | ❌ NO |
-| 9 | Habitación | Precio, Habitaciones, Baños, Superficie, Zona, 1 Amenity (8 campos) | ❌ NO |
-| 10 | Local Comercial | Precio, Baños, Superficie (4 campos) | ❌ NO |
+| 1 | Terreno Comercial | Precio, Superficie, Zona (4 campos) |  NO |
+| 2 | Terreno | Precio, Superficie, Zona (4 campos) |  NO |
+| 3 | Habitación | Precio, Habitaciones, Baños, Superficie (5 campos) |  NO |
+| 4 | Departamento | Precio, Habitaciones, Superficie (4 campos) |  NO |
+| 5 | Bodega | Precio, Baños, Superficie, Zona, 2 Amenities (6 campos) |  NO |
+| 6 | Comercial/Negocio | Baños, Zona (2 campos) |  SÍ (falta precio) |
+| 7 | Comercial/Negocio | Baños, Zona (2 campos) |  SÍ (falta precio) |
+| 8 | Habitación | Precio, Habitaciones, Baños, Superficie, Zona, 1 Amenity (8 campos) |  NO |
+| 9 | Habitación | Precio, Habitaciones, Baños, Superficie, Zona, 1 Amenity (8 campos) |  NO |
+| 10 | Local Comercial | Precio, Baños, Superficie (4 campos) |  NO |
 
 ### Resumen Estadístico
 
@@ -222,7 +222,7 @@ Total propiedades analizadas: 10
 
 ---
 
-## 🛠️ Uso del Sistema
+##  Uso del Sistema
 
 ### Para Desarrolladores
 
@@ -272,7 +272,7 @@ if codigo_proveedor == '02' and descripcion:
 
 ---
 
-## 🎯 Ventajas del Sistema Híbrido
+##  Ventajas del Sistema Híbrido
 
 ### Vs. Solo Regex
 | Aspecto | Solo Regex | Híbrido |
@@ -292,16 +292,16 @@ if codigo_proveedor == '02' and descripcion:
 
 ---
 
-## 🔍 Casos de Uso Ideales
+##  Casos de Uso Ideales
 
-### ✅ Perfecto Para:
+###  Perfecto Para:
 - Descripciones estructuradas con patrones claros
 - Datasets grandes (>1,000 propiedades)
 - Presupuestos limitados de API
 - Procesamiento ETL batch
 - Fallback cuando LLM no disponible
 
-### ⚠️ Limitaciones:
+###  Limitaciones:
 - Descripciones muy informales o ambiguas
 - Idiomas mezclados (español-inglés-guaraní)
 - Abreviaturas no estándar
@@ -309,7 +309,7 @@ if codigo_proveedor == '02' and descripcion:
 
 ---
 
-## 📈 Mejoras Futuras
+##  Mejoras Futuras
 
 ### Corto Plazo
 - [ ] Expandir patrones regex a 100+ zonas
@@ -350,7 +350,7 @@ python scripts/test_regex_vs_llm.py
 
 ---
 
-## 📞 Soporte
+##  Soporte
 
 ¿Problemas con la extracción? 
 
@@ -360,4 +360,4 @@ python scripts/test_regex_vs_llm.py
 
 ---
 
-**Desarrollado con ❤️ para optimizar el ETL de Citrino**
+**Desarrollado con  para optimizar el ETL de Citrino**

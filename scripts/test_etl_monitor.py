@@ -141,7 +141,7 @@ def main():
         for alerta in alertas[:5]:  # Mostrar solo primeras 5
             print(f"  [{alerta['nivel']}] {alerta['tipo']}: {alerta['descripcion']}")
     else:
-        print(f"\n✅ Sin alertas activas")
+        print(f"\n Sin alertas activas")
 
     # Generar reporte periódico
     print(f"\n" + "=" * 40)
@@ -188,7 +188,7 @@ def main():
     print(f"\nDashboard final guardado en: {final_file}")
 
     print(f"\n" + "=" * 60)
-    print("✅ PRUEBA DE MONITOREO COMPLETADA EXITOSAMENTE")
+    print(" PRUEBA DE MONITOREO COMPLETADA EXITOSAMENTE")
     print("El sistema de monitoreo funciona correctamente")
     print("=" * 60)
 

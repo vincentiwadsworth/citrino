@@ -19,11 +19,11 @@ def create_env_file():
     env_file = Path('.env')
 
     if env_file.exists():
-        print("✅ Archivo .env ya existe")
+        print(" Archivo .env ya existe")
         return True
 
     if not env_example.exists():
-        print("❌ No se encuentra el archivo .env.example")
+        print(" No se encuentra el archivo .env.example")
         return False
 
     # Copiar template a .env
@@ -33,8 +33,8 @@ def create_env_file():
     with open(env_file, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print("✅ Archivo .env creado desde template")
-    print("⚠️  Recuerda configurar tus API keys en .env")
+    print(" Archivo .env creado desde template")
+    print("  Recuerda configurar tus API keys en .env")
     return True
 
 def check_docker():
@@ -42,10 +42,10 @@ def check_docker():
     try:
         result = subprocess.run(['docker', '--version'],
                               capture_output=True, text=True)
-        print(f"✅ Docker encontrado: {result.stdout.strip()}")
+        print(f" Docker encontrado: {result.stdout.strip()}")
         return True
     except FileNotFoundError:
-        print("❌ Docker no está instalado")
+        print(" Docker no está instalado")
         print("   Por favor, instala Docker desde https://docker.com")
         return False
 
@@ -54,10 +54,10 @@ def check_docker_compose():
     try:
         result = subprocess.run(['docker-compose', '--version'],
                               capture_output_output=True, text=True)
-        print(f"✅ Docker Compose encontrado: {result.stdout.strip()}")
+        print(f" Docker Compose encontrado: {result.stdout.strip()}")
         return True
     except FileNotFoundError:
-        print("❌ Docker Compose no está instalado")
+        print(" Docker Compose no está instalado")
         print("   Por favor, instala Docker Compose")
         return False
 
@@ -67,7 +67,7 @@ def create_directories():
 
     for directory in directories:
         Path(directory).mkdir(exist_ok=True)
-        print(f"✅ Directorio '{directory}' listo")
+        print(f" Directorio '{directory}' listo")
 
 def check_dependencies():
     """Verifica las dependencias del proyecto."""
@@ -85,12 +85,12 @@ def check_dependencies():
             missing_files.append(str(file_path))
 
     if missing_files:
-        print("❌ Archivos requeridos faltantes:")
+        print(" Archivos requeridos faltantes:")
         for file_path in missing_files:
             print(f"   - {file_path}")
         return False
 
-    print("✅ Todas las dependencias encontradas")
+    print(" Todas las dependencias encontradas")
     return True
 
 def generate_dockerfile():
@@ -98,7 +98,7 @@ def generate_dockerfile():
     dockerfile_path = Path('..') / 'Dockerfile'
 
     if dockerfile_path.exists():
-        print("✅ Dockerfile ya existe")
+        print(" Dockerfile ya existe")
         return True
 
     dockerfile_content = """FROM python:3.11-slim
@@ -129,7 +129,7 @@ CMD ["python", "api/server.py"]
     with open(dockerfile_path, 'w', encoding='utf-8') as f:
         f.write(dockerfile_content)
 
-    print("✅ Dockerfile generado")
+    print(" Dockerfile generado")
     return True
 
 def check_data_files():
@@ -138,7 +138,7 @@ def check_data_files():
     data_dir = parent_dir / 'data'
 
     if not data_dir.exists():
-        print("❌ Directorio de datos no encontrado")
+        print(" Directorio de datos no encontrado")
         return False
 
     # Buscar archivos de análisis generados
@@ -146,27 +146,27 @@ def check_data_files():
 
     if analysis_files:
         latest_file = max(analysis_files, key=os.path.getctime)
-        print(f"✅ Archivo de análisis encontrado: {latest_file.name}")
+        print(f" Archivo de análisis encontrado: {latest_file.name}")
 
         # Verificar que contenga propiedades
         try:
             with open(latest_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 prop_count = len(data.get('propiedades', []))
-                print(f"✅ {prop_count} propiedades en el análisis")
+                print(f" {prop_count} propiedades en el análisis")
                 return prop_count > 0
         except Exception as e:
-            print(f"⚠️  Error leyendo archivo de análisis: {e}")
+            print(f"  Error leyendo archivo de análisis: {e}")
             return False
     else:
-        print("⚠️  No se encontraron archivos de análisis en data/metrics/")
+        print("  No se encontraron archivos de análisis en data/metrics/")
         print("   Ejecuta primero: python scripts/analysis/procesar_y_analizar_raw.py")
         return False
 
 def run_setup():
     """Ejecuta el setup completo."""
     print("="*60)
-    print("🚀 SETUP DE CHATBOT UI - CITRINO")
+    print(" SETUP DE CHATBOT UI - CITRINO")
     print("="*60)
 
     # Cambiar al directorio del chatbot
@@ -185,15 +185,15 @@ def run_setup():
 
     all_good = True
     for step_name, step_func in steps:
-        print(f"\n🔧 {step_name}...")
+        print(f"\n {step_name}...")
         if not step_func():
             all_good = False
 
     if all_good:
         print("\n" + "="*60)
-        print("✅ SETUP COMPLETADO")
+        print(" SETUP COMPLETADO")
         print("="*60)
-        print("\n📋 PRÓXIMOS PASOS:")
+        print("\n PRÓXIMOS PASOS:")
         print("1. Configura tus API keys en .env:")
         print("   - ZAI_API_KEY=clave_zai")
         print("   - OPENROUTER_API_KEY=clave_openrouter")
@@ -203,17 +203,17 @@ def run_setup():
         print("   - Chatbot UI: http://localhost:3000")
         print("   - API Citrino: http://localhost:5001")
         print("   - Health Check: http://localhost:5001/api/health")
-        print("\n📚 Para más información, consulta README.md")
+        print("\n Para más información, consulta README.md")
         return True
     else:
-        print("\n❌ SETUP INCOMPLETO")
+        print("\n SETUP INCOMPLETO")
         print("Por favor, resuelve los problemas indicados arriba.")
         return False
 
 def show_help():
     """Muestra la ayuda del script."""
     print("""
-🚀 SETUP DE CHATBOT UI - CITRINO
+ SETUP DE CHATBOT UI - CITRINO
 
 Uso:
   python setup.py    - Ejecuta el setup completo

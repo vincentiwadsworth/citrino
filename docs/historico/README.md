@@ -2,7 +2,7 @@
 
 Esta carpeta contiene documentos generados durante el desarrollo y despliegue inicial del proyecto. Son notas de momentos específicos del desarrollo y **no son necesarias para el uso actual del sistema**.
 
-## 📁 Archivos Archivados
+##  Archivos Archivados
 
 ### README_DEPLOY.md
 **Fecha:** Octubre 2025  
@@ -24,7 +24,7 @@ Esta carpeta contiene documentos generados durante el desarrollo y despliegue in
 **Propósito:** Snapshot del estado del proyecto durante la integración Z.AI  
 **Estado:** Histórico - El estado actual está documentado en el README principal
 
-## ℹ️ Nota
+## ℹ Nota
 
 Estos documentos se mantienen para referencia histórica del proceso de desarrollo. Para información actualizada sobre el proyecto, consulta:
 
@@ -32,7 +32,7 @@ Estos documentos se mantienen para referencia histórica del proceso de desarrol
 - **CLAUDE.md** - Guía para desarrollo con IA
 - **INTEGRACION_LLM_CAMBIOS_PENDIENTES.md** - Estado actual de la integración Z.AI (si existe)
 
-## 🗄️ Política de Archivo
+##  Política de Archivo
 
 Los documentos se archivan aquí cuando:
 1. La funcionalidad descrita ya está implementada y en producción

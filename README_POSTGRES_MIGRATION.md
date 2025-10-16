@@ -1,10 +1,10 @@
 # PostgreSQL Migration - Sprint 1
 
-## 🎯 **Overview**
+##  **Overview**
 
 Migración completa del sistema Citrino desde archivos JSON/Excel hacia una base de datos PostgreSQL + PostGIS optimizada para análisis geoespacial inmobiliario.
 
-## 📊 **Current State → Target**
+##  **Current State → Target**
 
 | Aspecto | Estado Actual (JSON) | Target (PostgreSQL) |
 |---------|---------------------|-------------------|
@@ -14,7 +14,7 @@ Migración completa del sistema Citrino desde archivos JSON/Excel hacia una base
 | **Consultas** | Secuenciales, lentas | Índices GIST, milisegundos |
 | **Análisis Espacial** | Python + Haversine | PostGIS nativo |
 
-## 🏗️ **Architecture**
+##  **Architecture**
 
 ### **Flujo Principal**
 ```
@@ -42,7 +42,7 @@ Excel Crudo → Excel Intermedio → (Revisión Humana) → PostgreSQL + PostGIS
    - Recuperación de errores
    - Logging completo
 
-## 🚀 **Quick Start**
+##  **Quick Start**
 
 ### **1. Prerrequisitos**
 
@@ -98,36 +98,36 @@ python migrate_to_postgres.py --dry-run
 python migrate_to_postgres.py --skip validate_migration
 ```
 
-## 📁 **Directory Structure**
+##  **Directory Structure**
 
 ```
 data/
-├── raw/                           # Entrada: archivos crudos
-│   ├── guia/
-│   │   └── GUIA URBANA.xlsx
-│   └── relevamiento/
-│       └── *.xlsx (archivos de scraping)
-├── intermedio/                    # Procesamiento: archivos intermedios
-│   ├── procesados/               # Generados automáticamente
-│   │   ├── propiedades_*_procesado.xlsx
-│   │   ├── servicios_*_procesado.xlsx
-│   │   └── agentes_consolidados.xlsx
-│   ├── validados/                # Aprobados por personal Citrino
-│   └── errores/                  # Logs de problemas
-├── postgres/                     # Base de datos y scripts
-│   ├── scripts/                  # Scripts ETL y DDL
-│   │   ├── 01_create_schema.sql
-│   │   ├── etl_excel_to_intermediate.py
-│   │   ├── etl_guia_to_intermediate.py
-│   │   ├── etl_consolidar_agentes.py
-│   │   ├── etl_intermediate_to_postgres.py
-│   │   └── etl_validate_migration.py
-│   ├── logs/                     # Logs de transacciones
-│   └── backups/                  # Respaldos automáticos
-└── postgis/                      # Índices y funciones espaciales
+ raw/                           # Entrada: archivos crudos
+    guia/
+       GUIA URBANA.xlsx
+    relevamiento/
+        *.xlsx (archivos de scraping)
+ intermedio/                    # Procesamiento: archivos intermedios
+    procesados/               # Generados automáticamente
+       propiedades_*_procesado.xlsx
+       servicios_*_procesado.xlsx
+       agentes_consolidados.xlsx
+    validados/                # Aprobados por personal Citrino
+    errores/                  # Logs de problemas
+ postgres/                     # Base de datos y scripts
+    scripts/                  # Scripts ETL y DDL
+       01_create_schema.sql
+       etl_excel_to_intermediate.py
+       etl_guia_to_intermediate.py
+       etl_consolidar_agentes.py
+       etl_intermediate_to_postgres.py
+       etl_validate_migration.py
+    logs/                     # Logs de transacciones
+    backups/                  # Respaldos automáticos
+ postgis/                      # Índices y funciones espaciales
 ```
 
-## 🗄️ **Database Schema**
+##  **Database Schema**
 
 ### **Tablas Principales**
 
@@ -184,7 +184,7 @@ CREATE INDEX idx_propiedades_zona_precio ON propiedades (zona, precio_usd);
 CREATE INDEX idx_propiedades_tipo_zona ON propiedades (tipo_propiedad, zona);
 ```
 
-## 🔄 **ETL Process Details**
+##  **ETL Process Details**
 
 ### **Fase 1: Excel → Intermedio**
 
@@ -229,7 +229,7 @@ CREATE INDEX idx_propiedades_tipo_zona ON propiedades (tipo_propiedad, zona);
 - Reporte completo en Excel + JSON
 - Validación de integridad referencial
 
-## 📊 **Performance Optimizations**
+##  **Performance Optimizations**
 
 ### **PostgreSQL Configuration**
 ```sql
@@ -252,7 +252,7 @@ effective_io_concurrency = 200
 - Parallel workers para ETL
 - Connection pooling
 
-## 🔍 **Spatial Queries Examples**
+##  **Spatial Queries Examples**
 
 ### **Buscar propiedades cerca de servicios**
 ```sql
@@ -292,7 +292,7 @@ ORDER BY distancia_metros
 LIMIT 5;
 ```
 
-## 🔧 **Configuration Options**
+##  **Configuration Options**
 
 ### **Environment Variables**
 ```bash
@@ -330,7 +330,7 @@ python migrate_to_postgres.py --dry-run
 python migrate_to_postgres.py --skip create_schema validate_migration
 ```
 
-## 📈 **Expected Performance**
+##  **Expected Performance**
 
 ### **Improvements vs JSON**
 - **Consultas espaciales**: 5-10s → <100ms
@@ -349,14 +349,14 @@ python migrate_to_postgres.py --skip create_schema validate_migration
 -- PostgreSQL+PostGIS: ~200ms (75x más rápido)
 ```
 
-## 🔍 **Validation & Testing**
+##  **Validation & Testing**
 
 ### **Automated Validation**
-- ✅ Comparación de conteos Excel vs PostgreSQL
-- ✅ Validación de coordenadas dentro bounds Santa Cruz
-- ✅ Verificación de integridad referencial
-- ✅ Pruebas de rendimiento espacial
-- ✅ Reportes automáticos en Excel + JSON
+-  Comparación de conteos Excel vs PostgreSQL
+-  Validación de coordenadas dentro bounds Santa Cruz
+-  Verificación de integridad referencial
+-  Pruebas de rendimiento espacial
+-  Reportes automáticos en Excel + JSON
 
 ### **Manual Testing**
 ```sql
@@ -376,7 +376,7 @@ SELECT
 FROM propiedades;
 ```
 
-## 🚨 **Troubleshooting**
+##  **Troubleshooting**
 
 ### **Common Issues**
 
@@ -427,7 +427,7 @@ python migrate_to_postgres.py --skip create_schema guia_to_intermediate consolid
 python data/postgres/scripts/etl_validate_migration.py
 ```
 
-## 📋 **Post-Migration Checklist**
+##  **Post-Migration Checklist**
 
 ### **Technical**
 - [ ] Todos los scripts ETL ejecutados exitosamente
@@ -447,7 +447,7 @@ python data/postgres/scripts/etl_validate_migration.py
 - [ ] Validación completa de integridad referencial
 - [ ] Reportes de calidad generados automáticamente
 
-## 🔄 **Next Steps (Sprint 2)**
+##  **Next Steps (Sprint 2)**
 
 ### **Enhanced Features**
 - Motor de recomendación optimizado para PostGIS
@@ -461,7 +461,7 @@ python data/postgres/scripts/etl_validate_migration.py
 - Configurar conexión pooling para producción
 - Implementar caching layer (Redis)
 
-## 📞 **Support**
+##  **Support**
 
 ### **Documentation**
 - **Sprint Plan**: `docs/SPRINT_1_MIGRACION_POSTGRESQL.md`
@@ -480,7 +480,7 @@ python data/postgres/scripts/etl_validate_migration.py
 
 ---
 
-**Status**: ✅ **Sprint 1 Complete - Ready for Production Migration**
+**Status**:  **Sprint 1 Complete - Ready for Production Migration**
 
 **Migration Command**: `python migrate_to_postgres.py`
 

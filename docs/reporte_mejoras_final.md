@@ -28,24 +28,24 @@ Se implementaron mejoras en el proceso de extracción de propiedades de `data/ra
 
 ## Mejoras Implementadas
 
-### 1. Validaciones de Coordenadas Expandidas ✅
+### 1. Validaciones de Coordenadas Expandidas 
 - **Rango anterior:** Latitud (-18.0 a -17.0), Longitud (-63.5 a -63.0)
 - **Rango nuevo:** Latitud (-19.0 a -16.0), Longitud (-65.0 a -62.0)
 - **Impacto:** Permite más coordenadas válidas de Santa Cruz
 
-### 2. Validación de Propiedades Mejorada ✅
+### 2. Validación de Propiedades Mejorada 
 - **Lógica anterior:** Requería precio O coordenadas
 - **Lógica nueva:** Requiere (título O descripción larga) Y (precio O coordenadas)
 - **Impacto:** Más flexible, permite propiedades con descripciones extensas
 
-### 3. Extracción de Precios Mejorada ✅
+### 3. Extracción de Precios Mejorada 
 - **Mejoras implementadas:**
   - Detección de precios inválidos "0.00 BOB"
   - Manejo de formatos decimales europeos
   - Soporte para múltiples símbolos de moneda
   - Validación de rangos razonables (1-10M)
 
-### 4. Sistema LLM para Proveedor 02 ⚠️
+### 4. Sistema LLM para Proveedor 02 
 - **Estado:** Parcialmente implementado
 - **Resultado:** 36 mejoras aplicadas (12 precios, 9 habitaciones, 13 superficies, etc.)
 - **Problema:** 120 errores de regex "no such group" limitaron el impacto

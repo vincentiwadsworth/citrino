@@ -1,44 +1,44 @@
-# 🏗️ Arquitectura Técnica de Citrino
+#  Arquitectura Técnica de Citrino
 
 ## Diagrama de Componentes
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    FRONTEND (Presentación)                   │
-├─────────────────────────────────────────────────────────────┤
-│  index.html          │  citrino-reco.html  │  chat.html     │
-│  (Landing)           │  (Recomendaciones)  │  (Asistente)   │
-└──────────────┬──────────────────┬──────────────┬────────────┘
-               │                  │              │
-               └──────────────────┼──────────────┘
-                                  │
+
+                    FRONTEND (Presentación)                   
+
+  index.html            citrino-reco.html    chat.html     
+  (Landing)             (Recomendaciones)    (Asistente)   
+
+                                               
+               
+                                  
                            HTTP REST API
-                                  │
-┌─────────────────────────────────┴─────────────────────────────┐
-│                    BACKEND (Lógica de Negocio)                │
-├───────────────────────────────────────────────────────────────┤
-│  api/server.py (Flask)                                        │
-│  ├─ Health & Stats endpoints                                 │
-│  ├─ Search & Recommendation endpoints                        │
-│  └─ Property data endpoints                                  │
-│                                                               │
-│  src/ (Motores de Negocio)                                   │
-│  ├─ recommendation_engine.py (básico)                        │
-│  ├─ recommendation_engine_mejorado.py (geoespacial)          │
-│  ├─ llm_integration.py (Z.AI + OpenRouter)                   │
-│  ├─ description_parser.py (Extracción híbrida)               │
-│  └─ regex_extractor.py (Patrones regex)                      │
-└───────────────────────────────┬───────────────────────────────┘
-                                │
+                                  
+
+                    BACKEND (Lógica de Negocio)                
+
+  api/server.py (Flask)                                        
+   Health & Stats endpoints                                 
+   Search & Recommendation endpoints                        
+   Property data endpoints                                  
+                                                               
+  src/ (Motores de Negocio)                                   
+   recommendation_engine.py (básico)                        
+   recommendation_engine_mejorado.py (geoespacial)          
+   llm_integration.py (Z.AI + OpenRouter)                   
+   description_parser.py (Extracción híbrida)               
+   regex_extractor.py (Patrones regex)                      
+
+                                
                       Acceso a Datos
-                                │
-┌───────────────────────────────┴───────────────────────────────┐
-│                    DATOS (Información)                        │
-├───────────────────────────────────────────────────────────────┤
-│  data/base_datos_relevamiento.json (1,583 propiedades)       │
-│  data/guia_urbana_municipal_completa.json (4,777 servicios)  │
-│  data/raw/*.xlsx (Archivos Excel de proveedores)             │
-└───────────────────────────────────────────────────────────────┘
+                                
+
+                    DATOS (Información)                        
+
+  data/base_datos_relevamiento.json (1,583 propiedades)       
+  data/guia_urbana_municipal_completa.json (4,777 servicios)  
+  data/raw/*.xlsx (Archivos Excel de proveedores)             
+
 ```
 
 ## Stack Tecnológico
@@ -78,62 +78,62 @@
 
 ```
 Usuario → Frontend → API POST /api/search → Motor de Búsqueda
-                                                    │
-                                                    ├─ Filtrar por criterios
-                                                    ├─ Calcular scores
-                                                    └─ Ordenar resultados
-                                                    │
+                                                    
+                                                     Filtrar por criterios
+                                                     Calcular scores
+                                                     Ordenar resultados
+                                                    
                                               Resultados JSON
-                                                    │
-                        Frontend ← API Response ←──┘
+                                                    
+                        Frontend ← API Response ←
 ```
 
 ### 2. Recomendaciones Avanzadas
 
 ```
 Usuario → Frontend → API POST /api/recommend/enhanced
-                                │
-                    ┌───────────┴──────────┐
-                    │                      │
+                                
+                    
+                                          
             Recomendación Base      Z.AI Enriquecimiento
-                    │                      │
-          ┌─────────┴─────────┐    ┌──────┴──────┐
-          │                   │    │             │
-    Filtrado por      Scoring con  │  Briefing   Justificaciones
-    criterios         Haversine    │  Ejecutivo  Personalizadas
-          │                   │    │             │
-          └─────────┬─────────┘    └──────┬──────┘
-                    │                     │
-                    └──────────┬──────────┘
-                               │
+                                          
+              
+                                              
+    Filtrado por      Scoring con    Briefing   Justificaciones
+    criterios         Haversine      Ejecutivo  Personalizadas
+                                              
+              
+                                         
+                    
+                               
                         Resultado Completo
-                               │
-            Frontend ← API Response ←──┘
+                               
+            Frontend ← API Response ←
 ```
 
 ### 3. ETL de Datos del Proveedor 02
 
 ```
 Excel (Proveedor 02) → build_relevamiento_dataset.py
-                                │
-                    ┌───────────┴──────────┐
-                    │                      │
+                                
+                    
+                                          
             Lectura y       Procesamiento
             Normalización   por Propiedad
-                    │                │
-                    └────────┬───────┘
-                             │
+                                    
+                    
+                             
                     DescriptionParser
-                             │
-                    ┌────────┴────────┐
-                    │                 │
+                             
+                    
+                                     
             RegexExtractor    LLM (si necesario)
             (80% casos)       (20% casos)
-                    │                 │
-                    └────────┬────────┘
-                             │
+                                     
+                    
+                             
                     Datos Estructurados
-                             │
+                             
                     base_datos_relevamiento.json
 ```
 
@@ -275,11 +275,11 @@ CORS(app, resources={
 ### Niveles de Testing
 ```
 tests/
-├── test_api.py              # Integration tests
-├── test_api_simple.py       # Smoke tests
-├── test_fallback_simple.py  # LLM fallback tests
-├── test_zai_integration.py  # Z.AI integration
-└── test_zai_simple.py       # Z.AI unit tests
+ test_api.py              # Integration tests
+ test_api_simple.py       # Smoke tests
+ test_fallback_simple.py  # LLM fallback tests
+ test_zai_integration.py  # Z.AI integration
+ test_zai_simple.py       # Z.AI unit tests
 ```
 
 ### Cobertura
@@ -342,10 +342,10 @@ CREATE INDEX idx_coords ON properties USING GIST (
 ### Arquitectura Microservicios
 ```
 API Gateway
-    ├─ Property Service (búsqueda)
-    ├─ Recommendation Service (motor)
-    ├─ LLM Service (extracción)
-    └─ Analytics Service (métricas)
+     Property Service (búsqueda)
+     Recommendation Service (motor)
+     LLM Service (extracción)
+     Analytics Service (métricas)
 ```
 
 ### CDN y Caching

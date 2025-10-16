@@ -2,7 +2,7 @@
 
 Documentación completa del sistema de prompts, restricciones y configuraciones para controlar el comportamiento de los modelos de lenguaje en Citrino.
 
-## 📋 Overview
+##  Overview
 
 El sistema de prompts de Citrino está diseñado para:
 
@@ -12,18 +12,18 @@ El sistema de prompts de Citrino está diseñado para:
 - **Validar información** en tiempo real
 - **Prevenir especulaciones** y promesas irreales
 
-## 🗂️ Estructura de Archivos
+##  Estructura de Archivos
 
 ```
 src/prompts/
-├── system_prompt_chat.py        # System prompts para Citrino Chat
-├── system_prompt_reco.py        # System prompts para Citrino Reco
-├── llm_config.py               # Configuración centralizada de LLM
-├── data_restrictions.py        # Restricciones de datos y fuentes
-└── README.md                   # Esta documentación
+ system_prompt_chat.py        # System prompts para Citrino Chat
+ system_prompt_reco.py        # System prompts para Citrino Reco
+ llm_config.py               # Configuración centralizada de LLM
+ data_restrictions.py        # Restricciones de datos y fuentes
+ README.md                   # Esta documentación
 ```
 
-## 🌡️ Configuración de Temperatura
+##  Configuración de Temperatura
 
 ### Temperatura Ultra-Baja: 0.05 - 0.1
 - **Chat**: 0.05 (máxima consistencia)
@@ -35,7 +35,7 @@ src/prompts/
 - **Reco**: 400 tokens máximo (recomendaciones detalladas)
 - **General**: 300 tokens máximo
 
-## 🔒 Restricciones Principales
+##  Restricciones Principales
 
 ### 1. Fuentes de Datos Permitidas
 ```python
@@ -67,7 +67,7 @@ ALLOWED_DATA_SOURCES = {
 - **Subjetividad**: "perfecto", "excelente", "mejor"
 - **Presión**: "urgente", "oportunidad única", "no te lo pierdas"
 
-## 📝 System Prompts
+##  System Prompts
 
 ### Citrino Chat - Principios Clave
 
@@ -99,7 +99,7 @@ existententes en nuestra base de datos. Cada recomendación debe corresponder
 a una propiedad real con ID."
 ```
 
-## 🛡️ Validación de Datos
+##  Validación de Datos
 
 ### Validación en Tiempo Real
 ```python
@@ -118,7 +118,7 @@ class DataValidator:
 - **Existencia en BD**: Confirmar que los datos existen
 - **Consistencia**: Validar relaciones entre datos
 
-## ⚙️ Configuración LLM
+##  Configuración LLM
 
 ### Parámetros por Componente
 
@@ -148,7 +148,7 @@ CITRINO_RECO_LLM_CONFIG = {
 - **Rate Limiting**: 60 solicitudes por minuto
 - **Timeout**: 30 segundos por solicitud
 
-## 📊 Métricas y Monitoreo
+##  Métricas y Monitoreo
 
 ### Métricas Clave
 - **Response Time**: Tiempo de respuesta (objetivo: <5s)
@@ -162,7 +162,7 @@ CITRINO_RECO_LLM_CONFIG = {
 - **Hallucination Rate > 5%**: Alerta crítica
 - **Data Accuracy < 80%**: Alerta de validación
 
-## 🔧 Implementación
+##  Implementación
 
 ### Integración con LLM
 ```python
@@ -194,7 +194,7 @@ from src.prompts.system_prompt_reco import CITRINO_RECO_SYSTEM_PROMPT
 from src.prompts.llm_config import get_llm_config
 ```
 
-## 🚀 Guía de Uso Rápido
+##  Guía de Uso Rápido
 
 ### 1. Configurar Ambiente
 ```bash
@@ -233,7 +233,7 @@ if forbidden_words:
     pass
 ```
 
-## 📈 Mejoras Futuras
+##  Mejoras Futuras
 
 ### Planeado
 - [ ] Integración con más modelos LLM
@@ -247,7 +247,7 @@ if forbidden_words:
 - **Security**: Validación y filtros en múltiples capas
 - **Performance**: Optimización para respuestas rápidas
 
-## 🆘 Troubleshooting
+##  Troubleshooting
 
 ### Problemas Comunes
 
@@ -283,7 +283,7 @@ from src.prompts.llm_config import print_config_summary
 print_config_summary('chat')
 ```
 
-## 📞 Soporte
+##  Soporte
 
 Para problemas con el sistema de prompts:
 

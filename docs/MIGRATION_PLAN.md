@@ -1,6 +1,6 @@
 # PLAN DE MIGRACIÓN - PostgreSQL + PostGIS v3.0.0
 
-## 📋 **Resumen Ejecutivo**
+##  **Resumen Ejecutivo**
 
 Este documento describe el plan completo de migración del sistema Citrino desde archivos Excel a PostgreSQL + PostGIS para lograr un rendimiento 100x superior en consultas geoespaciales.
 
@@ -12,7 +12,7 @@ Este documento describe el plan completo de migración del sistema Citrino desde
 
 ---
 
-## 🎯 **Objetivos de la Migración**
+##  **Objetivos de la Migración**
 
 ### **Rendimiento**
 - **Consultas espaciales**: 3-10 segundos → <0.5 segundos (100x más rápido)
@@ -31,7 +31,7 @@ Este documento describe el plan completo de migración del sistema Citrino desde
 
 ---
 
-## 🏗️ **Arquitectura PostgreSQL + PostGIS**
+##  **Arquitectura PostgreSQL + PostGIS**
 
 ### **Esquema Principal**
 
@@ -86,7 +86,7 @@ CREATE OR REPLACE FUNCTION servicios_cercanos(
 
 ---
 
-## 📊 **Flujo de Migración**
+##  **Flujo de Migración**
 
 ### **Fase 1: Preparación**
 1. **Verificar prerequisitos**
@@ -126,7 +126,7 @@ CREATE OR REPLACE FUNCTION servicios_cercanos(
 
 ---
 
-## 🔧 **Comandos de Ejecución**
+##  **Comandos de Ejecución**
 
 ### **Ejecución Completa Automatizada**
 ```bash
@@ -162,7 +162,7 @@ python migration/scripts/validate_migration.py
 
 ---
 
-## 📈 **Métricas de Éxito**
+##  **Métricas de Éxito**
 
 ### **Datos Migrados**
 - **Propiedades**: 2,010 (100% de archivos Excel)
@@ -219,7 +219,7 @@ ORDER BY total_propiedades DESC;
 
 ---
 
-## 🚨 **Consideraciones Especiales**
+##  **Consideraciones Especiales**
 
 ### **Rollback Plan**
 ```bash
@@ -241,7 +241,7 @@ python api/server.py
 
 ---
 
-## 📝 **Post-Migración**
+##  **Post-Migración**
 
 ### **Monitoreo**
 - Logs de rendimiento en `migration/logs/`
@@ -270,7 +270,7 @@ def search_properties():
 
 ---
 
-## 🎯 **Beneficios Logrados**
+##  **Beneficios Logrados**
 
 ### **Rendimiento**
 1. **100x más rápido** en consultas espaciales
@@ -294,7 +294,7 @@ def search_properties():
 
 ---
 
-## 🚀 **Próximos Pasos**
+##  **Próximos Pasos**
 
 ### **Corto Plazo (Post-Migración)**
 1. **Monitoreo** de rendimiento en producción
@@ -313,7 +313,7 @@ def search_properties():
 
 ---
 
-**Estado del Plan:** ✅ Completo y Listo para Ejecución
+**Estado del Plan:**  Completo y Listo para Ejecución
 **Fecha de Creación:** 2025-10-15
 **Mantenedor:** Equipo Citrino
 **Versión Target:** v3.0.0

@@ -2,7 +2,7 @@
 
 Suite de testing automatizado para las interfaces HTML del sistema Citrino.
 
-## 📋 Tabla de Contenidos
+##  Tabla de Contenidos
 
 - [Overview](#overview)
 - [Estructura](#estructura)
@@ -13,7 +13,7 @@ Suite de testing automatizado para las interfaces HTML del sistema Citrino.
 - [Reportes](#reportes)
 - [Troubleshooting](#troubleshooting)
 
-## 🎯 Overview
+##  Overview
 
 Esta suite de tests está diseñada para validar la funcionalidad, usabilidad y performance de las interfaces HTML del sistema Citrino:
 
@@ -21,24 +21,24 @@ Esta suite de tests está diseñada para validar la funcionalidad, usabilidad y 
 - **Citrino Chat**: Interface conversacional con LLM
 - **Integración**: Cross-browser testing, accesibilidad y performance
 
-## 📁 Estructura
+##  Estructura
 
 ```
 tests/frontend/
-├── test_runner.html          # Interfaz principal para ejecutar tests
-├── test_utils.js            # Utilidades y framework de testing
-├── config.json              # Configuración de tests
-├── README.md                # Este archivo
-├── test_reco.html           # Tests específicos para Citrino Reco
-├── test_chat.html           # Tests específicos para Citrino Chat
-├── test_integration.html    # Tests de integración
-└── reports/                 # Directorio para reportes generados
-    ├── screenshots/
-    ├── json/
-    └── html/
+ test_runner.html          # Interfaz principal para ejecutar tests
+ test_utils.js            # Utilidades y framework de testing
+ config.json              # Configuración de tests
+ README.md                # Este archivo
+ test_reco.html           # Tests específicos para Citrino Reco
+ test_chat.html           # Tests específicos para Citrino Chat
+ test_integration.html    # Tests de integración
+ reports/                 # Directorio para reportes generados
+     screenshots/
+     json/
+     html/
 ```
 
-## 🚀 Setup
+##  Setup
 
 ### Prerrequisitos
 
@@ -72,7 +72,7 @@ tests/frontend/
    php -S localhost:8080
    ```
 
-## 🏃‍♂️ Ejecución
+## ‍ Ejecución
 
 ### Método 1: Interface Web
 
@@ -141,7 +141,7 @@ Tests de integración y calidad.
 - **Errores**: Manejo de desconexión, fallbacks
 - **Flujo completo**: Reco → Chat → Exportar
 
-## 🎭 Mock Data
+##  Mock Data
 
 Los tests utilizan datos mock para simular respuestas de API y datos de prueba:
 
@@ -166,7 +166,7 @@ mockAPI('/api/health', {
 }
 ```
 
-## 📊 Reportes
+##  Reportes
 
 ### Formatos Disponibles
 
@@ -190,7 +190,7 @@ Los reportes se pueden exportar haciendo clic en "Exportar Reporte" o programát
 const results = testRunner.exportResults();
 ```
 
-## 🔧 Configuración
+##  Configuración
 
 La configuración se encuentra en `config.json`:
 
@@ -215,7 +215,7 @@ La configuración se encuentra en `config.json`:
 }
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Problemas Comunes
 
@@ -274,7 +274,7 @@ Para ver logs detallados durante ejecución:
 testRunner.enableConsoleLogging = true;
 ```
 
-## 📝 Desarrollo de Nuevos Tests
+##  Desarrollo de Nuevos Tests
 
 ### Añadir Nueva Suite
 
@@ -308,7 +308,7 @@ describe('Mi Suite', () => {
 4. **Assertions**: Ser específicos en mensajes de error
 5. **Timeouts**: Configurar timeouts apropiados
 
-## 🚀 Roadmap
+##  Roadmap
 
 ### v1.1 (Planeado)
 - [ ] Visual regression testing
@@ -322,7 +322,7 @@ describe('Mi Suite', () => {
 - [ ] Performance profiling
 - [ ] Accessibility auditing avanzado
 
-## 📚 Documentación Adicional
+##  Documentación Adicional
 
 ### Guías Rápidas
 - **[QUICK_START.md](QUICK_START.md)** - Guía de inicio en 5 minutos
@@ -333,11 +333,11 @@ describe('Mi Suite', () => {
 - **[config.json](config.json)** - Configuración completa de tests
 - **[test_runner.html](test_runner.html)** - Interface principal de testing
 
-## 📄 Licencia
+##  Licencia
 
 Esta suite de tests sigue la misma licencia MIT que el proyecto Citrino principal.
 
-## 📞 Soporte
+##  Soporte
 
 Para preguntas o problemas:
 
@@ -351,7 +351,7 @@ Para preguntas o problemas:
    - Consola errors
    - URL del test específico
 
-### 🆘 Comandos de Debug Rápido
+###  Comandos de Debug Rápido
 ```javascript
 // En consola del navegador
 localStorage.clear();           // Limpiar cache

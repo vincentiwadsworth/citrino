@@ -24,10 +24,10 @@ def test_zai_connection():
     # Verificar que la API key esté configurada
     api_key = os.getenv('ZAI_API_KEY')
     if not api_key:
-        print("❌ Error: ZAI_API_KEY no está configurada en .env")
+        print(" Error: ZAI_API_KEY no está configurada en .env")
         return False
     
-    print(f"✅ API Key configurada: {api_key[:20]}...")
+    print(f" API Key configurada: {api_key[:20]}...")
     print()
     
     # Crear configuración de LLM
@@ -42,25 +42,25 @@ def test_zai_connection():
     # Validar configuración
     print("Validando configuración...")
     if not llm.validar_configuracion():
-        print("❌ Error: Configuración inválida")
+        print(" Error: Configuración inválida")
         return False
     
-    print("✅ Configuración válida")
+    print(" Configuración válida")
     print()
     
     # Probar con mensaje de ejemplo
     mensaje_prueba = "Busco un departamento en Equipetrol de 3 habitaciones, presupuesto hasta 200000 dólares"
     
-    print(f"📝 Mensaje de prueba:")
+    print(f" Mensaje de prueba:")
     print(f"   '{mensaje_prueba}'")
     print()
-    print("🔄 Procesando con Z.AI (puede tardar 10-30 segundos)...")
+    print(" Procesando con Z.AI (puede tardar 10-30 segundos)...")
     
     try:
         perfil = llm.parsear_perfil_desde_texto(mensaje_prueba)
         
         print()
-        print("✅ RESPUESTA DE Z.AI:")
+        print(" RESPUESTA DE Z.AI:")
         print("-" * 60)
         print(f"Composición familiar: {perfil.get('composicion_familiar', {})}")
         print(f"Presupuesto: {perfil.get('presupuesto', {})}")
@@ -68,12 +68,12 @@ def test_zai_connection():
         print(f"Preferencias: {perfil.get('preferencias', {})}")
         print("-" * 60)
         print()
-        print("✅ ¡Integración con Z.AI funcionando correctamente!")
+        print(" ¡Integración con Z.AI funcionando correctamente!")
         return True
         
     except Exception as e:
         print()
-        print(f"❌ Error al procesar con Z.AI: {e}")
+        print(f" Error al procesar con Z.AI: {e}")
         print()
         print("Posibles causas:")
         print("  1. API Key inválida o expirada")
@@ -87,8 +87,8 @@ if __name__ == '__main__':
         success = test_zai_connection()
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        print("\n⚠️  Prueba interrumpida por el usuario")
+        print("\n  Prueba interrumpida por el usuario")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Error inesperado: {e}")
+        print(f"\n Error inesperado: {e}")
         sys.exit(1)

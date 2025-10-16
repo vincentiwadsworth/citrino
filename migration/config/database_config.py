@@ -181,11 +181,18 @@ class DockerPostgresCursor:
     def execute(self, query: str, params: Optional[Tuple] = None):
         """Execute SQL query using Docker psql"""
         try:
+            # Replace %s parameters with actual values for Docker psql
+            if params:
+                # Simple parameter substitution - WARNING: only for trusted queries
+                formatted_query = query % tuple(f"'{str(p)}'" for p in params)
+            else:
+                formatted_query = query
+
             # Build psql command
             cmd = [
                 'docker', 'exec', '-i', self.connection.container_name,
                 'psql', '-U', self.config.user, '-d', self.config.database,
-                '-t', '-A', '-F,', '-c', query
+                '-t', '-A', '-F,', '-c', formatted_query
             ]
 
             # Execute command
@@ -267,17 +274,12 @@ class DockerPostgresCursor:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-@contextmanager
 def docker_connection(config: Optional[DatabaseConfig] = None):
-    """Context manager for Docker PostgreSQL connection"""
+    """Factory function for Docker PostgreSQL connection"""
     if config is None:
         config = load_database_config()
 
-    conn = DockerPostgresConnection(config)
-    try:
-        yield conn
-    finally:
-        conn.close()
+    return DockerPostgresConnection(config)
 
 # =====================================================
 # Database Connection Functions
@@ -334,24 +336,30 @@ def test_connection(config: Optional[DatabaseConfig] = None) -> bool:
         config = load_database_config()
 
     try:
-        with create_connection(config) as conn:
-            with conn.cursor() as cursor:
-                # Test basic query
-                cursor.execute("SELECT version()")
-                version = cursor.fetchone()[0]
-                logging.info(f"PostgreSQL version: {version}")
+        conn = create_connection(config)
 
-                # Test PostGIS extension
-                cursor.execute("SELECT PostGIS_Version()")
-                postgis_version = cursor.fetchone()[0]
-                logging.info(f"PostGIS version: {postgis_version}")
+        with conn.cursor() as cursor:
+            # Test basic query
+            cursor.execute("SELECT version()")
+            version = cursor.fetchone()[0]
+            logging.info(f"PostgreSQL version: {version}")
 
-                # Test basic spatial function
-                cursor.execute("SELECT ST_Distance(ST_MakePoint(-63.18, -17.78)::geography, ST_MakePoint(-63.19, -17.79)::geography)")
-                distance = cursor.fetchone()[0]
+            # Test PostGIS extension
+            cursor.execute("SELECT PostGIS_Version()")
+            postgis_version = cursor.fetchone()[0]
+            logging.info(f"PostGIS version: {postgis_version}")
+
+            # Test basic spatial function
+            cursor.execute("SELECT ST_Distance(ST_MakePoint(-63.18, -17.78)::geography, ST_MakePoint(-63.19, -17.79)::geography)")
+            distance_result = cursor.fetchone()
+            if distance_result:
+                distance = float(distance_result[0])
                 logging.info(f"Test spatial query result: {distance:.2f} meters")
+            else:
+                logging.warning("No spatial query result")
 
-                return True
+            conn.close()
+            return True
 
     except Exception as e:
         logging.error(f"Connection test failed: {e}")
@@ -376,8 +384,9 @@ def validate_database_setup(config: Optional[DatabaseConfig] = None) -> Dict[str
     }
 
     try:
-        with create_connection(config) as conn:
-            with conn.cursor() as cursor:
+        conn = create_connection(config)
+
+        with conn.cursor() as cursor:
                 # Test connection
                 cursor.execute("SELECT 1")
                 validation_results['connection'] = True
@@ -425,6 +434,8 @@ def validate_database_setup(config: Optional[DatabaseConfig] = None) -> Dict[str
                             validation_results['estimated_sizes'][table] = size
                         except Exception:
                             validation_results['estimated_sizes'][table] = 'Unknown'
+
+        conn.close()
 
     except Exception as e:
         logging.error(f"Database validation failed: {e}")

@@ -479,7 +479,7 @@ if __name__ == "__main__":
     print(f"  - Altamente recomendadas: {resultado['potencial_propiedades']['altamente_recomendadas']}")
     print(f"\nFortalezas:")
     for fortaleza in resultado['fortalezas']:
-        print(f"  ✓ {fortaleza}")
+        print(f"   {fortaleza}")
     print(f"\nDebilidades:")
     for debilidad in resultado['debilidades']:
-        print(f"  ✗ {debilidad}")
+        print(f"   {debilidad}")

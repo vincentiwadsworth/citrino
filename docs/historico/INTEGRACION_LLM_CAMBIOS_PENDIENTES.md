@@ -1,20 +1,20 @@
 # Cambios Pendientes para Completar Integración LLM en Citrino Reco
 
-## ✅ Completado
+##  Completado
 
 1. **Backend (api/server.py)**
-   - ✅ Función `generar_briefing_ejecutivo_llm()` agregada
-   - ✅ Endpoint `/api/recomendar-mejorado-llm` creado
-   - ✅ Enriquecimiento de justificaciones con Z.AI implementado
-   - ✅ Health endpoint actualizado con nuevo endpoint
+   -  Función `generar_briefing_ejecutivo_llm()` agregada
+   -  Endpoint `/api/recomendar-mejorado-llm` creado
+   -  Enriquecimiento de justificaciones con Z.AI implementado
+   -  Health endpoint actualizado con nuevo endpoint
 
 2. **API Client (assets/js/api.js)**
-   - ✅ Método `getRecommendationsWithLLM()` agregado
+   -  Método `getRecommendationsWithLLM()` agregado
 
 3. **Frontend (citrino-reco.html)**
-   - ✅ Funciones `renderBriefing()` y `exportBriefing()` agregadas
+   -  Funciones `renderBriefing()` y `exportBriefing()` agregadas
 
-## ⚠️ Cambios Manuales Requeridos en citrino-reco.html
+##  Cambios Manuales Requeridos en citrino-reco.html
 
 ### 1. Añadir Variables Globales (después de línea 824)
 
@@ -241,7 +241,7 @@ function buildRecommendationCard(property) {
 }
 ```
 
-## 📝 Instrucciones de Implementación
+##  Instrucciones de Implementación
 
 1. Abre `citrino-reco.html` en tu editor
 2. Busca línea 824 y añade las dos variables globales
@@ -251,7 +251,7 @@ function buildRecommendationCard(property) {
 6. En el bloque `<style>` (después de línea 221), añade los estilos CSS para .llm-analysis y .briefing-section
 7. Guarda el archivo
 
-## ✅ Testing
+##  Testing
 
 Después de hacer estos cambios:
 
@@ -262,7 +262,7 @@ Después de hacer estos cambios:
    - Botón "Exportar" funcional
 3. **Fallback**: Si Z.AI falla, debe caer al endpoint normal automáticamente
 
-## 🚀 Deploy
+##  Deploy
 
 Una vez probado localmente:
 

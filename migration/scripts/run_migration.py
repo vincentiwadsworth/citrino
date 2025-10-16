@@ -75,14 +75,21 @@ class MigrationManager:
 
         # Verificar conexión a PostgreSQL
         try:
-            conn = psycopg2.connect(**self.db_config)
+            import psycopg2
+            conn = psycopg2.connect(
+                host=self.db_config['host'],
+                database=self.db_config['database'],
+                user=self.db_config['user'],
+                password=self.db_config['password'],
+                port=self.db_config['port']
+            )
             conn.close()
             logger.info("Conexión a PostgreSQL verificada")
         except Exception as e:
             logger.error(f"No se puede conectar a PostgreSQL: {e}")
             raise
 
-        logger.info("Todos los prerequisitos verificados ✓")
+        logger.info("Todos los prerequisitos verificados ")
 
     def crear_esquema_db(self):
         """Crear esquema completo de base de datos"""
@@ -91,23 +98,23 @@ class MigrationManager:
         schema_file = 'migration/database/02_create_schema_postgis.sql'
 
         try:
-            # Ejecutar script SQL
+            # Ejecutar script SQL con Docker
             cmd = [
-                'psql',
-                f'-h{self.db_config["host"]}',
-                f'-U{self.db_config["user"]}',
-                f'-d{self.db_config["database"]}',
-                f'-f{schema_file}'
+                'docker', 'exec', '-i', 'citrino-postgres-new',
+                'psql', '-U', self.db_config['user'], '-d', self.db_config['database'],
+                '-f', f'/tmp/schema.sql'
             ]
 
-            # Establecer variable de entorno de contraseña
-            env = os.environ.copy()
-            env['PGPASSWORD'] = self.db_config['password']
+            # Copiar schema file al contenedor
+            copy_cmd = [
+                'docker', 'cp', schema_file, 'citrino-postgres-new:/tmp/schema.sql'
+            ]
+            subprocess.run(copy_cmd, check=True)
 
-            result = subprocess.run(cmd, capture_output=True, text=True, env=env)
+            result = subprocess.run(cmd, capture_output=True, text=True)
 
             if result.returncode == 0:
-                logger.info("Esquema creado exitosamente ✓")
+                logger.info("Esquema creado exitosamente ")
             else:
                 logger.error(f"Error creando esquema: {result.stderr}")
                 raise Exception(f"Error ejecutando script SQL: {result.stderr}")
@@ -129,7 +136,7 @@ class MigrationManager:
 
             etl.cerrar_conexion()
 
-            logger.info(f"ETL de propiedades completado: {len(propiedades)} propiedades migradas ✓")
+            logger.info(f"ETL de propiedades completado: {len(propiedades)} propiedades migradas ")
             return propiedades
 
         except Exception as e:
@@ -149,7 +156,7 @@ class MigrationManager:
 
             etl.cerrar_conexion()
 
-            logger.info(f"ETL de servicios completado: {len(servicios)} servicios migrados ✓")
+            logger.info(f"ETL de servicios completado: {len(servicios)} servicios migrados ")
             return servicios
 
         except Exception as e:
@@ -227,7 +234,7 @@ class MigrationManager:
             if len(indices_espaciales) < 2:
                 raise Exception("No se crearon suficientes índices espaciales")
 
-            logger.info("Migración validada exitosamente ✓")
+            logger.info("Migración validada exitosamente ")
 
             # Guardar reporte
             reporte = {
@@ -325,9 +332,9 @@ class MigrationManager:
                 logger.warning(f"Query compleja lenta: {tiempo_query:.3f}s")
 
             if tiempo_zona < 0.05 and tiempo_espacial < 0.5 and tiempo_query < 1.0:
-                logger.info("Rendimiento excelente ✓")
+                logger.info("Rendimiento excelente ")
             else:
-                logger.info("Rendimiento aceptable ⚠")
+                logger.info("Rendimiento aceptable ")
 
         except Exception as e:
             logger.error(f"Error en pruebas de rendimiento: {e}")

@@ -69,13 +69,13 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 #### Arquitectura de Datos
 ```
 /data/
-├── raw/                               # Archivos Excel originales (fuente de datos)
-│   ├── relevamiento/                 # Archivos Excel de propiedades
-│   └── guia/GUIA URBANA.xlsx         # Guía urbana municipal
-├── processed/                         # Archivos intermedios para validación
-│   ├── *_intermedio.xlsx             # Excel procesados para revisión
-│   └── *_reporte.json               # Reportes de calidad
-└── final/                            # Datos listos para producción
+ raw/                               # Archivos Excel originales (fuente de datos)
+    relevamiento/                 # Archivos Excel de propiedades
+    guia/GUIA URBANA.xlsx         # Guía urbana municipal
+ processed/                         # Archivos intermedios para validación
+    *_intermedio.xlsx             # Excel procesados para revisión
+    *_reporte.json               # Reportes de calidad
+ final/                            # Datos listos para producción
 
 # PostgreSQL (base de datos principal):
 - agentes (tabla normalizada)
@@ -255,13 +255,13 @@ LLM_TEMPERATURE=0.1
 
 ```
 /data/
-├── raw/                               # Archivos Excel ORIGINALES (fuente de datos)
-│   ├── relevamiento/                 # Propiedades en archivos Excel
-│   └── guia/GUIA URBANA.xlsx         # Servicios urbanos
-├── processed/                         # Archivos intermedios validados
-│   ├── *_intermedio.xlsx             # Para revisión del equipo
-│   └── *_reporte.json               # Métricas de calidad
-└── final/                            # Datos aprobados para PostgreSQL
+ raw/                               # Archivos Excel ORIGINALES (fuente de datos)
+    relevamiento/                 # Propiedades en archivos Excel
+    guia/GUIA URBANA.xlsx         # Servicios urbanos
+ processed/                         # Archivos intermedios validados
+    *_intermedio.xlsx             # Para revisión del equipo
+    *_reporte.json               # Métricas de calidad
+ final/                            # Datos aprobados para PostgreSQL
 
 # PostgreSQL (base de datos principal)
 - agentes: Datos normalizados de agentes inmobiliarios
@@ -497,16 +497,16 @@ python api/server.py
 #### 1.1 Estructura de Archivos Intermedios
 ```
 /data/
-├── raw/                           # Archivos originales (no modificar)
-│   ├── guia/GUIA URBANA.xlsx
-│   └── relevamiento/*.xlsx
-├── processed/                     # Archivos intermedios para revisión
-│   ├── 2025.08.15 05_intermedio.xlsx
-│   ├── 2025.08.17 01_intermedio.xlsx
-│   └── guia_urbana_intermedio.xlsx
-└── final/                         # Datos aprobados para producción
-    ├── propiedades_aprobadas.json
-    └── servicios_aprobados.json
+ raw/                           # Archivos originales (no modificar)
+    guia/GUIA URBANA.xlsx
+    relevamiento/*.xlsx
+ processed/                     # Archivos intermedios para revisión
+    2025.08.15 05_intermedio.xlsx
+    2025.08.17 01_intermedio.xlsx
+    guia_urbana_intermedio.xlsx
+ final/                         # Datos aprobados para producción
+     propiedades_aprobadas.json
+     servicios_aprobados.json
 ```
 
 #### 1.2 Procesamiento Individual por Archivo
@@ -611,11 +611,11 @@ python scripts/validation/generate_validation_report.py \
 
 ```
 scripts/validation/
-├── validate_raw_to_intermediate.py    # Procesamiento individual
-├── process_all_raw.py                 # Procesamiento batch
-├── generate_validation_report.py      # Reportes HTML/JSON
-├── approve_processed_data.py          # Aprobación a producción
-└── validation_utils.py                # Utilidades comunes
+ validate_raw_to_intermediate.py    # Procesamiento individual
+ process_all_raw.py                 # Procesamiento batch
+ generate_validation_report.py      # Reportes HTML/JSON
+ approve_processed_data.py          # Aprobación a producción
+ validation_utils.py                # Utilidades comunes
 ```
 
 ### Métricas de Calidad por Defecto

@@ -114,7 +114,7 @@ class MigrationValidator:
             if len(results['indices_espaciales']) < 2:
                 raise Exception("Faltan índices espaciales")
 
-            logger.info("Estructura de BD validada ✓")
+            logger.info("Estructura de BD validada ")
             return results
 
         except Exception as e:
@@ -188,7 +188,7 @@ class MigrationValidator:
 
             logger.info(f"Propiedades: {results['propiedades_total']} ({results.get('porcentaje_coordenadas_propiedades', 0):.1f}% con coordenadas)")
             logger.info(f"Servicios: {results['servicios_total']} ({results.get('porcentaje_coordenadas_servicios', 0):.1f}% con coordenadas)")
-            logger.info("Datos básicos validados ✓")
+            logger.info("Datos básicos validados ")
 
             return results
 
@@ -296,7 +296,7 @@ class MigrationValidator:
                 logger.warning("No se encontraron servicios cercanos a propiedades")
 
             logger.info(f"Tiempos de ejecución: {results['tiempos_ejecucion']}")
-            logger.info("Consultas espaciales validadas ✓")
+            logger.info("Consultas espaciales validadas ")
 
             return results
 
@@ -407,9 +407,9 @@ class MigrationValidator:
                     results['consultas'].append(resultado_test)
 
                     if resultado_test['exitoso']:
-                        logger.info(f"✓ {consulta['nombre']}: {tiempo_ejecucion:.3f}s ({len(resultados)} resultados)")
+                        logger.info(f" {consulta['nombre']}: {tiempo_ejecucion:.3f}s ({len(resultados)} resultados)")
                     else:
-                        logger.warning(f"⚠ {consulta['nombre']}: {tiempo_ejecucion:.3f}s (umbral: {consulta['umbral']}s)")
+                        logger.warning(f" {consulta['nombre']}: {tiempo_ejecucion:.3f}s (umbral: {consulta['umbral']}s)")
 
                 cursor.close()
 
@@ -423,9 +423,9 @@ class MigrationValidator:
                 results['total_consultas'] = total_consultas
 
                 if porcentaje_exito >= 80:
-                    logger.info(f"Rendimiento excelente: {porcentaje_exito:.1f}% consultas exitosas ✓")
+                    logger.info(f"Rendimiento excelente: {porcentaje_exito:.1f}% consultas exitosas ")
                 elif porcentaje_exito >= 60:
-                    logger.info(f"Rendimiento aceptable: {porcentaje_exito:.1f}% consultas exitosas ⚠")
+                    logger.info(f"Rendimiento aceptable: {porcentaje_exito:.1f}% consultas exitosas ")
                 else:
                     logger.warning(f"Rendimiento bajo: {porcentaje_exito:.1f}% consultas exitosas")
 
@@ -517,7 +517,7 @@ class MigrationValidator:
                 problemas += 1
 
             if problemas == 0:
-                logger.info("Datos consistentes ✓")
+                logger.info("Datos consistentes ")
             else:
                 logger.warning(f"Se encontraron {problemas} tipos de problemas de consistencia")
 
@@ -568,14 +568,14 @@ class MigrationValidator:
             if resultados['resumen']['general_exitosa']:
                 logger.info("=== VALIDACIÓN COMPLETADA EXITOSAMENTE ===")
                 logger.info(f"Duración: {duracion:.1f} segundos")
-                logger.info("Todos los tests pasaron ✓")
+                logger.info("Todos los tests pasaron ")
             else:
                 logger.warning("=== VALIDACIÓN COMPLETADA CON OBSERVACIONES ===")
                 logger.info(f"Duración: {duracion:.1f} segundos")
-                logger.info(f"Estructura: {'✓' if estructura_ok else '✗'}")
-                logger.info(f"Datos: {'✓' if datos_ok else '✗'}")
-                logger.info(f"Rendimiento: {'✓' if rendimiento_ok else '✗'}")
-                logger.info(f"Consistencia: {'✓' if consistencia_ok else '✗'}")
+                logger.info(f"Estructura: {'' if estructura_ok else ''}")
+                logger.info(f"Datos: {'' if datos_ok else ''}")
+                logger.info(f"Rendimiento: {'' if rendimiento_ok else ''}")
+                logger.info(f"Consistencia: {'' if consistencia_ok else ''}")
 
             # Guardar resultados
             with open('migration/logs/validation_results.json', 'w') as f:

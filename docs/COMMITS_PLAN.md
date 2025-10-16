@@ -1,13 +1,13 @@
 # COMMITS PLAN - Migración Completa a PostgreSQL + PostGIS
 
-## 📋 **Resumen del Plan**
+##  **Resumen del Plan**
 Este documento detalla la secuencia de 8 commits para implementar el sistema completo de migración desde Excel/JSON a PostgreSQL + PostGIS con validación y pruebas.
 
 **Objetivo Principal:** Migrar 2,010 propiedades (7 archivos Excel) + 4,938 servicios (JSON) a PostgreSQL + PostGIS con rendimiento 100x superior.
 
 ---
 
-## 🎯 **Visión General**
+##  **Visión General**
 
 ### **Datos a Migrar:**
 - **Propiedades**: 2,010 en 7 archivos Excel (2025.08.15 - 2025.08.29)
@@ -23,7 +23,7 @@ Este documento detalla la secuencia de 8 commits para implementar el sistema com
 
 ---
 
-## 📦 **Secuencia Detallada de Commits**
+##  **Secuencia Detallada de Commits**
 
 ### **Commit 1/8: Infraestructura Base PostgreSQL**
 
@@ -265,7 +265,7 @@ CLAUDE.md (actualizado)
 
 ---
 
-## 🔧 **Proceso de Ejecución**
+##  **Proceso de Ejecución**
 
 ### **Pre-Commit Checklist (para cada commit):**
 - [ ] **Funcionalidad core validada**: Componente principal funcionando
@@ -282,7 +282,7 @@ CLAUDE.md (actualizado)
 
 ---
 
-## 📊 **Métricas de Éxito Esperadas**
+##  **Métricas de Éxito Esperadas**
 
 ### **Datos Migrados:**
 - **Propiedades**: 2,010 (100% de archivos Excel)
@@ -302,7 +302,7 @@ CLAUDE.md (actualizado)
 
 ---
 
-## 🎯 **Beneficios Logrados**
+##  **Beneficios Logrados**
 
 ### **Rendimiento:**
 1. **100x más rápido** en consultas espaciales (segundos → milisegundos)
@@ -326,7 +326,7 @@ CLAUDE.md (actualizado)
 
 ---
 
-## 🚨 **Consideraciones Especiales**
+##  **Consideraciones Especiales**
 
 ### **Rollback Plan:**
 ```bash
@@ -348,7 +348,7 @@ python api/server.py
 
 ---
 
-## 🚀 **Comandos de Ejecución**
+##  **Comandos de Ejecución**
 
 ### **Ejecución Completa:**
 ```bash
@@ -383,7 +383,7 @@ python migration/scripts/validate_migration.py
 
 ---
 
-## 📝 **Notas de Desarrollo**
+##  **Notas de Desarrollo**
 
 ### **Lecciones Aprendidas:**
 1. **Validar datos reales** antes de declarar éxito
@@ -399,7 +399,7 @@ python migration/scripts/validate_migration.py
 
 ---
 
-**Estado del Plan:** ✅ Completo y Aprobado
+**Estado del Plan:**  Completo y Aprobado
 **Fecha de Creación:** 2025-10-15
 **Mantenedor:** Equipo Citrino
 **Versión Target:** v3.0.0

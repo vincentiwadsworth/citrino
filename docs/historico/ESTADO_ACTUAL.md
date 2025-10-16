@@ -6,11 +6,11 @@
 
 ---
 
-## ✅ LO QUE FUNCIONA
+##  LO QUE FUNCIONA
 
 ### 1. Backend en Producción
 - **URL:** https://citrino.onrender.com
-- **Estado:** ✅ LIVE y funcionando
+- **Estado:**  LIVE y funcionando
 - **Propiedades:** 1,583 cargadas correctamente
 - **Python:** 3.11.9
 - **Dependencias:** pandas 2.2.3, numpy 2.2.1, flask 2.3.3
@@ -38,14 +38,14 @@ curl https://citrino.onrender.com/api/health
 - **Endpoint:** `/api/chat/process` operativo
 
 **Integración actual:**
-- ✅ **Citrino Chat:** Z.AI completamente integrado
-- ❌ **Citrino Reco:** Campo preparado pero sin uso de Z.AI
+-  **Citrino Chat:** Z.AI completamente integrado
+-  **Citrino Reco:** Campo preparado pero sin uso de Z.AI
 
 ### 3. Infraestructura
-- ✅ Render.com con autodeploy desde GitHub
-- ✅ Configuración de CORS para producción
-- ✅ Logs optimizados con banners claros
-- ✅ Manejo robusto de errores
+-  Render.com con autodeploy desde GitHub
+-  Configuración de CORS para producción
+-  Logs optimizados con banners claros
+-  Manejo robusto de errores
 
 ### 4. Git Repository
 - **Commits totales:** 10
@@ -76,7 +76,7 @@ curl https://citrino.onrender.com/api/health
 
 ---
 
-## 📁 Archivos Importantes
+##  Archivos Importantes
 
 ### Configuración
 - `.env.example` - Plantilla de variables de entorno
@@ -105,7 +105,7 @@ curl https://citrino.onrender.com/api/health
 
 ---
 
-## 🔑 Credenciales
+##  Credenciales
 
 ### Z.AI API Key
 **Ubicación:** Configurada en Render Dashboard como variable secreta
@@ -124,7 +124,7 @@ curl https://citrino.onrender.com/api/health
 
 ---
 
-## 📊 Historial de Commits (Últimos 10)
+##  Historial de Commits (Últimos 10)
 
 ```
 ecd76c8 - docs: documentar plan completo de integracion z.ai en Citrino Reco
@@ -141,7 +141,7 @@ de26af9 - feat: configurar despliegue online con Render y GitHub Pages
 
 ---
 
-## 🚀 Para Retomar el Trabajo
+##  Para Retomar el Trabajo
 
 ### 1. Verificar Estado del Sistema
 ```bash
@@ -185,16 +185,16 @@ curl https://citrino.onrender.com/api/health
 
 ### Variables de Entorno en Render
 ```
-PYTHON_VERSION=3.11.9 ✅
-ZAI_API_KEY=<configurada en Render Dashboard> ✅
-LLM_PROVIDER=zai ✅
-LLM_MODEL=glm-4.5-air ✅
-FLASK_ENV=production ✅
+PYTHON_VERSION=3.11.9 
+ZAI_API_KEY=<configurada en Render Dashboard> 
+LLM_PROVIDER=zai 
+LLM_MODEL=glm-4.5-air 
+FLASK_ENV=production 
 ```
 
 ---
 
-## 📞 Información de Contacto
+##  Información de Contacto
 
 **Plan de Trabajo:** `PLAN_SIGUIENTE_FASE.md`
 **Guía de Despliegue:** `README_DEPLOY.md`
@@ -202,7 +202,7 @@ FLASK_ENV=production ✅
 
 ---
 
-## ✅ Checklist de Sesión
+##  Checklist de Sesión
 
 - [x] Backend deployado en Render
 - [x] Base de datos (1583 propiedades) funcionando
@@ -216,5 +216,5 @@ FLASK_ENV=production ✅
 
 ---
 
-**Estado:** ✅ Sistema estable y funcional, listo para siguiente fase
+**Estado:**  Sistema estable y funcional, listo para siguiente fase
 **Próximo paso:** Configurar GitHub Pages → Implementar Z.AI en Reco

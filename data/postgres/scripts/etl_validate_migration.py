@@ -528,15 +528,15 @@ class MigrationValidator:
             ['Fecha Validación', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ''],
             ['', '', ''],
             ['Agentes', f"{self.validation_results['conteos']['postgres'].get('agentes', 0)} cargados",
-             '✓' if self.validation_results['conteos']['coincidencias'].get('agentes', False) else '✗'],
+             '' if self.validation_results['conteos']['coincidencias'].get('agentes', False) else ''],
             ['Propiedades', f"{self.validation_results['conteos']['postgres'].get('propiedades', 0)} cargadas",
-             '✓' if self.validation_results['conteos']['coincidencias'].get('propiedades', False) else '✗'],
+             '' if self.validation_results['conteos']['coincidencias'].get('propiedades', False) else ''],
             ['Servicios', f"{self.validation_results['conteos']['postgres'].get('servicios', 0)} cargados",
-             '✓' if self.validation_results['conteos']['coincidencias'].get('servicios', False) else '✗'],
+             '' if self.validation_results['conteos']['coincidencias'].get('servicios', False) else ''],
             ['', '', ''],
             ['Migración General',
              'Exitosa' if self.validation_results['conteos']['migracion_exitosa'] else 'Con Diferencias',
-             '✓' if self.validation_results['conteos']['migracion_exitosa'] else '⚠']
+             '' if self.validation_results['conteos']['migracion_exitosa'] else '']
         ]
 
         for row in resumen_data:
@@ -557,7 +557,7 @@ class MigrationValidator:
             pg_count = self.validation_results['conteos']['postgres'].get(tabla, 0)
             diferencia = excel_count - pg_count
             porcentaje = self.validation_results['conteos']['porcentaje_migracion'].get(tabla, 0)
-            estado = '✓ OK' if diferencia == 0 else f'⚠ Dif: {diferencia}'
+            estado = ' OK' if diferencia == 0 else f' Dif: {diferencia}'
 
             conteos_data.append([tabla.title(), excel_count, pg_count, diferencia, f"{porcentaje}%", estado])
 
@@ -580,10 +580,10 @@ class MigrationValidator:
             calidad_data.extend([
                 ['Propiedades - Coordenadas Válidas', props['total'], props['coordenadas_validas'],
                  f"{props['porcentaje_coords_validas']}%",
-                 '✓' if props['porcentaje_coords_validas'] > 80 else '⚠'],
+                 '' if props['porcentaje_coords_validas'] > 80 else ''],
                 ['Propiedades - Datos Completos', props['total'], props['datos_completos'],
                  f"{props['porcentaje_datos_completos']}%",
-                 '✓' if props['porcentaje_datos_completos'] > 80 else '⚠']
+                 '' if props['porcentaje_datos_completos'] > 80 else '']
             ])
 
         # Servicios
@@ -592,7 +592,7 @@ class MigrationValidator:
             calidad_data.extend([
                 ['Servicios - Coordenadas Válidas', serv['total'], serv['coordenadas_validas'],
                  f"{serv['porcentaje_coords_validas']}%",
-                 '✓' if serv['porcentaje_coords_validas'] > 80 else '⚠']
+                 '' if serv['porcentaje_coords_validas'] > 80 else '']
             ])
 
         # Agentes
@@ -601,10 +601,10 @@ class MigrationValidator:
             calidad_data.extend([
                 ['Agentes - Con Email', agentes['total'], agentes['con_email'],
                  f"{agentes['porcentaje_con_email']}%",
-                 '✓' if agentes['porcentaje_con_email'] > 60 else '⚠'],
+                 '' if agentes['porcentaje_con_email'] > 60 else ''],
                 ['Agentes - Con Teléfono', agentes['total'], agentes['con_telefono'],
                  f"{agentes['porcentaje_con_telefono']}%",
-                 '✓' if agentes['porcentaje_con_telefono'] > 60 else '⚠']
+                 '' if agentes['porcentaje_con_telefono'] > 60 else '']
             ])
 
         for row in calidad_data:
@@ -622,7 +622,7 @@ class MigrationValidator:
         for prueba, datos in self.validation_results['rendimiento'].items():
             if isinstance(datos, dict) and 'tiempo_segundos' in datos:
                 estado = datos.get('rendimiento', 'Desconocido')
-                icono = '✓' if estado == 'Excelente' else '✓' if estado == 'Bueno' else '⚠'
+                icono = '' if estado == 'Excelente' else '' if estado == 'Bueno' else ''
                 rendimiento_data.append([
                     prueba.replace('_', ' ').title(),
                     datos.get('resultado', datos.get('resultados', 'N/A')),
@@ -661,7 +661,7 @@ class MigrationValidator:
                 ])
 
         if len(detalles_data) == 1:  # Solo encabezado
-            detalles_data.append(['Estado', 'No se detectaron problemas graves', '✓'])
+            detalles_data.append(['Estado', 'No se detectaron problemas graves', ''])
 
         for row in detalles_data:
             ws_detalles.append(row)
@@ -728,14 +728,14 @@ class MigrationValidator:
 
         # Conteos
         conteos = self.validation_results['conteos']
-        logger.info(f"ESTADO MIGRACIÓN: {'✓ EXITOSA' if conteos['migracion_exitosa'] else '⚠ CON DIFERENCIAS'}")
+        logger.info(f"ESTADO MIGRACIÓN: {' EXITOSA' if conteos['migracion_exitosa'] else ' CON DIFERENCIAS'}")
         logger.info("")
         logger.info("Conteos de registros:")
         for tabla in ['agentes', 'propiedades', 'servicios']:
             excel_count = conteos['excel'].get(tabla, 0)
             pg_count = conteos['postgres'].get(tabla, 0)
             porc = conteos['porcentaje_migracion'].get(tabla, 0)
-            estado = "✓" if conteos['coincidencias'].get(tabla, False) else f"✗ (Dif: {excel_count - pg_count})"
+            estado = "" if conteos['coincidencias'].get(tabla, False) else f" (Dif: {excel_count - pg_count})"
             logger.info(f"  {tabla.title()}: Excel={excel_count}, PostgreSQL={pg_count}, {porc}% {estado}")
 
         logger.info(f"Diferencias totales: {conteos['total_diferencias']}")
@@ -779,10 +779,10 @@ class MigrationValidator:
             logger.info("")
             logger.warning("Problemas detectados:")
             for problema in problemas:
-                logger.warning(f"  ⚠ {probleblema}")
+                logger.warning(f"   {probleblema}")
         else:
             logger.info("")
-            logger.info("✓ No se detectaron problemas graves")
+            logger.info(" No se detectaron problemas graves")
 
         logger.info("=" * 80)
 

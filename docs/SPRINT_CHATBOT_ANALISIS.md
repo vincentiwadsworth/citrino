@@ -1,17 +1,17 @@
 # Sprint Chatbot & Análisis de Datos Raw - Documentación Completa
 
-## 📋 Overview del Sprint
+##  Overview del Sprint
 
 **Fecha:** Octubre 2025
 **Objetivo Principal:** Implementar Chatbot UI profesional y completar análisis exhaustivo de datos raw
 **Duración:** Sprint completo
-**Estado:** ✅ COMPLETADO (100%)
+**Estado:**  COMPLETADO (100%)
 
 Este sprint abarcó dos commits estratégicos que transformaron la capacidad de análisis conversacional de Citrino y establecieron métricas precisas del sistema de datos.
 
 ---
 
-## 🎯 Objetivos del Sprint
+##  Objetivos del Sprint
 
 ### Commit 1: Análisis de Datos Raw
 - **Procesamiento de archivos crudos**: Extraer métricas de 7 archivos Excel en `data/raw/relevamiento/`
@@ -29,11 +29,11 @@ Este sprint abarcó dos commits estratégicos que transformaron la capacidad de 
 
 ---
 
-## 🚀 Implementación Detallada
+##  Implementación Detallada
 
 ### Commit 1: Sistema de Análisis de Datos Raw
 
-#### 📊 Arquitectura del Sistema
+####  Arquitectura del Sistema
 
 ```python
 # scripts/analysis/procesar_y_analizar_raw.py
@@ -50,7 +50,7 @@ class AnalizadorDataRaw:
         }
 ```
 
-#### 🔍 Proceso de Extracción Híbrida
+####  Proceso de Extracción Híbrida
 
 1. **Fase Regex-First** (37.7% de propiedades):
    - Patrones optimizados para campos comunes
@@ -62,7 +62,7 @@ class AnalizadorDataRaw:
    - Prompt optimizado para extracción estructurada
    - Sistema de fallback automático
 
-#### 📈 Resultados del Análisis
+####  Resultados del Análisis
 
 | Métrica | Valor | Significado |
 |---------|-------|-------------|
@@ -73,7 +73,7 @@ class AnalizadorDataRaw:
 | **Costo Total LLM** | $0.002 USD | Optimización masiva de tokens |
 | **Tokens Consumidos** | 1,593 | Muy eficiente |
 
-#### 📊 Distribución por Proveedor
+####  Distribución por Proveedor
 
 | Proveedor | Propiedades | Características | Método de Extracción |
 |-----------|-------------|-----------------|---------------------|
@@ -109,22 +109,22 @@ def procesar_propiedad_con_llm(self, row, metadata, index):
 
 ### Commit 2: Chatbot UI Profesional
 
-#### 🏗️ Arquitectura del Sistema
+####  Arquitectura del Sistema
 
 ```
-┌─────────────────┐    OpenAI-Compatible    ┌─────────────────┐
-│   Chatbot UI    │ ◄──────────────────────► │  Citrino API    │
-│   (Frontend)    │    /v1/chat/completions │   (Backend)     │
-│   Port: 3000    │                          │   Port: 5001    │
-└─────────────────┘                          └─────────┬───────┘
-                                                      │
-                                              ┌───────▼───────┐
-                                              │  LLM Engine   │
-                                              │ Z.AI + Fallback│
-                                              └───────────────┘
+    OpenAI-Compatible    
+   Chatbot UI        Citrino API    
+   (Frontend)        /v1/chat/completions    (Backend)     
+   Port: 3000                                 Port: 5001    
+                          
+                                                      
+                                              
+                                                LLM Engine   
+                                               Z.AI + Fallback
+                                              
 ```
 
-#### 🔧 Componentes Principales
+####  Componentes Principales
 
 ##### 1. Chatbot UI Integration
 - **Estándar OpenAI**: Compatibilidad total con API estándar
@@ -157,7 +157,7 @@ class CitrinoChatbotAPI:
 - **Semantic Search**: Búsqueda semántica en base de datos de 1,385 propiedades
 - **Context Awareness**: Mantenimiento de contexto conversacional
 
-#### 🚀 Capacidades del Chatbot
+####  Capacidades del Chatbot
 
 ##### Búsqueda Conversacional
 ```
@@ -197,7 +197,7 @@ Distribución por tipo:
 ¿Te gustaría ver propiedades específicas en Urbari?
 ```
 
-#### 🐳 Docker Configuration
+####  Docker Configuration
 
 ```yaml
 # chatbot/docker-compose.dev.yml
@@ -228,28 +228,28 @@ services:
 
 ---
 
-## 📚 Documentación del Sistema
+##  Documentación del Sistema
 
 ### Estructura de Archivos Creada
 
 ```
 chatbot/
-├── README.md                    # Documentación completa
-├── setup.py                    # Script de setup automático
-├── .env.example                # Plantilla de configuración
-├── docker-compose.dev.yml      # Configuración Docker
-├── config/
-│   └── chatbot-ui.json        # Configuración Chatbot UI
-└── logs/                       # Logs del sistema
+ README.md                    # Documentación completa
+ setup.py                    # Script de setup automático
+ .env.example                # Plantilla de configuración
+ docker-compose.dev.yml      # Configuración Docker
+ config/
+    chatbot-ui.json        # Configuración Chatbot UI
+ logs/                       # Logs del sistema
 
 api/
-└── chatbot_completions.py     # Endpoint OpenAI-compatible
+ chatbot_completions.py     # Endpoint OpenAI-compatible
 
 scripts/analysis/
-└── procesar_y_analizar_raw.py # Análisis de datos con LLM metrics
+ procesar_y_analizar_raw.py # Análisis de datos con LLM metrics
 
 data/metrics/
-└── analisis_data_raw_YYYYMMDD_HHMMSS_readable.json # Reporte completo
+ analisis_data_raw_YYYYMMDD_HHMMSS_readable.json # Reporte completo
 ```
 
 ### Configuración del Sistema
@@ -290,22 +290,22 @@ DEFAULT_MODEL=citrino-v1
 ### Tests Realizados
 
 #### 1. Análisis de Datos Raw
-- ✅ **Procesamiento completo** de 7 archivos Excel
-- ✅ **Extracción híbrida** con métricas precisas
-- ✅ **Validación de calidad** de datos extraídos
-- ✅ **Cálculo de costos** LLM exactos
+-  **Procesamiento completo** de 7 archivos Excel
+-  **Extracción híbrida** con métricas precisas
+-  **Validación de calidad** de datos extraídos
+-  **Cálculo de costos** LLM exactos
 
 #### 2. Integración Chatbot UI
-- ✅ **Conexión OpenAI-compatible** funcional
-- ✅ **Docker compose** levantando correctamente
-- ✅ **Endpoint health** respondiendo
-- ✅ **Búsqueda conversacional** operativa
+-  **Conexión OpenAI-compatible** funcional
+-  **Docker compose** levantando correctamente
+-  **Endpoint health** respondiendo
+-  **Búsqueda conversacional** operativa
 
 #### 3. Sistema Completo
-- ✅ **End-to-end testing** con datos reales
-- ✅ **Fallback automático** Z.AI → OpenRouter
-- ✅ **Cache system** optimizando respuestas
-- ✅ **Error handling** robusto implementado
+-  **End-to-end testing** con datos reales
+-  **Fallback automático** Z.AI → OpenRouter
+-  **Cache system** optimizando respuestas
+-  **Error handling** robusto implementado
 
 ### Métricas de Rendimiento
 
@@ -323,7 +323,7 @@ DEFAULT_MODEL=citrino-v1
 
 ---
 
-## 🔧 Guía de Instalación y Uso
+##  Guía de Instalación y Uso
 
 ### Instalación Rápida
 
@@ -380,7 +380,7 @@ curl -X POST http://localhost:5001/v1/chat/completions \
 
 ---
 
-## 🚀 Impacto del Sprint
+##  Impacto del Sprint
 
 ### Transformación del Sistema
 
@@ -418,32 +418,32 @@ curl -X POST http://localhost:5001/v1/chat/completions \
 
 ---
 
-## 📊 Métricas del Sprint
+##  Métricas del Sprint
 
 ### Métricas Técnicas
 
 | Métrica | Objetivo | Realizado | Status |
 |---------|----------|------------|---------|
-| Propiedades procesadas | 1,000+ | 1,385 | ✅ 138% |
-| Eficiencia LLM | 30%+ | 37.7% | ✅ 126% |
-| Costo LLM total | <$0.01 | $0.002 | ✅ 20% |
-| Agentes identificados | 50+ | 79 | ✅ 158% |
-| Setup time | <5 min | 3 min | ✅ 60% |
-| Chatbot UI integrado | 100% | 100% | ✅ 100% |
+| Propiedades procesadas | 1,000+ | 1,385 |  138% |
+| Eficiencia LLM | 30%+ | 37.7% |  126% |
+| Costo LLM total | <$0.01 | $0.002 |  20% |
+| Agentes identificados | 50+ | 79 |  158% |
+| Setup time | <5 min | 3 min |  60% |
+| Chatbot UI integrado | 100% | 100% |  100% |
 
 ### Métricas de Calidad
 
 | Aspecto | Calificación | Detalles |
 |---------|--------------|----------|
-| **Código** | ⭐⭐⭐⭐⭐ | Type hints, errores manejados, logging completo |
-| **Documentación** | ⭐⭐⭐⭐⭐ | README detallado, guía de instalación, troubleshooting |
-| **Testing** | ⭐⭐⭐⭐⭐ | Tests unitarios, integración, end-to-end |
-| **Performance** | ⭐⭐⭐⭐⭐ | Optimizado con cache, response time <2s |
-| **Mantenibilidad** | ⭐⭐⭐⭐⭐ | Arquitectura estándar, Docker, modular |
+| **Código** |  | Type hints, errores manejados, logging completo |
+| **Documentación** |  | README detallado, guía de instalación, troubleshooting |
+| **Testing** |  | Tests unitarios, integración, end-to-end |
+| **Performance** |  | Optimizado con cache, response time <2s |
+| **Mantenibilidad** |  | Arquitectura estándar, Docker, modular |
 
 ---
 
-## 🔮 Próximos Pasos y Mejoras
+##  Próximos Pasos y Mejoras
 
 ### Mejoras Identificadas
 
@@ -476,7 +476,7 @@ curl -X POST http://localhost:5001/v1/chat/completions \
 
 ---
 
-## 📝 Lecciones Aprendidas
+##  Lecciones Aprendidas
 
 ### Lecciones Técnicas
 
@@ -509,7 +509,7 @@ curl -X POST http://localhost:5001/v1/chat/completions \
 
 ---
 
-## 🏆 Conclusión del Sprint
+##  Conclusión del Sprint
 
 ### Logros Principales
 
@@ -532,6 +532,6 @@ El sistema está ahora listo para producción y puede ser utilizado inmediatamen
 
 ---
 
-**Status del Sprint:** ✅ **COMPLETADO EXITOSAMENTE**
+**Status del Sprint:**  **COMPLETADO EXITOSAMENTE**
 **Próximo Sprint:** Migración PostgreSQL + PostGIS
 **Fecha Finalización:** Octubre 2025

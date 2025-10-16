@@ -1,4 +1,4 @@
-# 📁 Arquitectura Actual - Sistema Basado en JSON
+#  Arquitectura Actual - Sistema Basado en JSON
 
 **Versión**: 1.8.5 (actual)
 **Fecha**: 2025-10-14
@@ -6,7 +6,7 @@
 
 ---
 
-## 🎯 Resumen del Sistema Actual
+##  Resumen del Sistema Actual
 
 ### Arquitectura Centralizada en JSON
 El sistema Citrino actualmente utiliza una arquitectura basada en archivos JSON centralizados para el almacenamiento y procesamiento de datos inmobiliarios.
@@ -19,14 +19,14 @@ El sistema Citrino actualmente utiliza una arquitectura basada en archivos JSON 
 
 ---
 
-## 📊 Estructura de Datos Actual
+##  Estructura de Datos Actual
 
 ### Archivos Principales
 ```
 data/
-├── base_datos_relevamiento.json              # 1,588 propiedades
-├── base_datos_relevamiento_integrado.json    # Dataset integrado
-└── guia_urbana_municipal_completa.json      # 4,777 servicios urbanos
+ base_datos_relevamiento.json              # 1,588 propiedades
+ base_datos_relevamiento_integrado.json    # Dataset integrado
+ guia_urbana_municipal_completa.json      # 4,777 servicios urbanos
 ```
 
 ### Esquema de Propiedades (JSON)
@@ -94,7 +94,7 @@ data/
 
 ---
 
-## 🔄 Flujo de Procesamiento Actual
+##  Flujo de Procesamiento Actual
 
 ### 1. Carga de Datos
 ```python
@@ -146,7 +146,7 @@ class RecommendationEngine:
 
 ---
 
-## ⚠️ Limitaciones Críticas Identificadas
+##  Limitaciones Críticas Identificadas
 
 ### Problemas de Rendimiento
 1. **Complejidad Algorítmica**: O(n×m) = 7,585,876 cálculos por búsqueda
@@ -186,7 +186,7 @@ class RecommendationEngine:
 
 ---
 
-## 🏗️ Componentes del Sistema Actual
+##  Componentes del Sistema Actual
 
 ### API Server (`api/server.py`)
 - **Framework**: Flask 2.3.3
@@ -212,7 +212,7 @@ class RecommendationEngine:
 
 ---
 
-## 📈 Métricas Actuales del Sistema
+##  Métricas Actuales del Sistema
 
 ### Rendimiento
 - **Carga inicial**: 3-5 segundos
@@ -233,7 +233,7 @@ class RecommendationEngine:
 
 ---
 
-## 🔧 Procesos de Datos Actuales
+##  Procesos de Datos Actuales
 
 ### ETL Principal
 ```python
@@ -254,7 +254,7 @@ def procesar_datos():
 
 ---
 
-## 🚨 Problemas Críticos que Justifican Migración
+##  Problemas Críticos que Justifican Migración
 
 ### 1. Performance Inaceptable
 ```
@@ -298,14 +298,14 @@ PostgreSQL:
 
 ---
 
-## 📋 Lista de Problemas Específicos
+##  Lista de Problemas Específicos
 
 ### Críticos (Bloquean desarrollo)
 1. **Tiempo de respuesta**: >5 segundos para consultas geoespaciales
 2. **Sin concurrencia**: Un solo usuario a la vez
 3. **Integridad**: Riesgo de corrupción en actualizaciones
 
-### Serios (Afectan用户体验)
+### Serios (Afectan)
 1. **Memory leaks**: Carga incremental en memoria
 2. **No persistencia**: Se pierden cachés al reiniciar
 3. **Difícil debugging**: Datos en JSON vs código
@@ -317,7 +317,7 @@ PostgreSQL:
 
 ---
 
-## 🎯 Justificación de Migración
+##  Justificación de Migración
 
 ### ROI de Migración a PostgreSQL
 - **Inversión**: 2-3 días desarrollo
@@ -339,15 +339,15 @@ PostgreSQL:
 
 ---
 
-## 🔄 Estado Actual de Preparación
+##  Estado Actual de Preparación
 
-### ✅ Listo para Migración
+###  Listo para Migración
 - **Documentación**: Completa y detallada
 - **Scripts ETL**: Implementados y probados
 - **DDL PostgreSQL**: Definido y optimizado
 - **Plan Rollback**: Probado y confiable
 
-### 📋 Próximos Pasos
+###  Próximos Pasos
 1. **Commit 4**: Completar documentación arquitectura (actual)
 2. **Commit 5**: Crear estructura para nueva arquitectura
 3. **Implementación**: Ejecutar migración completa

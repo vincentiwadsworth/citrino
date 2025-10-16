@@ -1,6 +1,6 @@
 # WORKFLOW - Guía de Desarrollo y Procesos
 
-## 📋 Índice
+##  Índice
 
 1. [Principios de Desarrollo](#principios-de-desarrollo)
 2. [Workflow de Commits](#workflow-de-commits)
@@ -10,9 +10,9 @@
 
 ---
 
-## 🎯 Principios de Desarrollo
+##  Principios de Desarrollo
 
-### ✅ Reglas Fundamentales
+###  Reglas Fundamentales
 
 1. **VALIDACIÓN CRÍTICA**: Nunca declarar éxito sin validar funcionalidad core
 2. **COORDENADAS PRIMERO**: Las coordenadas son el CORE del sistema geoespacial
@@ -22,7 +22,7 @@
 
 ---
 
-## 🔄 Workflow de Commits
+##  Workflow de Commits
 
 ### Commit Messages Estándar
 
@@ -42,12 +42,12 @@ test: añadir pruebas para componente W
 
 ---
 
-## 📚 Lecciones Aprendidas (v2.2.1)
+##  Lecciones Aprendidas (v2.2.1)
 
 ### Lección #1: Nunca Confundir Estadísticas con Realidad
 
-**❌ ERROR:** Declarar "sistema listo" con 0 coordenadas válidas
-**✅ CORRECCIÓN:** Validar funcionalidad core antes de declarar éxito
+** ERROR:** Declarar "sistema listo" con 0 coordenadas válidas
+** CORRECCIÓN:** Validar funcionalidad core antes de declarar éxito
 
 ```python
 # Error: Confundir métricas con funcionalidad
@@ -63,8 +63,8 @@ if coordenadas_reales > 0:
 
 ### Lección #2: Debugging Sistemático vs Adivinanza
 
-**❌ ERROR:** Cambiar código sin entender el problema real
-**✅ CORRECCIÓN:** Debugging paso a paso con datos reales
+** ERROR:** Cambiar código sin entender el problema real
+** CORRECCIÓN:** Debugging paso a paso con datos reales
 
 ```python
 # Proceso correcto de debugging:
@@ -80,8 +80,8 @@ corregir_bug_especifico(punto_fallo)
 
 ### Lección #3: El Problema Siempre Está en los Datos
 
-**❌ ERROR:** Asumir que el parser está mal cuando los datos sí existen
-**✅ CORRECCIÓN:** Verificar que los datos estén llegando correctamente
+** ERROR:** Asumir que el parser está mal cuando los datos sí existen
+** CORRECCIÓN:** Verificar que los datos estén llegando correctamente
 
 ```python
 # Error común: Cambiar parser sin verificar datos
@@ -98,8 +98,8 @@ else:
 
 ### Lección #4: Las Estadísticas Deben Reflejar Realidad
 
-**❌ ERROR:** Estadísticas inconsistentes con datos reales
-**✅ CORRECCIÓN:** Sincronizar estadísticas con procesamiento real
+** ERROR:** Estadísticas inconsistentes con datos reales
+** CORRECCIÓN:** Sincronizar estadísticas con procesamiento real
 
 ```python
 # Error en el código original:
@@ -113,8 +113,8 @@ if servicio.get('metadatos', {}).get('coordenadas_validadas', False):
 
 ### Lección #5: Validación Extrema de Funcionalidad Core
 
-**❌ ERROR:** Aceptar 99% como "bueno suficiente" para coordenadas
-**✅ CORRECCIÓN:** Investigar hasta el 100% de éxito posible
+** ERROR:** Aceptar 99% como "bueno suficiente" para coordenadas
+** CORRECCIÓN:** Investigar hasta el 100% de éxito posible
 
 ```python
 # Proceso de validación completa:
@@ -130,8 +130,8 @@ test_integracion_motor_recomendacion()
 
 ### Lección #6: Validación Humana es Obligatoria (v2.2.2)
 
-**❌ ERROR:** Procesar directamente de raw a producción sin revisión intermedia
-**✅ CORRECCIÓN:** Siempre generar archivos intermedios para validación humana
+** ERROR:** Procesar directamente de raw a producción sin revisión intermedia
+** CORRECCIÓN:** Siempre generar archivos intermedios para validación humana
 
 ```python
 # Error: Procesamiento directo
@@ -148,8 +148,8 @@ if aprobado_por_equipo_citrino(datos_intermedios):
 
 ### Lección #7: No Celebrar Métricas Aisladas
 
-**❌ ERROR:** Celebrar 98.9% coordenadas válidas sin validar que los datos tengan sentido
-**✅ CORRECCIÓN:** Validar integridad completa de datos, no solo métricas aisladas
+** ERROR:** Celebrar 98.9% coordenadas válidas sin validar que los datos tengan sentido
+** CORRECCIÓN:** Validar integridad completa de datos, no solo métricas aisladas
 
 ```python
 # Error: Validar solo coordenadas
@@ -166,7 +166,7 @@ datos_tienen_sentido = validar_integridad_completa()
 
 ---
 
-## 🔍 Procesos de Validación
+##  Procesos de Validación
 
 ### Checklist de Validación de Coordenadas
 
@@ -218,7 +218,7 @@ def test_integracion_completa():
 
 ---
 
-## 🐛 Debugging y Solución de Problemas
+##  Debugging y Solución de Problemas
 
 ### Metodología de Debugging Estructurado
 
@@ -273,12 +273,12 @@ def debug_coordenadas_completas():
 
 ---
 
-## 🎖️ Estándares de Calidad
+##  Estándares de Calidad
 
 ### Código de Calidad
 
 ```python
-# ✅ Buen ejemplo: Validación explícita
+#  Buen ejemplo: Validación explícita
 def procesar_coordenadas(coordenadas_str):
     if not coordenadas_str:
         return None
@@ -295,7 +295,7 @@ def procesar_coordenadas(coordenadas_str):
         logger.error(f"Error procesando coordenadas: {e}")
         return None
 
-# ❌ Mal ejemplo: Sin validación de errores
+#  Mal ejemplo: Sin validación de errores
 def procesar_coordenadas_malo(coordenadas_str):
     coords = parsear_coordenadas(coordenadas_str)  # Puede fallar
     return coords  # Retorna None si falla, sin saber por qué
@@ -304,7 +304,7 @@ def procesar_coordenadas_malo(coordenadas_str):
 ### Estándares de Testing
 
 ```python
-# ✅ Testing con datos reales
+#  Testing con datos reales
 def test_etl_con_datos_reales():
     """Test ETL con datos reales del Excel"""
     etl = GuiaUrbanaETL()
@@ -321,7 +321,7 @@ def test_etl_con_datos_reales():
 
 ---
 
-## 🚀 Proceso de Entrega
+##  Proceso de Entrega
 
 ### Pre-Commit Checklist
 
@@ -340,7 +340,7 @@ def test_etl_con_datos_reales():
 
 ---
 
-## 📝 Plantillas Útiles
+##  Plantillas Útiles
 
 ### Plantilla de Commit Message para Bug Crítico
 
@@ -369,7 +369,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ---
 
-## 🎓 Mejora Continua
+##  Mejora Continua
 
 ### Próximos Pasos
 

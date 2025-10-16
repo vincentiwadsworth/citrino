@@ -134,18 +134,18 @@ Operaciones/minuto: 200.0
 ### 5.1 Componentes Principales
 ```
 src/
-├── amenities_extractor.py    # Extracción híbrida de amenities
-├── price_corrector.py        # Corrección de precios inválidos
-├── etl_monitor.py          # Sistema de monitoreo avanzado
-├── llm_integration.py      # Integración LLM con fallback
-└── description_parser.py   # Parser híbrido mejorado
+ amenities_extractor.py    # Extracción híbrida de amenities
+ price_corrector.py        # Corrección de precios inválidos
+ etl_monitor.py          # Sistema de monitoreo avanzado
+ llm_integration.py      # Integración LLM con fallback
+ description_parser.py   # Parser híbrido mejorado
 
 scripts/etl/
-└── etl_mejorado_proveedores.py  # ETL especializado por proveedor
+ etl_mejorado_proveedores.py  # ETL especializado por proveedor
 
 scripts/analysis/
-├── diagnosticar_proveedor02.py     # Diagnóstico completo
-└── analisis_comparativo_proveedores.py  # Análisis comparativo
+ diagnosticar_proveedor02.py     # Diagnóstico completo
+ analisis_comparativo_proveedores.py  # Análisis comparativo
 ```
 
 ### 5.2 Flujo de Procesamiento Mejorado

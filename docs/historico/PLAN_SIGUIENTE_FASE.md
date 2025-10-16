@@ -1,21 +1,21 @@
 # Plan: Integración Z.AI en Citrino Reco
 
-## 📊 Estado Actual del Proyecto
+##  Estado Actual del Proyecto
 
-### ✅ Completado en Esta Sesión
+###  Completado en Esta Sesión
 
 1. **Despliegue Online**
-   - Backend en Render: https://citrino.onrender.com ✅
+   - Backend en Render: https://citrino.onrender.com 
    - Frontend en GitHub Pages: https://vincentiwadsworth.github.io/citrino/ (pendiente configurar)
-   - Base de datos: 1,583 propiedades cargadas ✅
-   - API funcionando correctamente ✅
+   - Base de datos: 1,583 propiedades cargadas 
+   - API funcionando correctamente 
 
 2. **Integración Z.AI Base**
    - API Key configurada: `34431b5a2e38422baa5551d4d623519f.DEYL3LOWMUFvL0kh`
    - `src/llm_integration.py` con soporte completo para Z.AI (GLM-4.5-Air)
    - Endpoint `/api/chat/process` funcionando
-   - **Citrino Chat**: Z.AI completamente integrado ✅
-   - **Citrino Reco**: Campo preparado pero NO usa Z.AI aún ❌
+   - **Citrino Chat**: Z.AI completamente integrado 
+   - **Citrino Reco**: Campo preparado pero NO usa Z.AI aún 
 
 3. **Infraestructura**
    - Python 3.11.9 configurado en Render
@@ -25,7 +25,7 @@
 
 ---
 
-## 🎯 Trabajo Pendiente: Z.AI en Citrino Reco
+##  Trabajo Pendiente: Z.AI en Citrino Reco
 
 ### Opción A: Enriquecer Justificaciones con Z.AI
 
@@ -411,7 +411,7 @@ ${briefing}
 
 ---
 
-## 📋 Orden de Implementación Recomendado
+##  Orden de Implementación Recomendado
 
 ### Fase 1: Backend (api/server.py)
 1. Crear función `generar_briefing_ejecutivo_llm()`
@@ -482,7 +482,7 @@ ${briefing}
 
 ---
 
-## 💰 Consideraciones de Costos Z.AI
+##  Consideraciones de Costos Z.AI
 
 ### Estimación por Uso
 
@@ -506,7 +506,7 @@ ${briefing}
 
 ---
 
-## 🚀 Commit Planificado
+##  Commit Planificado
 
 ### Commit Title
 ```
@@ -535,7 +535,7 @@ NINGUNO (todo se integra en archivos existentes)
 
 ---
 
-## 📚 Referencias Útiles
+##  Referencias Útiles
 
 ### Documentación Z.AI
 - API: https://docs.z.ai/api-reference/llm/chat-completion
@@ -548,15 +548,15 @@ NINGUNO (todo se integra en archivos existentes)
 - Variable `ZAI_API_KEY` configurada en Render
 
 ### Endpoints Actuales
-- `/api/health` - Health check ✅
-- `/api/recomendar` - Recomendaciones básicas ✅
-- `/api/recomendar-mejorado` - Con georreferenciación ✅
-- `/api/chat/process` - Con Z.AI integrado ✅
-- `/api/recomendar-mejorado-llm` - **PENDIENTE** ❌
+- `/api/health` - Health check 
+- `/api/recomendar` - Recomendaciones básicas 
+- `/api/recomendar-mejorado` - Con georreferenciación 
+- `/api/chat/process` - Con Z.AI integrado 
+- `/api/recomendar-mejorado-llm` - **PENDIENTE** 
 
 ---
 
-## ✅ Checklist de Implementación
+##  Checklist de Implementación
 
 ### Backend
 - [ ] Función `generar_briefing_ejecutivo_llm()` en server.py
@@ -587,7 +587,7 @@ NINGUNO (todo se integra en archivos existentes)
 
 ---
 
-## 🎯 Resultado Final Esperado
+##  Resultado Final Esperado
 
 Cuando un usuario use Citrino Reco:
 
@@ -606,7 +606,7 @@ Cuando un usuario use Citrino Reco:
 
 ---
 
-## 📞 Contacto y Soporte
+##  Contacto y Soporte
 
 **API Key Z.AI:** `34431b5a2e38422baa5551d4d623519f.DEYL3LOWMUFvL0kh`
 **Backend URL:** https://citrino.onrender.com
@@ -615,5 +615,5 @@ Cuando un usuario use Citrino Reco:
 ---
 
 **Última actualización:** 2025-10-09
-**Estado del sistema:** ✅ Backend Live, Frontend pendiente GitHub Pages
+**Estado del sistema:**  Backend Live, Frontend pendiente GitHub Pages
 **Próximo paso:** Implementar Opción A + C en Citrino Reco

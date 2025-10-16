@@ -32,7 +32,8 @@
       "Bash(find:*)",
       "Bash(cat:*)",
       "WebFetch(domain:stackoverflow.com)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(where:*)"
     ],
     "deny": [],
     "ask": []

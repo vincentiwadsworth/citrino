@@ -5,12 +5,12 @@ Implementar un sistema de fallback automático que use OpenRouter cuando z.ai no
 
 ## Situación Actual
 
-### ✅ Ya Implementado
+###  Ya Implementado
 - Método `_call_openrouter()` en `llm_integration.py` (línea 187)
 - Método `consultar()` con lógica de routing por provider
 - Soporte para múltiples providers: zai, openrouter, openai
 
-### ❌ Problema Actual
+###  Problema Actual
 - Si z.ai falla (429, 500, timeout), el sistema retorna datos vacíos
 - No hay retry ni fallback automático
 - Solo usa el provider configurado en `.env`
@@ -202,7 +202,7 @@ def extract_from_description(
         
         # Logging
         if resultado_llm["fallback_activado"]:
-            logger.info(f"✓ Fallback activado: {resultado_llm['provider_usado']}")
+            logger.info(f" Fallback activado: {resultado_llm['provider_usado']}")
         
         # Cache
         if use_cache:
@@ -382,37 +382,37 @@ Asumiendo promedio de 300 tokens por descripción:
 
 ## Orden de Implementación
 
-1. ✅ **Fase 1: Configuración** (15 min)
+1.  **Fase 1: Configuración** (15 min)
    - Actualizar `.env.example` con fallback options
    - Documentar en README.md
 
-2. ✅ **Fase 2: Core Fallback** (30 min)
+2.  **Fase 2: Core Fallback** (30 min)
    - Implementar `consultar_con_fallback()` en `llm_integration.py`
    - Implementar `_get_provider_chain()`
    - Actualizar `_call_openrouter()` con modelo configurable
 
-3. ✅ **Fase 3: Integración** (20 min)
+3.  **Fase 3: Integración** (20 min)
    - Actualizar `description_parser.py` para usar nuevo método
    - Agregar tracking de estadísticas de fallback
 
-4. ✅ **Fase 4: Testing** (30 min)
+4.  **Fase 4: Testing** (30 min)
    - Crear `tests/test_llm_fallback.py`
    - Test con rate limit simulado
    - Test con fallback deshabilitado
    - Test con provider primario exitoso
 
-5. ✅ **Fase 5: Monitoreo** (15 min)
+5.  **Fase 5: Monitoreo** (15 min)
    - Agregar logging de fallback stats
    - Actualizar output de ETL con métricas
 
 ## Ventajas del Diseño
 
-✅ **Transparente**: Usuario no necesita intervenir
-✅ **Configurable**: Puede deshabilitar fallback si quiere
-✅ **Robusto**: Maneja rate limits, timeouts, server errors
-✅ **Auditable**: Tracking de qué provider se usó
-✅ **Flexible**: Fácil agregar más providers (OpenAI, etc.)
-✅ **Económico**: Usa fallback solo cuando es necesario
+ **Transparente**: Usuario no necesita intervenir
+ **Configurable**: Puede deshabilitar fallback si quiere
+ **Robusto**: Maneja rate limits, timeouts, server errors
+ **Auditable**: Tracking de qué provider se usó
+ **Flexible**: Fácil agregar más providers (OpenAI, etc.)
+ **Económico**: Usa fallback solo cuando es necesario
 
 ## Testing del Sistema
 

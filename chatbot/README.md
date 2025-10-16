@@ -2,7 +2,7 @@
 
 Interfaz conversacional profesional para el sistema inmobiliario Citrino, basada en Chatbot UI con integración OpenAI-compatible.
 
-## 📋 Overview
+##  Overview
 
 Citrino Chatbot UI proporciona una experiencia de chat conversacional moderna para interactuar con el sistema de análisis de propiedades de Santa Cruz de la Sierra. La interfaz es compatible con la API estándar de OpenAI y permite:
 
@@ -13,7 +13,7 @@ Citrino Chatbot UI proporciona una experiencia de chat conversacional moderna pa
 - **Historial de conversaciones**
 - **Exportación de resultados**
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerrequisitos
 
@@ -52,7 +52,7 @@ docker-compose -f docker-compose.dev.yml up
 - **API Citrino**: http://localhost:5001
 - **Health Check**: http://localhost:5001/api/health
 
-## 🔧 Configuración
+##  Configuración
 
 ### Variables de Entorno
 
@@ -82,7 +82,7 @@ El comportamiento del chatbot se configura en `config/chatbot-ui.json`:
 - **Examples**: Ejemplos de consultas predefinidas
 - **Branding**: Colores y apariencia personalizada
 
-## 📊 Capacidades
+##  Capacidades
 
 ### Búsqueda de Propiedades
 
@@ -111,29 +111,29 @@ El sistema utiliza el motor de recomendaciones de Citrino para:
 - **Evaluación de potencial de plusvalía**
 - **Justificación personalizada** de cada recomendación
 
-## 🏗️ Arquitectura
+##  Arquitectura
 
 ```
-┌─────────────────┐
-│   Chatbot UI     │  │
-│   (Frontend)    │  │
-│  Port: 3000     │  │
-└─────────┬───────┘  │
-          │          │
-          │          │
-    ┌─────▼─────┐    │
-    │  Citrino    │    │
-    │  API        │    │
-    │  (Backend)   │    │
-    │  Port: 5001 │    │
-    └─────┬─────┘    │
-          │          │
-          │          │
-    ┌─────▼─────┐    │
-    │  Data       │    │
-    │  Processing│    │
-    │  Layer      │    │
-    └─────────────┘    │
+
+   Chatbot UI       
+   (Frontend)      
+  Port: 3000       
+  
+                    
+                    
+        
+      Citrino        
+      API            
+      (Backend)       
+      Port: 5001     
+        
+                    
+                    
+        
+      Data           
+      Processing    
+      Layer          
+        
 ```
 
 ### Componentes Principales
@@ -144,7 +144,7 @@ El sistema utiliza el motor de recomendaciones de Citrino para:
 - **Recommendation Engine**: Motor de recomendaciones geoespaciales
 - **Data Layer**: Acceso a 1,385 propiedades procesadas
 
-## 🔌 API Endpoints
+##  API Endpoints
 
 ### Endpoints OpenAI-Compatible
 
@@ -159,7 +159,7 @@ El sistema utiliza el motor de recomendaciones de Citrino para:
 - `GET /api/estadisticas` - Estadísticas del sistema
 - `GET /api/zonas` - Lista de zonas disponibles
 
-## 📊 Datos Procesados (Commit 1)
+##  Datos Procesados (Commit 1)
 
 ### Estadísticas de Extracción
 
@@ -185,7 +185,7 @@ El sistema utiliza el motor de recomendaciones de Citrino para:
 | 05 | 98 | Datos estructurados |
 | 03 | 19 | Volumen bajo |
 
-## 🎯 Casos de Uso
+##  Casos de Uso
 
 ### Para Inversores
 
@@ -205,7 +205,7 @@ El sistema utiliza el motor de recomendaciones de Citrino para:
 2. **Cobertura de servicios**: "Análisis de disponibilidad de colegios y hospitales"
 3. **Proyecciones**: "Modelar crecimiento de valores por zona"
 
-## 🔍 Integración de Datos
+##  Integración de Datos
 
 El chatbot tiene acceso a:
 
@@ -221,7 +221,7 @@ El chatbot tiene acceso a:
 3. **Servicios urbanos**: 4,777 servicios municipales (integración futura)
 4. **Datos georreferenciados**: Coordenadas y análisis espacial
 
-## 🚨 Solución de Problemas
+##  Solución de Problemas
 
 ### Problemas Comunes
 
@@ -282,7 +282,7 @@ environment:
   - LOG_LEVEL=DEBUG
 ```
 
-## 📈 Monitoreo
+##  Monitoreo
 
 ### Logs del Sistema
 
@@ -297,7 +297,7 @@ environment:
 - **Queries procesadas**: Número de consultas exitosas
 - **Tiempo de respuesta**: Latencia promedio por endpoint
 
-## 🔄 Actualizaciones
+##  Actualizaciones
 
 ### Para actualizar el sistema:
 
@@ -337,7 +337,7 @@ python scripts/analysis/procesar_y_analizar_raw.py
 - **Docker**: Multi-stage builds optimizados
 - **Documentación**: Markdown con ejemplos claros
 
-## 📞 Soporte
+##  Soporte
 
 ### Para ayuda técnica:
 
@@ -362,14 +362,14 @@ docker stats
 docker-compose logs -f citrino-api
 ```
 
-## 📚 Documentación Adicional
+##  Documentación Adicional
 
 - **API Reference**: Documentación completa de endpoints
 - **Architecture Guide**: Detalles técnicos del sistema
 - **Migration Guide**: Guía para PostgreSQL + PostGIS
 - **Data Analysis**: Scripts para análisis de datos
 
-## 📄 Licencia
+##  Licencia
 
 Este proyecto está licenciado bajo los términos de la Licencia MIT. Ver archivo `LICENSE` para más detalles.
 
