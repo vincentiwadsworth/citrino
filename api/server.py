@@ -14,7 +14,7 @@ from flask_cors import CORS
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from recommendation_engine import RecommendationEngine
-from recommendation_engine_mejorado import RecommendationEngineMejorado
+from recommendation_engine_mejorado import RecommendationEngineMejorado  # DEPRECATED
 from property_catalog import SistemaConsultaCitrino
 
 app = Flask(__name__)
@@ -35,8 +35,8 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permitir todos los orígen
 
 # Inicializar sistemas
 sistema_consulta = SistemaConsultaCitrino()
-motor_recomendacion = RecommendationEngine()
-motor_mejorado = RecommendationEngineMejorado()
+motor_recomendacion = RecommendationEngine()                    # RECOMMENDED - Simple y eficiente
+motor_mejorado = RecommendationEngineMejorado()               # DEPRECATED - Scoring multicriterio complejo
 
 # Variable global para estado de carga
 DATOS_CARGADOS = False
@@ -122,19 +122,25 @@ def health_check():
         'version': '1.0.0',
         'endpoints': [
             '/api/health',
-            '/api/buscar',
-            '/api/recomendar',
-            '/api/recomendar-mejorado',
-            '/api/recomendar-mejorado-llm',
+            '/api/recomendar',           # RECOMMENDED - Motor simple y eficiente
+            '/api/recomendar-mejorado',  # DEPRECATED - Scoring multicriterio complejo
+            '/api/recomendar-mejorado-llm', # DEPRECATED - Usar /api/chat/process
+            '/api/buscar',               # DEPRECATED - Scoring multicriterio complejo
             '/api/estadisticas',
             '/api/zonas',
-            '/api/chat/process'
+            '/api/chat/process',         # RECOMMENDED - Chatbot conversacional v2.3.0
+            '/api/analisis'              # RECOMMENDED - Consultas analíticas directas
         ]
     })
 
 @app.route('/api/buscar', methods=['POST'])
 def buscar_propiedades():
-    """Busca propiedades según filtros incluyendo UV/Manzana"""
+    """Busca propiedades según filtros incluyendo UV/Manzana
+
+    DEPRECATED - Este endpoint usa motor_mejorado (scoring multicriterio complejo)
+    ALTERNATIVE: Usar filtrado directo en lugar de scoring multicriterio
+    REASON: El scoring multicriterio agrega complejidad innecesaria
+    """
     try:
         data = request.get_json()
 
@@ -426,7 +432,12 @@ def obtener_zonas():
 
 @app.route('/api/recomendar-mejorado', methods=['POST'])
 def recomendar_propiedades_mejorado():
-    """Genera recomendaciones para inversores con filtros UV/Manzana"""
+    """Genera recomendaciones para inversores con filtros UV/Manzana
+
+    DEPRECATED - Este endpoint usa motor_mejorado (scoring multicriterio complejo)
+    ALTERNATIVE: Usar /api/recomendar (motor simple y eficiente)
+    REASON: El scoring multicriterio con pesos arbitrarios no agrega valor real
+    """
     try:
         data = request.get_json()
 
@@ -629,11 +640,13 @@ Formato: Markdown, profesional, conciso (máximo 400 palabras)."""
 def recomendar_con_llm():
     """
     Endpoint de recomendaciones con enriquecimiento Z.AI
-    
-    SIEMPRE genera:
+
+    DEPRECATED - Este endpoint usa motor_mejorado (scoring multicriterio complejo)
+    ALTERNATIVE: Usar /api/chat/process (chatbot conversacional v2.3.0)
+    REASON: Chatbot conversacional ha demostrado 92% éxito vs scoring complejo
+
+    GENERA:
     - Briefing ejecutivo (valor principal de Citrino Reco)
-    
-    CONDICIONALMENTE genera:
     - Análisis personalizado por propiedad (solo si hay informacion_llm)
     """
     try:

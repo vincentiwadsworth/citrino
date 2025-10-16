@@ -1,6 +1,13 @@
 """
 Motor de recomendación especializado para inversores inmobiliarios
-Implementa análisis de oportunidades de inversión con georreferenciación real
+IMPLEMENTA ANÁLISIS DE OPORTUNIDADES DE INVERSIÓN CON GEORREFERENCIACIÓN REAL
+
+DEPRECATED - Este motor será eliminado en futuras versiones
+REASON: El scoring multicriterio con pesos arbitrarios (ubicación 35%, precio 25%, etc.)
+     agrega complejidad innecesaria sin valor real demostrado.
+
+ALTERNATIVE: Usar recommendation_engine.py (motor simple y eficiente)
+STATUS: Será reemplazado por filtrado directo + chatbot conversacional (v2.3.0)
 """
 
 from typing import Dict, List, Any, Optional, Tuple
@@ -15,7 +22,11 @@ from pathlib import Path
 
 
 class RecommendationEngineMejorado:
-    """Motor de recomendación especializado para inversores con georreferenciación real."""
+    """DEPRECATED - Motor de recomendación especializado para inversores con georreferenciación real.
+
+    ESTA CLASE SERÁ ELIMINADA - Usar recommendation_engine.py en su lugar.
+    El scoring multicriterio complejo ha demostrado agregar más complejidad que valor.
+    """
 
     def __init__(self):
         self.propiedades = []
@@ -243,17 +254,29 @@ class RecommendationEngineMejorado:
 
     def _evaluar_presupuesto_cercania(self, presupuesto_min: int, presupuesto_max: int, precio_propiedad: int) -> float:
         """Evalúa adecuación presupuestaria con lógica mejorada."""
+        # Manejar valores None
+        if presupuesto_min is None:
+            presupuesto_min = 0
+        if presupuesto_max is None:
+            presupuesto_max = float('inf')
+        if precio_propiedad is None:
+            precio_propiedad = 0
+
         if presupuesto_min <= precio_propiedad <= presupuesto_max:
             return 1.0
         elif precio_propiedad < presupuesto_min:
             # Si está por debajo, calcular qué tan cerca está del mínimo
             margen = presupuesto_max - presupuesto_min
+            if margen <= 0:
+                return 0.5
             diferencia = presupuesto_min - precio_propiedad
             return max(0.3, 1.0 - (diferencia / margen))
         else:
             # Si está por encima, penalizar proporcionalmente
             exceso = precio_propiedad - presupuesto_max
             margen = presupuesto_max - presupuesto_min
+            if margen <= 0:
+                return 0.1
             penalizacion = max(0.1, 1.0 - (exceso / margen))
             return max(0.1, penalizacion)
 

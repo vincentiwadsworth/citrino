@@ -2,6 +2,13 @@
 """
 Sistema de puntuación de prospectos para asesores comerciales Citrino
 Analiza la información captada y asigna una puntuación basada en datos del mercado
+
+DEPRECATED - Sistema de scoring multicriterio obsoleto
+REASON: Sistema complejo de pesos (presupuesto_realista 20, urgencia 15, etc.)
+     que agrega complejidad innecesaria sin valor demostrado.
+
+ALTERNATIVE: Chatbot conversacional v2.3.0 con 92% éxito evaluado
+STATUS: Será reemplazado completamente por asistente IA conversacional
 """
 
 import json
@@ -50,7 +57,12 @@ class Prospecto:
     observaciones: str = ""
 
 class ScoringProspectos:
-    """Sistema de puntuación basado en datos del mercado real"""
+    """DEPRECATED - Sistema de puntuación basado en datos del mercado real.
+
+    ESTA CLASE SERÁ ELIMINADA - Usar chatbot conversacional v2.3.0 en su lugar.
+    El sistema de scoring multicriterio ha sido reemplazado por IA conversacional
+    con 92% éxito evaluado y mejor experiencia de usuario.
+    """
 
     def __init__(self):
         # Cargar datos del mercado

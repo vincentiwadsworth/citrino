@@ -9,7 +9,11 @@
       "Bash(dir:*)",
       "Bash(git rm:*)",
       "WebFetch(domain:vincentiwadsworth.github.io)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebSearch",
+      "WebFetch(domain:www.oracle.com)",
+      "WebFetch(domain:www.hetzner.com)",
+      "WebFetch(domain:docs.hetzner.com)"
     ],
     "deny": [],
     "ask": []
