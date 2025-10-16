@@ -64,8 +64,8 @@ class DatabaseConfig:
         )
 
     def get_connection_params(self) -> Dict[str, Any]:
-        """Get connection parameters - FORCED to Docker wrapper to avoid psycopg2 encoding issues"""
-        raise NotImplementedError("Direct psycopg2 connections are DISABLED due to UnicodeDecodeError. Use create_connection() instead.")
+        """Get connection parameters - Docker wrapper para evitar encoding Windows"""
+        raise NotImplementedError("Direct psycopg2 connections DISABLED due to UnicodeDecodeError. Use create_connection() with Docker wrapper.")
 
 @dataclass
 class MigrationConfig:
