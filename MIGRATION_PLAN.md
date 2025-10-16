@@ -1,56 +1,53 @@
 # 🚀 Plan de Migración a PostgreSQL + PostGIS
 
-**Documentación completa para la migración desde JSON centralizado a PostgreSQL + PostGIS**
+**Documentación completa para la migración desde Excel RAW a PostgreSQL + PostGIS. Los datos ORIGINALES provienen EXCLUSIVAMENTE de archivos Excel en data/raw/.**
 
 ---
 
 ## 📋 Resumen Ejecutivo
 
 ### Objetivo Principal
-Migrar el sistema de Citrino desde archivos JSON a PostgreSQL + PostGIS para mejorar drásticamente el rendimiento de consultas geoespaciales, escalabilidad y mantenibilidad.
+Establecer el flujo completo desde archivos Excel RAW hasta PostgreSQL + PostGIS con validación estructurada y revisión humana obligatoria para garantizar la calidad de datos.
 
 ### Impacto Esperado
 - **Rendimiento**: Consultas geoespaciales de segundos → milisegundos (95% de mejora)
+- **Calidad**: Validación estructurada con revisión humana obligatoria
 - **Escalabilidad**: Capacidad para 10x crecimiento sin degradación
 - **Concurrencia**: Múltiples usuarios sin bloqueos
-- **Calidad**: Deduplicación automática y validación de datos
+- **Trazabilidad**: Seguimiento completo desde archivo Excel original
 
-### Datos a Migrar
-- **1,588 propiedades** con coordenadas geoespaciales
-- **4,777 servicios urbanos** (colegios, hospitales, etc.)
-- **Agentes inmobiliarios** (deduplicación automática)
+### Flujo de Datos
+- **Excel RAW**: Archivos originales en data/raw/ (fuente EXCLUSIVA)
+- **Validación**: Archivos intermedios para revisión del equipo Citrino
+- **PostgreSQL**: Base de datos principal con PostGIS
+- **API REST**: Datos disponibles para consultas en milisegundos
 
 ---
 
 ## 🗄️ Arquitectura Actual vs Destino
 
-### Sistema Actual (JSON)
+### Flujo Actual (Excel RAW → PostgreSQL)
 ```
 /data/
-├── base_datos_relevamiento.json    # 1,588 propiedades
-└── guia_urbana_municipal_completa.json  # 4,777 servicios
+├── raw/                           # Archivos Excel ORIGINALES
+│   ├── relevamiento/*.xlsx        # Propiedades
+│   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
+├── processed/                     # Archivos intermedios validados
+│   ├── *_intermedio.xlsx         # Para revisión humana
+│   └── *_reporte.json           # Reportes de calidad
+└── final/                        # Datos aprobados
 
-Limitaciones:
-- Consultas O(n×m): 7,585,876 cálculos por búsqueda
-- Sin concurrencia en actualizaciones
-- Duplicación de agentes
-- Performance: segundos por consulta geoespacial
-```
-
-### Sistema Propuesto (PostgreSQL + PostGIS)
-```
-PostgreSQL Database:
+PostgreSQL (base de datos principal):
 ├── agentes (tabla normalizada)
-├── propiedades (con coordenadas GEOGRAPHY)
-├── servicios (con índices espaciales GIST)
-├── proveedores_datos
-└── migration_log
+├── propiedades (con PostGIS)
+├── servicios (índices espaciales)
+└── trazabilidad (archivo_origen)
 
 Ventajas:
+- Validación humana obligatoria
 - Consultas con índices: milisegundos
-- Integridad referencial completa
-- Concurrencia transaccional
-- Deduplicación automática
+- Trazabilidad completa
+- Integridad referencial
 ```
 
 ---
@@ -61,8 +58,8 @@ Ventajas:
 
 ```sql
 -- =====================================================
--- MIGRATION: JSON to PostgreSQL + PostGIS for Citrino
--- Basado en investigación Tongyi y arquitectura existente
+-- MIGRATION: Excel RAW to PostgreSQL + PostGIS for Citrino
+-- Flujo completo: Excel RAW → Validación → PostgreSQL → API
 -- =====================================================
 
 -- Habilitar extensión PostGIS (ejecutar una vez)
@@ -113,7 +110,9 @@ CREATE TABLE propiedades (
     ultima_actualizacion TIMESTAMPTZ DEFAULT now(),
     proveedor_datos VARCHAR(100), -- 01, 02, 03, etc.
     url_origen TEXT,
-    archivo_origen VARCHAR(255), -- tracking del archivo original
+    archivo_origen VARCHAR(255) NOT NULL, -- tracking del archivo Excel original
+    fecha_procesamiento TIMESTAMPTZ DEFAULT now(),
+    aprobado_por VARCHAR(100), -- nombre del revisor Citrino
     uuid_procesamiento UUID DEFAULT gen_random_uuid(),
 
     -- Constraints de integridad
@@ -134,7 +133,8 @@ CREATE TABLE servicios (
     direccion TEXT,
 
     -- Metadatos
-    fuente_datos VARCHAR(100), -- guía urbana municipal
+    fuente_datos VARCHAR(100) DEFAULT 'guia_urbana_municipal', -- Excel RAW
+    archivo_origen VARCHAR(255) DEFAULT 'GUIA URBANA.xlsx',
     fecha_registro TIMESTAMPTZ DEFAULT now(),
 
     -- Constraints
@@ -162,6 +162,8 @@ CREATE INDEX idx_servicios_subtipo ON servicios(subtipo);
 -- Índices compuestos para consultas frecuentes
 CREATE INDEX idx_propiedades_zona_precio_tipo ON propiedades(zona, precio_usd, tipo_propiedad);
 CREATE INDEX idx_propiedades_ultima_actualizacion ON propiedades(ultima_actualizacion DESC);
+CREATE INDEX idx_propiedades_archivo_origen ON propiedades(archivo_origen);
+CREATE INDEX idx_propiedades_aprobado_por ON propiedades(aprobado_por);
 
 -- =====================================================
 -- 5. VISTAS ÚTILES PARA CONSULTAS COMUNES
@@ -182,6 +184,9 @@ SELECT
     ST_X(p.coordenadas) as longitud,
     p.fecha_publicacion,
     p.proveedor_datos,
+    p.archivo_origen,
+    p.fecha_procesamiento,
+    p.aprobado_por,
     a.nombre as nombre_agente,
     a.telefono as telefono_agente,
     a.email as email_agente
@@ -203,29 +208,38 @@ ORDER BY total_servicios DESC;
 
 ## 🔄 Proceso ETL Detallado
 
-### Estructura de Directorios de Migración
+### Estructura de Directorios del Flujo Completo
 ```
-migration/
-├── scripts/
-│   ├── 01_etl_agentes.py          # Deduplicación de agentes
-│   ├── 02_etl_propiedades.py      # Migración de propiedades
-│   ├── 03_etl_servicios.py        # Migración de servicios
-│   ├── 04_validate_migration.py   # Validación completa
-│   └── 05_performance_test.py     # Tests de rendimiento
-├── database/
-│   ├── 01_create_schema.sql       # DDL completo
-│   ├── 02_create_indexes.sql      # Índices
-│   ├── 03_create_views.sql        # Vistas útiles
-│   └── 04_sample_data.sql         # Datos de prueba
-├── config/
-│   ├── database_config.py         # Configuración conexión
-│   ├── migration_config.py        # Parámetros ETL
-│   └── validation_rules.py        # Reglas de validación
+├── data/
+│   ├── raw/                           # Archivos Excel ORIGINALES
+│   │   ├── relevamiento/             # Propiedades por fecha
+│   │   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
+│   ├── processed/                     # Archivos intermedios
+│   │   ├── *_intermedio.xlsx         # Validados para revisión
+│   │   └── *_reporte.json           # Reportes de calidad
+│   └── final/                        # Datos aprobados
+│
+├── scripts/validation/               # Validación Excel RAW
+│   ├── validate_raw_to_intermediate.py  # Procesamiento individual
+│   ├── process_all_raw.py               # Batch processing
+│   ├── generate_validation_report.py    # Reportes
+│   └── approve_processed_data.py        # Aprobación a producción
+│
+├── migration/                       # Migración a PostgreSQL
+│   ├── scripts/
+│   │   ├── 01_etl_agentes.py          # Deduplicación agentes
+│   │   ├── 02_etl_propiedades.py      # Migración propiedades
+│   │   ├── 03_etl_servicios.py        # Migración servicios
+│   │   └── 04_validate_migration.py   # Validación final
+│   ├── database/
+│   │   └── 01_create_schema.sql       # DDL completo
+│   └── config/
+│       └── database_config.py         # Configuración conexión
+│
 └── logs/
-    ├── etl_agentes.log
-    ├── etl_propiedades.log
-    ├── etl_servicios.log
-    └── validation.log
+    ├── validation/                     # Logs de validación
+    ├── migration/                      # Logs de migración
+    └── etl_*.log                     # Logs específicos
 ```
 
 ### Script 1: ETL de Agentes (Deduplicación)
@@ -265,23 +279,24 @@ class AgentesETL:
         self.agentes_unicos: Set[str] = set()
         self.agentes_map: Dict[str, int] = {}
 
-    def extraer_agentes_de_json(self) -> List[Dict]:
-        """Extraer todos los agentes únicos del JSON actual"""
-        logger.info("Extrayendo agentes del JSON actual...")
-
-        with open('data/base_datos_relevamiento.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
+    def extraer_agentes_de_archivos_aprobados(self) -> List[Dict]:
+        """Extraer todos los agentes únicos de archivos aprobados"""
+        logger.info("Extrayendo agentes de archivos aprobados...")
 
         agentes_encontrados = {}
 
-        for propiedad in data.get('propiedades', []):
-            nombre_agente = self.limpiar_texto(propiedad.get('agente', ''))
-            if nombre_agente and nombre_agente not in agentes_encontrados:
-                agentes_encontrados[nombre_agente] = {
-                    'nombre': nombre_agente,
-                    'telefono': self.limpiar_texto(propiedad.get('telefono', '')),
-                    'email': self.limpiar_texto(propiedad.get('correo', ''))
-                }
+        # Procesar todos los archivos aprobados en data/final/
+        for archivo in glob.glob('data/final/*_aprobado.xlsx'):
+            df = pd.read_excel(archivo)
+
+            for _, row in df.iterrows():
+                nombre_agente = self.limpiar_texto(row.get('nombre_agente', ''))
+                if nombre_agente and nombre_agente not in agentes_encontrados:
+                    agentes_encontrados[nombre_agente] = {
+                        'nombre': nombre_agente,
+                        'telefono': self.limpiar_texto(row.get('telefono_agente', '')),
+                        'email': self.limpiar_texto(row.get('email_agente', ''))
+                    }
 
         logger.info(f"Se encontraron {len(agentes_encontrados)} agentes únicos")
         return list(agentes_encontrados.values())
@@ -337,8 +352,8 @@ class AgentesETL:
     def run(self) -> Dict[str, int]:
         """Ejecutar proceso completo ETL de agentes"""
         try:
-            # 1. Extraer agentes del JSON
-            agentes = self.extraer_agentes_de_json()
+            # 1. Extraer agentes de archivos aprobados
+            agentes = self.extraer_agentes_de_archivos_aprobados()
 
             # 2. Insertar en PostgreSQL
             agentes_ids = self.insertar_agentes(agentes)
@@ -417,13 +432,13 @@ class PropiedadesETL:
 
         return f"ST_SetSRID(ST_MakePoint({lng}, {lat}), 4326)::geography"
 
-    def procesar_propiedad(self, propiedad: Dict) -> Optional[Dict]:
-        """Procesar una propiedad individual"""
+    def procesar_propiedad_fila(self, row: pd.Series, archivo: str) -> Optional[Dict]:
+        """Procesar una propiedad desde fila de Excel"""
         try:
             # Coordenadas
             coords_postgis = self.convertir_coordenadas_postgis(
-                propiedad.get('latitud'),
-                propiedad.get('longitud')
+                row.get('latitud'),
+                row.get('longitud')
             )
 
             if not coords_postgis:
@@ -431,42 +446,53 @@ class PropiedadesETL:
                 return None
 
             # ID de agente
-            nombre_agente = propiedad.get('agente', '').strip()
+            nombre_agente = row.get('nombre_agente', '').strip()
             agente_id = self.agentes_map.get(nombre_agente) if nombre_agente else None
 
             # Estructurar datos para PostgreSQL
             return {
                 'agente_id': agente_id,
-                'titulo': propiedad.get('titulo', '').strip(),
-                'tipo_propiedad': propiedad.get('tipo_propiedad', '').strip(),
-                'precio_usd': propiedad.get('precio'),
-                'direccion': propiedad.get('direccion', '').strip(),
-                'zona': propiedad.get('zona', '').strip(),
-                'uv': propiedad.get('unidad_vecinal', '').strip(),
-                'manzana': propiedad.get('manzana', '').strip(),
+                'titulo': row.get('titulo', '').strip(),
+                'tipo_propiedad': row.get('tipo_propiedad', '').strip(),
+                'precio_usd': row.get('precio'),
+                'direccion': row.get('direccion', '').strip(),
+                'zona': row.get('zona', '').strip(),
+                'uv': row.get('uv', '').strip(),
+                'manzana': row.get('manzana', '').strip(),
                 'coordenadas': coords_postgis,
-                'fecha_publicacion': self.parsear_fecha(propiedad.get('fecha_scraping')),
-                'proveedor_datos': propiedad.get('codigo_proveedor', ''),
-                'url_origen': propiedad.get('url', ''),
-                'archivo_origen': propiedad.get('archivo_origen', ''),
+                'fecha_publicacion': self.parsear_fecha(row.get('fecha_publicacion')),
+                'proveedor_datos': row.get('proveedor_datos', ''),
+                'url_origen': row.get('url_origen', ''),
+                'archivo_origen': os.path.basename(archivo),  # tracking del archivo original
+                'aprobado_por': row.get('aprobado_por', 'sistema'),
                 'uuid_procesamiento': str(uuid.uuid4())
             }
 
         except Exception as e:
-            logger.error(f"Error procesando propiedad {propiedad.get('id', 'unknown')}: {e}")
+            logger.error(f"Error procesando propiedad {row.get('titulo', 'unknown')}: {e}")
             self.registros_omitidos += 1
             return None
 
-    def parsear_fecha(self, fecha_str: Optional[str]) -> Optional[datetime]:
-        """Parsear fecha en formato YYYY.MM.DD"""
-        if not fecha_str:
+  def parsear_fecha(self, fecha_str: Optional[str]) -> Optional[datetime]:
+        """Parsear fecha en múltiples formatos"""
+        if not fecha_str or pd.isna(fecha_str):
             return None
 
-        try:
-            return datetime.strptime(fecha_str, '%Y.%m.%d')
-        except ValueError:
-            logger.warning(f"Fecha no válida: {fecha_str}")
-            return None
+        formatos = [
+            '%Y.%m.%d',     # 2025.08.15
+            '%Y-%m-%d',     # 2025-08-15
+            '%d/%m/%Y',     # 15/08/2025
+            '%Y/%m/%d',     # 2025/08/15
+        ]
+
+        for formato in formatos:
+            try:
+                return datetime.strptime(str(fecha_str), formato)
+            except ValueError:
+                continue
+
+        logger.warning(f"Fecha no válida en ningún formato: {fecha_str}")
+        return None
 
     def insertar_propiedades_batch(self, propiedades_procesadas: List[Dict]):
         """Insertar propiedades en lotes para mejor rendimiento"""
@@ -528,33 +554,43 @@ class PropiedadesETL:
         try:
             logger.info("Iniciando ETL de propiedades...")
 
-            # Cargar datos JSON
-            with open('data/base_datos_relevamiento.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            # Procesar archivos aprobados
+            archivos_aprobados = glob.glob('data/final/*_aprobado.xlsx')
+            total_propiedades = 0
 
-            propiedades = data.get('propiedades', [])
-            total_propiedades = len(propiedades)
+            for archivo in archivos_aprobados:
+                df = pd.read_excel(archivo)
+                total_propiedades += len(df)
+
             logger.info(f"Total de propiedades a procesar: {total_propiedades}")
 
-            # Procesar en lotes
+            # Procesar en lotes por archivo
             batch_size = 100
             batch_actual = []
+    property_count = 0
 
-            for i, propiedad in enumerate(propiedades):
-                procesada = self.procesar_propiedad(propiedad)
+            for archivo in archivos_aprobados:
+                df = pd.read_excel(archivo)
+                logger.info(f"Procesando archivo: {archivo}")
 
-                if procesada:
-                    batch_actual.append(procesada)
+                for _, row in df.iterrows():
+                    procesada = self.procesar_propiedad_fila(row, archivo)
 
-                # Insertar lote
-                if len(batch_actual) >= batch_size:
+                    if procesada:
+                        batch_actual.append(procesada)
+
+                    # Insertar lote
+                    if len(batch_actual) >= batch_size:
+                        self.insertar_propiedades_batch(batch_actual)
+                        batch_actual = []
+                        property_count += batch_size
+                        logger.info(f"Progreso: {property_count}/{total_propiedades} ({((property_count)/total_propiedades)*100:.1f}%)")
+
+                # Insertar último lote del archivo
+                if batch_actual:
                     self.insertar_propiedades_batch(batch_actual)
+                    property_count += len(batch_actual)
                     batch_actual = []
-                    logger.info(f"Progreso: {i+1}/{total_propiedades} ({((i+1)/total_propiedades)*100:.1f}%)")
-
-            # Insertar último lote
-            if batch_actual:
-                self.insertar_propiedades_batch(batch_actual)
 
             self.conn.commit()
 

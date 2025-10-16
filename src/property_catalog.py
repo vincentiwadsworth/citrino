@@ -15,7 +15,12 @@ logger = logging.getLogger(__name__)
 class SistemaConsultaCitrino:
     """Sistema de consulta y análisis para la base de datos de Citrino."""
 
-    def __init__(self):
+    def __init__(self, datos_postgres=None):
+        """Inicializa el sistema con datos desde PostgreSQL o JSON fallback
+
+        Args:
+            datos_postgres: Diccionario con datos cargados desde PostgreSQL
+        """
         self.propiedades = []
         self.indices = {
             'zona': {},
@@ -25,16 +30,21 @@ class SistemaConsultaCitrino:
         }
         self.estadisticas_globales = {}
 
-    def cargar_base_datos(self, ruta: str = 'data/bd_final/propiedades_limpias.json') -> None:
-        """Carga la base de datos integrada."""
-        logger.info(f"Cargando base de datos desde {ruta}...")
+        # Cargar datos desde PostgreSQL si se proporcionan
+        if datos_postgres and 'propiedades' in datos_postgres:
+            self.propiedades = datos_postgres['propiedades']
+            logger.info(f"Cargadas {len(self.propiedades)} propiedades desde PostgreSQL")
+            self.crear_indices()
+            self.calcular_estadisticas_globales()
+        else:
+            # Sin datos PostgreSQL disponible
+            logger.error("No se proporcionaron datos PostgreSQL. El sistema requiere PostgreSQL.")
+            self.propiedades = []
 
-        with open(ruta, 'r', encoding='utf-8') as f:
-            self.propiedades = json.load(f)
-
-        logger.info(f"Cargadas {len(self.propiedades)} propiedades")
-        self.crear_indices()
-        self.calcular_estadisticas_globales()
+    def cargar_base_datos(self, ruta: str = None) -> None:
+        """Método eliminado - usar siempre PostgreSQL"""
+        logger.error("Método cargar_base_datos eliminado. Usar SistemaConsultaCitrino(datos_postgres=datos)")
+        self.propiedades = []
 
     def crear_indices(self) -> None:
         """Crea índices para búsqueda rápida."""

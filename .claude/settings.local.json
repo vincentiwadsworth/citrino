@@ -22,7 +22,17 @@
       "Bash(pip install:*)",
       "mcp__web-search-prime__webSearchPrime",
       "Bash(pip uninstall:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.docker.com)",
+      "Bash(pipx:*)",
+      "Bash(postgres-mcp:*)",
+      "Bash($env:USE_POSTGRES=\"true\")",
+      "Bash(cmd:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

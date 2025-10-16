@@ -47,54 +47,118 @@ motor_mejorado = RecommendationEngineMejorado()               # DEPRECATED - Sco
 DATOS_CARGADOS = False
 
 def inicializar_datos():
-    """Carga datos una sola vez al iniciar el servidor"""
+    """Carga datos desde PostgreSQL una sola vez al iniciar el servidor"""
     global DATOS_CARGADOS
-    
+
     print("=" * 60)
-    print("INICIANDO CITRINO API")
+    print("INICIANDO CITRINO API - POSTGRESQL")
     print("=" * 60)
-    
-    # Intentar cargar base de datos de relevamiento (priorizar dataset integrado)
-    try:
-        # Usar ruta relativa al directorio del script
-        ruta_integrada = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento_integrado.json')
-        ruta_original = os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento.json')
 
-        # Priorizar dataset integrado si existe
-        if os.path.exists(ruta_integrada):
-            ruta = ruta_integrada
-            print(f"Cargando datos integrados desde: {ruta}")
-        else:
-            ruta = ruta_original
-            print(f"Cargando datos originales desde: {ruta}")
-        
-        with open(ruta, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            propiedades_relevamiento = data.get('propiedades', [])
-            print(f"[OK] Cargadas {len(propiedades_relevamiento)} propiedades de relevamiento")
+    # Verificar si debemos usar PostgreSQL
+    usar_postgres = os.getenv('USE_POSTGRES', 'false').lower() == 'true'
 
-            # Cargar en ambos motores
-            motor_recomendacion.cargar_propiedades(propiedades_relevamiento)
-            motor_mejorado.cargar_propiedades(propiedades_relevamiento)
-
-            # También cargar en el sistema de consulta para compatibilidad
-            sistema_consulta.propiedades = propiedades_relevamiento
-            sistema_consulta.estadisticas_globales['total_propiedades'] = len(propiedades_relevamiento)
-            
-            DATOS_CARGADOS = True
-            print("=" * 60)
-            print("[OK] CITRINO API LISTA")
-            print("=" * 60)
-            return True
-            
-    except FileNotFoundError as e:
-        print(f"[ERROR] No se encontro data/base_datos_relevamiento.json")
-        print(f"   Ruta buscada: {e}")
-        print("   Ejecute: python scripts/etl/build_relevamiento_dataset.py")
+    if not usar_postgres:
+        print("[ERROR] USE_POSTGRES no está configurado como 'true'")
+        print("   Configura USE_POSTGRES=true en el archivo .env")
         return False
-        
+
+    try:
+        # Importar psycopg2 para conexión PostgreSQL
+        import psycopg2
+
+        # Configuración de conexión
+        db_config = {
+            'host': os.getenv('DB_HOST', 'localhost'),
+            'database': os.getenv('DB_NAME', 'citrino'),
+            'user': os.getenv('DB_USER', 'citrino_app'),
+            'password': os.getenv('DB_PASSWORD', 'citrino123'),
+            'port': os.getenv('DB_PORT', '5432')
+        }
+
+        print(f"Conectando a PostgreSQL: {db_config['host']}:{db_config['port']}/{db_config['database']}")
+
+        # Conectar a PostgreSQL
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor()
+
+        # Cargar propiedades desde PostgreSQL
+        cursor.execute("""
+            SELECT id, titulo, descripcion, precio_usd, tipo_propiedad,
+                   latitud, longitud, zona, direccion, superficie_total,
+                   superficie_construida, num_dormitorios, num_banos, num_garajes,
+                   fecha_scraping, proveedor_datos, coordenadas_validas, datos_completos
+            FROM propiedades
+            ORDER BY id
+        """)
+
+        # Obtener resultados y convertir a formato esperado
+        columnas = [desc[0] for desc in cursor.description]
+        rows = cursor.fetchall()
+
+        propiedades_postgres = []
+        for row in rows:
+            prop_dict = dict(zip(columnas, row))
+
+            # Convertir al formato esperado por los motores
+            propiedad_formateada = {
+                'id': str(prop_dict['id']),
+                'titulo': prop_dict['titulo'],
+                'descripcion': prop_dict['descripcion'] or '',
+                'precio': float(prop_dict['precio_usd']) if prop_dict['precio_usd'] else 0,
+                'tipo_propiedad': prop_dict['tipo_propiedad'] or '',
+                'zona': prop_dict['zona'] or '',
+                'direccion': prop_dict['direccion'] or '',
+                'superficie': float(prop_dict['superficie_total']) if prop_dict['superficie_total'] else 0,
+                'habitaciones': prop_dict['num_dormitorios'],
+                'banos': prop_dict['num_banos'],
+                'coordenadas': {
+                    'lat': float(prop_dict['latitud']) if prop_dict['latitud'] else None,
+                    'lng': float(prop_dict['longitud']) if prop_dict['longitud'] else None
+                } if prop_dict['latitud'] and prop_dict['longitud'] else {},
+                'fuente': prop_dict['proveedor_datos'] or 'postgresql',
+                'coordenadas_validas': prop_dict['coordenadas_validas'] or False,
+                'datos_completos': prop_dict['datos_completos'] or False,
+                'caracteristicas_principales': {
+                    'precio': float(prop_dict['precio_usd']) if prop_dict['precio_usd'] else 0,
+                    'superficie_m2': float(prop_dict['superficie_total']) if prop_dict['superficie_total'] else 0,
+                    'habitaciones': prop_dict['num_dormitorios'] or 0,
+                    'banos_completos': prop_dict['num_banos'] or 0
+                },
+                'ubicacion': {
+                    'zona': prop_dict['zona'] or '',
+                    'direccion': prop_dict['direccion'] or '',
+                    'coordenadas': {
+                        'lat': float(prop_dict['latitud']) if prop_dict['latitud'] else None,
+                        'lng': float(prop_dict['longitud']) if prop_dict['longitud'] else None
+                    } if prop_dict['latitud'] and prop_dict['longitud'] else {}
+                }
+            }
+            propiedades_postgres.append(propiedad_formateada)
+
+        cursor.close()
+        conn.close()
+
+        print(f"[OK] Cargadas {len(propiedades_postgres)} propiedades desde PostgreSQL")
+
+        # Cargar en ambos motores
+        motor_recomendacion.cargar_propiedades(propiedades_postgres)
+        motor_mejorado.cargar_propiedades(propiedades_postgres)
+
+        # También cargar en el sistema de consulta para compatibilidad
+        sistema_consulta.propiedades = propiedades_postgres
+        sistema_consulta.estadisticas_globales['total_propiedades'] = len(propiedades_postgres)
+
+        DATOS_CARGADOS = True
+        print(f"[OK] CONEXIÓN POSTGRESQL ESTABLECIDA - {len(propiedades_postgres)} PROPIEDADES CARGADAS")
+        print("=" * 60)
+        return True
+
+    except ImportError:
+        print("[ERROR] psycopg2 no está instalado. Ejecuta: pip install psycopg2-binary")
+        return False
     except Exception as e:
-        print(f"[ERROR] Error cargando base de datos de relevamiento: {e}")
+        print(f"[ERROR] Error conectando a PostgreSQL: {e}")
+        print(f"   Revisa la configuración en el archivo .env")
         import traceback
         traceback.print_exc()
         return False

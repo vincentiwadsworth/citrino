@@ -7,20 +7,27 @@ Citrino es el sistema interno que ayuda al equipo de Citrino a tomar mejores dec
 ## 🔄 ¿Cómo Funciona Citrino?
 
 ### 1. **Relevamiento de Datos**
-El equipo de Citrino recopila información de propiedades de múltiples fuentes y la organiza en archivos Excel estandarizados. Este proceso manual garantiza calidad y control sobre los datos de entrada.
+El equipo de Citrino recopila información de propiedades exclusivamente en archivos Excel RAW ubicados en `data/raw/`. Estos archivos son la ÚNICA fuente de datos original del sistema.
 
-### 2. **Procesamiento Inteligente**
-Un script Python procesa estos archivos mediante un sistema híbrido:
+### 2. **Validación y Procesamiento**
+Los archivos Excel RAW pasan por un proceso de validación estructurado:
 
-- **📝 Extracción Automática (80%)**: Usa patrones regex para extraer datos estructurados sin costo
-- **🤖 Inteligencia Artificial (20%)**: Aplica LLM solo cuando los datos son complejos o ambiguos
-- **📊 Validación Continua**: Genera documentos intermedios para control de calidad
+- **📝 Validación Individual**: Cada archivo se procesa individualmente generando archivos intermedios
+- **🤖 Revisión Humana**: El equipo Citrino valida manualmente los datos procesados
+- **📊 Control de Calidad**: Generación de reportes de calidad y métricas de validación
 
-### 3. **Consolidación y Análisis**
-El sistema crea una base de datos unificada que alimenta:
+### 3. **Migración a PostgreSQL**
+Una vez validados, los datos se migran a PostgreSQL con PostGIS:
 
-- **Motor de Recomendación**: Evalúa propiedades según criterios de inversión
-- **Análisis Geográfico**: Calcula distancias y cobertura de servicios
+- **Base de Datos Principal**: PostgreSQL con coordenadas geoespaciales PostGIS
+- **Motor de Recomendación**: Consultas optimizadas con índices espaciales
+- **API REST**: Datos disponibles para aplicaciones via endpoints
+
+### 4. **Análisis y Recomendaciones**
+El sistema proporciona:
+
+- **Búsquedas Geoespaciales**: Consultas por radio y ubicación precisa
+- **Recomendaciones Inteligentes**: Evaluación según criterios de inversión
 - **Panel de Consulta**: Interface para explorar resultados con filtros avanzados
 
 ## 🌟 Ventajas para el Equipo Citrino
@@ -40,17 +47,17 @@ El sistema crea una base de datos unificada que alimenta:
 - **5 proveedores** de datos con diferentes estrategias de procesamiento
 
 ### Tecnologías Aplicadas
-- **Procesamiento**: Python con Pandas para manejo eficiente de datos
+- **Procesamiento**: Python con Pandas para manejo eficiente de datos Excel
 - **Inteligencia Artificial**: Modelos de lenguaje para extracción avanzada
-- **Análisis Geográfico**: Algoritmos de cálculo de distancias y cobertura
+- **Análisis Geográfico**: PostgreSQL + PostGIS para consultas geoespaciales optimizadas
 - **Interfaz Web**: HTML5 con Bootstrap para acceso multi-dispositivo
-- **Base de Datos**: JSON actual, con preparación para PostgreSQL
+- **Base de Datos**: PostgreSQL con PostGIS (base de datos principal)
 
 ### Eficiencia del Sistema
-- **90% extracción automática** mediante patrones (sin costo adicional)
-- **10% procesamiento con IA** para casos complejos o ambiguos
-- **Sistema redundante** con proveedores alternativos automáticos
-- **Reportes intermedios** para validación y control de calidad
+- **Procesamiento Excel RAW** directo desde archivos originales
+- **Validación estructurada** con archivos intermedios para revisión humana
+- **Migración automática** a PostgreSQL con PostGIS
+- **Consultas optimizadas** con índices espaciales (milisegundos)
 
 ## 🎯 Características Principales
 
@@ -88,9 +95,9 @@ El sistema crea una base de datos unificada que alimenta:
 |------|-------------|-----------|
 | **Frontend** | HTML5, Bootstrap 5, JavaScript ES6+ | Interfaz responsive y moderna |
 | **Backend** | Python 3.8+, Flask 2.3.3 | REST API para análisis |
-| **Datos** | Pandas, NumPy, JSON | Procesamiento y almacenamiento |
+| **Base de Datos** | PostgreSQL + PostGIS | Almacenamiento geoespacial optimizado |
+| **ETL** | Python, Pandas, openpyxl | Procesamiento archivos Excel RAW |
 | **IA** | Modelos de lenguaje avanzados | Extracción y análisis inteligente |
-| **Geoespacial** | Algoritmos de distancia | Cálculos de distancia precisos |
 
 ### Componentes del Sistema
 
@@ -108,9 +115,14 @@ El sistema crea una base de datos unificada que alimenta:
                           └─────────┘      └─────────────┘
                                 │
                           ┌─────▼──────┐
-                          │   Datos    │
-                          │  (1.5GB)   │
+                          │ PostgreSQL │
+                          │ + PostGIS  │
                           └────────────┘
+                                ↑
+                        ┌───────┴───────┐
+                        │ Excel RAW     │
+                        │ data/raw/     │
+                        └───────────────┘
 ```
 
 ## 🚀 Instalación Rápida (5 minutos)
@@ -203,11 +215,11 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 
 ### Integración con Modelos de Lenguaje
 
-**Sistema Híbrido de Extracción**
-- ⚡ **90% procesado con regex** (instantáneo, $0 costo)
-- 🤖 **10% requiere LLM** (casos complejos)
-- 💰 **70-80% reducción de tokens** vs. LLM puro
-- 🔄 **Fallback automático** entre proveedores (99.9% uptime)
+**Flujo de Datos ETL**
+- 📊 **Excel RAW** como única fuente de datos (data/raw/)
+- ✅ **Validación estructurada** con archivos intermedios
+- 🗄️ **Migración automática** a PostgreSQL + PostGIS
+- ⚡ **Consultas optimizadas** con índices espaciales (milisegundos)
 
 ##  📚 Documentación
 
@@ -234,9 +246,9 @@ Citrino utiliza un **motor de scoring multicritero** que evalúa cada propiedad 
 
 Citrino tiene un plan de evolución claro enfocado en:
 
-🔄 **En Progreso - Mejora de calidad de datos** - Sistema híbrido optimizado 90% extracción
-📅 **Próximos - Geocodificación avanzada** - Reducir propiedades sin zona de 50% → <15%
-📅 **Próximos - Optimización UI/UX** - Mayor adopción del equipo interno
+🔄 **En Progreso - Excel RAW a PostgreSQL** - Migración completa a base de datos relacional
+📅 **Próximos - Validación mejorada** - Sistema automatizado de control de calidad
+📅 **Próximos - Consultas avanzadas** - Análisis geoespacial en tiempo real
 
 **Ver roadmap completo:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -246,8 +258,10 @@ Citrino tiene un plan de evolución claro enfocado en:
 
 - **Backend:** Python 3.8+, Flask 2.3.3, Pandas, NumPy
 - **Frontend:** HTML5, Bootstrap 5, JavaScript ES6+
+- **Base de Datos:** PostgreSQL + PostGIS (almacenamiento geoespacial)
+- **ETL:** Python, openpyxl (procesamiento archivos Excel RAW)
 - **IA:** Modelos de lenguaje avanzados con sistema redundante
-- **Algoritmos:** Haversine, Weighted Scoring, Regex Patterns
+- **Algoritmos:** Índices espaciales PostGIS, Weighted Scoring, Regex Patterns
 
 **Ver arquitectura completa:** [docs/ARQUITECTURA_TECNICA.md](docs/ARQUITECTURA_TECNICA.md)
 

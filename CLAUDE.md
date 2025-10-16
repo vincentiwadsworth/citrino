@@ -8,7 +8,7 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 
 ### Enfoque Principal
 - **Objetivo**: Herramienta de trabajo para el equipo de Citrino al atender a sus clientes inversores (no orientada al público general)
-- **Datos procesados**: Base de datos con propiedades y servicios urbanos actualizados
+- **Datos procesados**: PostgreSQL con propiedades y servicios urbanos migrados desde archivos Excel RAW
 - **Usuarios internos**: Analistas de datos, consultores de inversión y equipo comercial de Citrino
 - **Criterios de análisis**: Ponderaciones configurables, cobertura de servicios cercanos y cálculos basados en distancias Haversine
 
@@ -20,7 +20,7 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - **LLM Primario**: Z.AI GLM-4.6 para análisis y extracción de datos
 - **LLM Fallback**: OpenRouter con Qwen2.5 72B (gratuito, 2025)
 - **Extracción Híbrida**: Sistema Regex + LLM (80% sin LLM, 90% reducción tokens)
-- **Datos**: Base de datos con propiedades y servicios urbanos actualizados
+- **Datos**: PostgreSQL con propiedades y servicios urbanos migrados desde archivos Excel RAW
 
 ## Technology Stack
 
@@ -37,8 +37,9 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 - Responsive design with professional UI
 
 ### Data Storage
-- **Base de datos principal** (implementación actual)
-- Propiedades y servicios urbanos con actualizaciones dinámicas
+- **PostgreSQL** (base de datos principal con PostGIS para datos geoespaciales)
+- Propiedades y servicios urbanos migrados desde archivos Excel RAW
+- Sistema de validación de archivos intermedios para control de calidad
 
 ### Arquitectura del Sistema
 
@@ -68,20 +69,21 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
 #### Arquitectura de Datos
 ```
 /data/
-├── base_datos_relevamiento.json          # JSON actual (siendo migrado)
-├── guia_urbana_municipal_completa.json   # Servicios urbanos (4,777)
-└── perfiles_inversion/                   # Plantillas de perfiles
+├── raw/                               # Archivos Excel originales (fuente de datos)
+│   ├── relevamiento/                 # Archivos Excel de propiedades
+│   └── guia/GUIA URBANA.xlsx         # Guía urbana municipal
+├── processed/                         # Archivos intermedios para validación
+│   ├── *_intermedio.xlsx             # Excel procesados para revisión
+│   └── *_reporte.json               # Reportes de calidad
+└── final/                            # Datos listos para producción
 
-# Nueva estructura en migración:
-/migration/
-├── scripts/           # Scripts ETL para PostgreSQL
-├── database/          # DDL y esquemas SQL
-└── config/           # Configuración conexión
-
-# PostgreSQL (target):
+# PostgreSQL (base de datos principal):
 - agentes (tabla normalizada)
 - propiedades (con coordenadas GEOGRAPHY + PostGIS)
 - servicios (con índices espaciales GIST)
+
+# Flujo de datos:
+Excel RAW → Validación → PostgreSQL → API
 ```
 
 #### Directorios Clave
@@ -91,24 +93,27 @@ Citrino es una herramienta interna que el equipo de la empresa utiliza para anal
   - `description_parser.py` - Sistema híbrido Regex + LLM para extracción
   - `recommendation_engine_mejorado.py` - Motor con geolocalización Haversine
 - **`scripts/`** - Scripts organizados por funcionalidad
-  - `scripts/etl/` - Procesamiento ETL principal
-    - `build_relevamiento_dataset.py` - ETL con sistema híbrido de extracción
-    - `build_urban_services_dataset.py` - Integración servicios urbanos
-    - `etl_proveedor02_mejorado.py` - ETL especializado Proveedor 02
+  - `scripts/validation/` - Validación de archivos Excel RAW
+    - `validate_raw_to_intermediate.py` - Procesamiento Excel a intermedio
+    - `process_all_raw.py` - Procesamiento batch de archivos RAW
+    - `generate_validation_report.py` - Reportes de validación
+    - `approve_processed_data.py` - Aprobación a producción
+  - `scripts/etl/` - Procesamiento ETL para PostgreSQL
+    - `01_etl_agentes.py` - Migración de agentes a PostgreSQL
+    - `02_etl_propiedades.py` - Migración de propiedades con PostGIS
+    - `03_etl_servicios.py` - Migración de servicios urbanos
   - `scripts/analysis/` - Análisis y reporting de datos
-    - `analizar_por_proveedor.py` - Análisis por proveedor
     - `analizar_calidad_datos.py` - Análisis de calidad
     - `detectar_duplicados.py` - Detección de duplicados
   - `scripts/maintenance/` - Mantenimiento y utilidades
     - `build_sample_inventory.py` - Generador de inventarios
     - `geocodificar_coordenadas.py` - Geocodificación
     - `normalizar_precios.py` - Normalización de precios
-  - `scripts/legacy/` - Scripts obsoletos y de depuración
-- **`migration/`** - Scripts y configuración para migración PostgreSQL
-  - `scripts/etl_*.py` - Scripts ETL para agentes, propiedades, servicios
+- **`migration/`** - Scripts y configuración para PostgreSQL
   - `database/01_create_schema.sql` - DDL PostgreSQL + PostGIS
+  - `config/database_config.py` - Configuración de conexión
 - **`tests/`** - Suite de pruebas completa
-- **`data/`** - Datos JSON actuales (en proceso de migración)
+- **`data/`** - Archivos Excel RAW y datos procesados
 - **`assets/`** - CSS y JavaScript del frontend
 - **`docs/`** - Documentación técnica organizada
   - `CHANGELOG.md` - Historial de versiones (nuevo)
@@ -144,11 +149,19 @@ python -m http.server 8080
 
 ### Procesamiento de Datos
 ```bash
-# Procesar datos de relevamiento
-python scripts/etl/build_relevamiento_dataset.py
+# Validar archivos Excel RAW (individual)
+python scripts/validation/validate_raw_to_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
 
-# Construir dataset de servicios urbanos
-python scripts/etl/build_urban_services_dataset.py
+# Procesar todos los archivos RAW
+python scripts/validation/process_all_raw.py --input-dir "data/raw/" --output-dir "data/processed/"
+
+# Aprobar datos procesados para PostgreSQL
+python scripts/validation/approve_processed_data.py --input "data/processed/2025.08.15 05_intermedio.xlsx"
+
+# Migrar a PostgreSQL
+python migration/scripts/01_etl_agentes.py
+python migration/scripts/02_etl_propiedades.py
+python migration/scripts/03_etl_servicios.py
 
 # Generar inventario de ejemplo para demostraciones
 python scripts/maintenance/build_sample_inventory.py
@@ -242,12 +255,18 @@ LLM_TEMPERATURE=0.1
 
 ```
 /data/
-├── base_datos_citrino_limpios.json    # Main database (76,853 properties)
-├── guia_urbana_municipal_completa.json # 4,777 urban services
-├── bd_final/                          # Cleaned final datasets
-├── bd_franz/                          # Franz database exports
-├── bd_integrada/                      # Integrated datasets
-└── perfiles/                          # User profile templates
+├── raw/                               # Archivos Excel ORIGINALES (fuente de datos)
+│   ├── relevamiento/                 # Propiedades en archivos Excel
+│   └── guia/GUIA URBANA.xlsx         # Servicios urbanos
+├── processed/                         # Archivos intermedios validados
+│   ├── *_intermedio.xlsx             # Para revisión del equipo
+│   └── *_reporte.json               # Métricas de calidad
+└── final/                            # Datos aprobados para PostgreSQL
+
+# PostgreSQL (base de datos principal)
+- agentes: Datos normalizados de agentes inmobiliarios
+- propiedades: Datos con coordenadas PostGIS
+- servicios: Puntos de interés con índices espaciales
 ```
 
 ### Key Directories
@@ -256,7 +275,7 @@ LLM_TEMPERATURE=0.1
 - **`src/`** - Core recommendation engines and business logic
 - **`scripts/`** - Data processing, validation, and evaluation tools
 - **`tests/`** - Test suite for API and recommendation engines
-- **`data/`** - All data files and databases
+- **`data/`** - Archivos Excel RAW y datos procesados para validación
 - **`documentation/`** - Technical documentation and evaluation reports
 
 ## API Endpoints
@@ -307,16 +326,17 @@ pytest tests/test_api_simple.py -v
 ## Data Processing Workflows
 
 ### ETL Pipeline
-1. **Raw Data Import** - Excel and JSON files from multiple sources
-2. **Data Cleaning** - Unicode normalization, extreme value handling
-3. **Geolocation Processing** - Coordinate validation and spatial indexing
-4. **Integration** - Combining Franz database with municipal data
-5. **Validation** - Quality checks and deduplication
+1. **Excel RAW Import** - Archivos Excel exclusivamente desde data/raw/
+2. **Validation Processing** - Generación de archivos intermedios para revisión
+3. **Human Validation** - Revisión manual por equipo Citrino
+4. **PostgreSQL Migration** - Carga a base de datos con PostGIS
+5. **API Integration** - Datos disponibles para consulta vía REST API
 
 ### Key Processing Scripts
-- **`scripts/etl/build_relevamiento_dataset.py`** - Main data processing pipeline
-- **`scripts/etl/build_urban_services_dataset.py`** - Municipal urban guide integration
-- **`scripts/maintenance/build_sample_inventory.py`** - Sample inventory generator for demos/tests
+- **`scripts/validation/validate_raw_to_intermediate.py`** - Validación de Excel RAW a intermedio
+- **`migration/scripts/02_etl_propiedades.py`** - Migración de propiedades a PostgreSQL
+- **`migration/scripts/03_etl_servicios.py`** - Migración de servicios a PostgreSQL
+- **`scripts/maintenance/build_sample_inventory.py`** - Generador de inventarios para demos
 
 ## Development Guidelines
 

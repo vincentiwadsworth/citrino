@@ -77,30 +77,21 @@ class CitrinoChatbotAPI:
             logger.error(f"Error inicializando componentes LLM: {e}")
 
     def _load_properties(self):
-        """Carga las propiedades desde el archivo JSON."""
+        """Carga las propiedades desde PostgreSQL (ya cargadas en server.py)."""
         try:
-            # Intentar cargar desde diferentes rutas posibles
-            rutas_posibles = [
-                os.path.join(os.path.dirname(__file__), '..', 'data', 'base_datos_relevamiento.json'),
-                os.path.join(os.path.dirname(__file__), '..', 'data', 'metrics', 'analisis_data_raw_20251015_112747_readable.json'),
-            ]
-
-            for ruta in rutas_posibles:
-                if os.path.exists(ruta):
-                    with open(ruta, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        if 'propiedades' in data:
-                            self.propiedades = data['propiedades']
-                            break
+            # Las propiedades ya están cargadas en el server.py desde PostgreSQL
+            # Importarlas desde el sistema de consulta global
+            from server import sistema_consulta
+            self.propiedades = sistema_consulta.propiedades
 
             # Si el motor de recomendaciones está inicializado, cargar propiedades
             if self.recommendation_engine and self.propiedades:
                 self.recommendation_engine.cargar_propiedades(self.propiedades)
 
-            logger.info(f"Cargadas {len(self.propiedades)} propiedades")
+            logger.info(f"Cargadas {len(self.propiedades)} propiedades desde PostgreSQL")
 
         except Exception as e:
-            logger.error(f"Error cargando propiedades: {e}")
+            logger.error(f"Error cargando propiedades desde PostgreSQL: {e}")
             self.propiedades = []
 
     def format_openai_response(self, content: str, model: str = "citrino-v1") -> Dict[str, Any]:

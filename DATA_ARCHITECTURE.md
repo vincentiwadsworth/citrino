@@ -1,18 +1,19 @@
-# 🏗️ Arquitectura de Datos - Migración a PostgreSQL + PostGIS
+# 🏗️ Arquitectura de Datos - Excel RAW a PostgreSQL + PostGIS
 
-Documentación completa de la migración desde JSON centralizado a PostgreSQL + PostGIS basada en investigación experta de Tongyi.
+Documentación completa del flujo de datos desde archivos Excel RAW hasta PostgreSQL + PostGIS. Los datos ORIGINALES provienen EXCLUSIVAMENTE de archivos Excel en data/raw/.
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-**Decisión Estratégica**: Migración de archivos JSON a PostgreSQL + PostGIS
-**Fuente**: Investigación detallada con Tongyi (LLM especializado)
-**Objetivo**: Resolver limitaciones de rendimiento, escalabilidad y consistencia
+**Decisión Estratégica**: Flujo Excel RAW → PostgreSQL + PostGIS
+**Fuente de Datos**: Exclusivamente archivos Excel en data/raw/ (NO JSON)
+**Objetivo**: Validación estructurada y base de datos relacional optimizada
 **Resultado Esperado**: Consultas geoespaciales de segundos → milisegundos
 
 ### Beneficios Clave
 - **Rendimiento**: Reducción drástica en tiempos de respuesta geoespacial
+- **Validación**: Proceso estructurado con archivos intermedios para revisión humana
 - **Escalabilidad**: Capacidad para 10x crecimiento sin degradación
 - **Integridad**: Consistencia ACID con claves foráneas
 - **Capacidades Analíticas**: Consultas complejas relacionales + espaciales
@@ -21,33 +22,53 @@ Documentación completa de la migración desde JSON centralizado a PostgreSQL + 
 
 ## 📊 Estado Actual vs Propuesto
 
-### Arquitectura Actual (JSON)
+### Arquitectura Actual (Excel RAW → PostgreSQL)
 ```
 data/
-├── base_datos_relevamiento.json    # 1,588 propiedades
-└── guia_urbana_municipal_completa.json  # 4,777 servicios
-```
+├── raw/                           # Archivos Excel ORIGINALES
+│   ├── relevamiento/*.xlsx        # Propiedades
+│   └── guia/GUIA URBANA.xlsx     # Servicios urbanos
+├── processed/                     # Archivos intermedios
+│   ├── *_intermedio.xlsx         # Para revisión humana
+│   └── *_reporte.json           # Reportes de calidad
+└── final/                        # Datos listos para PostgreSQL
 
-**Limitaciones Críticas**:
-- Consultas O(n×m): 7,585,876 cálculos por búsqueda
-- Sin concurrencia en actualizaciones
-- Duplicación de datos de agentes
-- Performance: segundos por consulta geoespacial
-
-### Arquitectura Propuesta (PostgreSQL + PostGIS)
-```
-PostgreSQL Database:
+PostgreSQL (base de datos principal):
 ├── agentes (tabla normalizada)
-├── propiedades (con coordenadas GEOGRAPHY)
-├── servicios (con índices espaciales GIST)
-└── Índices optimizados (B-Tree + GIST)
+├── propiedades (con PostGIS)
+└── servicios (con índices espaciales)
 ```
 
-**Ventajas**:
-- Consultas con índices espaciales: milisegundos
-- Integridad referencial completa
-- Concurrencia transaccional
-- Deduplicación automática
+**Ventajas Actuales**:
+- Validación estructurada con revisión humana
+- Base de datos relacional con integridad ACID
+- Índices espaciales para consultas optimizadas
+- Performance: milisegundos por consulta geoespacial
+
+### Flujo de Datos Completo
+```
+Excel RAW (data/raw/)
+        ↓
+Validación Individual (scripts/validation/)
+        ↓
+Archivos Intermedios (data/processed/)
+        ↓
+Revisión Humana (Equipo Citrino)
+        ↓
+Aprobación (scripts/validation/approve_processed_data.py)
+        ↓
+Migración PostgreSQL (migration/scripts/)
+        ↓
+Base de Datos Principal (PostgreSQL + PostGIS)
+        ↓
+API REST (api/server.py)
+```
+
+**Ventajas del Flujo**:
+- Datos ORIGINALES siempre preservados en Excel
+- Validación estructurada con revisión humana obligatoria
+- Base de datos relacional con índices espaciales optimizados
+- Trazabilidad completa desde archivo original hasta producción
 
 ---
 
@@ -182,83 +203,93 @@ WHERE
 
 ---
 
-## 🚀 Plan de Migración (ETL)
+## 🔄 Flujo ETL Completo (Excel RAW → PostgreSQL)
 
-### Fase 1: Preparación del Entorno
-1. **Aprovisionar PostgreSQL** (RDS, Cloud SQL o local)
-2. **Ejecutar DDL** para crear tablas e índices
-3. **Configurar conexión** desde aplicación
+### Fase 1: Validación de Archivos Excel RAW
+1. **Procesamiento Individual**: Cada archivo Excel se procesa por separado
+2. **Archivos Intermedios**: Se genera Excel con columnas procesadas + reporte JSON
+3. **Revisión Humana**: Equipo Citrino valida coordenadas, precios y datos extraídos
 
-### Fase 2: Script ETL de Migración
+```bash
+# Ejemplo de procesamiento
+python scripts/validation/validate_raw_to_intermediate.py \
+  --input "data/raw/relevamiento/2025.08.15 05.xlsx"
+```
+
+### Fase 2: Migración a PostgreSQL
 
 #### Paso 2.1: Migrar Agentes (Deduplicación)
 ```python
-# Extraer agentes únicos del JSON
-agentes_unicos = set()
-for propiedad in datos_json:
-    if propiedad.get('agente'):
-        agentes_unicos.add(propiedad['agente'])
+# Extraer agentes de archivos procesados
+for archivo_procesado in archivos_aprobados:
+    df = pd.read_excel(archivo_procesado)
+    agentes_unicos.update(df['nombre_agente'].unique())
 
-# Insertar en PostgreSQL
+# Insertar en PostgreSQL con deduplicación
 for agente_nombre in agentes_unicos:
     cursor.execute("""
         INSERT INTO agentes (nombre, telefono, email)
         VALUES (%s, %s, %s)
         ON CONFLICT (nombre) DO NOTHING
     """, (agente_nombre, telefono, email))
-
-# Crear mapa de IDs para referencia rápida
-agente_map = {nombre: id for id, nombre in get_agentes_from_db()}
 ```
 
 #### Paso 2.2: Migrar Propiedades
 ```python
-for propiedad in datos_json:
-    # Convertir coordenadas a formato PostGIS
-    coords_postgis = f"ST_SetSRID(ST_MakePoint({longitud}, {latitud}), 4326)::geography"
+# Procesar archivos aprobados
+for archivo_aprobado in archivos_aprobados:
+    df = pd.read_excel(archivo_aprobado)
 
-    cursor.execute("""
-        INSERT INTO propiedades (
-            agente_id, titulo, tipo_propiedad, precio_usd,
-            direccion, zona, uv, manzana, coordenadas,
-            fecha_publicacion, proveedor_datos, url_origen
-        ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, {coords_postgis}, %s, %s, %s
-        )
-    """, (
-        agente_map.get(propiedad['agente']),
-        propiedad['titulo'],
-        propiedad['tipo_propiedad'],
-        propiedad['precio'],
-        propiedad['direccion'],
-        propiedad['zona'],
-        propiedad['unidad_vecinal'],
-        propiedad['manzana'],
-        propiedad['fecha_scraping'],
-        propiedad['codigo_proveedor'],
-        propiedad['url']
-    ))
+    for _, row in df.iterrows():
+        # Convertir coordenadas a formato PostGIS
+        if pd.notna(row['latitud']) and pd.notna(row['longitud']):
+            coords_postgis = f"ST_SetSRID(ST_MakePoint({row['longitud']}, {row['latitud']}), 4326)::geography"
+
+            cursor.execute("""
+                INSERT INTO propiedades (
+                    agente_id, titulo, tipo_propiedad, precio_usd,
+                    direccion, zona, uv, manzana, coordenadas,
+                    archivo_origen, fecha_procesamiento
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, {coords_postgis}, %s, %s
+                )
+            """, (
+                agente_map.get(row['nombre_agente']),
+                row['titulo'],
+                row['tipo_propiedad'],
+                row['precio'],
+                row['direccion'],
+                row['zona'],
+                row['uv'],
+                row['manzana'],
+                archivo_aprobado.name,
+                datetime.now()
+            ))
 ```
 
 #### Paso 2.3: Migrar Servicios
 ```python
-for servicio in servicios_json:
-    coords_postgis = f"ST_SetSRID(ST_MakePoint({longitud}, {latitud}), 4326)::geography"
+# Migrar servicios urbanos desde guía urbana
+df_servicios = pd.read_excel('data/raw/guia/GUIA URBANA.xlsx')
 
-    cursor.execute("""
-        INSERT INTO servicios (nombre, tipo_servicio, coordenadas)
-        VALUES (%s, %s, {coords_postgis})
-    """, (servicio['nombre'], servicio['categoria']))
+for _, row in df_servicios.iterrows():
+    if pd.notna(row['latitud']) and pd.notna(row['longitud']):
+        coords_postgis = f"ST_SetSRID(ST_MakePoint({row['longitud']}, {row['latitud']}), 4326)::geography"
+
+        cursor.execute("""
+            INSERT INTO servicios (nombre, tipo_servicio, coordenadas, direccion)
+            VALUES (%s, %s, {coords_postgis}, %s)
+        """, (row['nombre'], row['categoria'], row['direccion']))
 ```
 
 ### Fase 3: Validación Post-Migración
 ```sql
--- Verificar conteos
-SELECT COUNT(*) FROM propiedades; -- debe coincidir con JSON
-SELECT COUNT(*) FROM servicios; -- debe coincidir con JSON
+-- Verificar conteos vs archivos procesados
+SELECT COUNT(*) FROM propiedades; -- debe coincidir con total archivos aprobados
+SELECT COUNT(*) FROM servicios; -- debe coincidir con guía urbana
 
 -- Validar relaciones
-SELECT p.titulo, a.nombre
+SELECT p.titulo, a.nombre, p.archivo_origen
 FROM propiedades p
 JOIN agentes a ON p.agente_id = a.id
 WHERE p.id = 123;
@@ -267,6 +298,12 @@ WHERE p.id = 123;
 SELECT COUNT(*)
 FROM propiedades
 WHERE ST_DWithin(coordenadas, ST_MakePoint(-63.182, -17.783)::geography, 2000);
+
+-- Verificar trazabilidad
+SELECT archivo_origen, COUNT(*) as propiedades_por_archivo
+FROM propiedades
+GROUP BY archivo_origen
+ORDER BY propiedades_por_archivo DESC;
 ```
 
 ---
@@ -311,10 +348,11 @@ class RecommendationEnginePostGIS:
 ## 🛡️ Plan de Rollback
 
 ### Estrategia de Seguridad
-1. **Mantener Sistema JSON**: No eliminar archivos originales
-2. **Configuración Switchable**: Variable de entorno para cambiar fuente de datos
-3. **Ventana de Decisión**: 24-48 horas para validación final
-4. **Rollback Instantáneo**: Cambiar configuración y reiniciar aplicación
+1. **Mantener Excel RAW**: Nunca modificar archivos originales en data/raw/
+2. **Validación Humana**: Revisión obligatoria antes de migrar a PostgreSQL
+3. **Configuración Switchable**: Variable de entorno para cambiar fuente de datos
+4. **Ventana de Decisión**: 24-48 horas para validación final
+5. **Rollback Instantáneo**: Cambiar configuración y reiniciar aplicación
 
 ### Implementación
 ```python
@@ -326,8 +364,8 @@ if USE_POSTGRES:
     from .postgres_source import PostgresDataSource
     data_source = PostgresDataSource()
 else:
-    from .json_source import JsonDataSource
-    data_source = JsonDataSource()
+    from .excel_source import ExcelDataSource  # Carga desde archivos procesados
+    data_source = ExcelDataSource()
 ```
 
 ---
@@ -349,10 +387,10 @@ else:
 ### Validación Automatizada
 ```python
 def validate_migration():
-    # Comparar conteos
-    json_count = len(load_json_properties())
+    # Comparar conteos vs archivos procesados
+    processed_count = count_approved_properties()
     pg_count = execute_query("SELECT COUNT(*) FROM propiedades")[0][0]
-    assert json_count == pg_count, f"Mismatch: {json_count} vs {pg_count}"
+    assert processed_count == pg_count, f"Mismatch: {processed_count} vs {pg_count}"
 
     # Probar rendimiento
     start_time = time.time()
@@ -367,6 +405,13 @@ def validate_migration():
         WHERE NOT ST_IsValid(coordenadas)
     """)[0][0]
     assert invalid_coords == 0, f"Invalid coordinates: {invalid_coords}"
+
+    # Validar trazabilidad
+    missing_source = execute_query("""
+        SELECT COUNT(*) FROM propiedades
+        WHERE archivo_origen IS NULL OR archivo_origen = ''
+    """)[0][0]
+    assert missing_source == 0, f"Missing source tracking: {missing_source}"
 ```
 
 ---
@@ -399,9 +444,9 @@ citrino-clean/
 │   ├── database_connector.py
 │   └── [archivos existentes actualizados]
 └── data/
-    ├── base_datos_relevamiento.json (backup)
-    ├── guia_urbana_municipal_completa.json (backup)
-    └── archived/ (versiones antiguas)
+    ├── raw/                           # Archivos Excel ORIGINALES (nunca modificados)
+    ├── processed/                     # Archivos intermedios para validación
+    └── final/                         # Datos aprobados para migración
 ```
 
 ---
@@ -423,14 +468,15 @@ citrino-clean/
 ### Cambios Inmediatos
 - **Recomendation Engine**: Migración de Haversine Python a PostGIS
 - **API Server**: Nuevos endpoints para consultas PostgreSQL
-- **ETL Process**: Sistema de procesamiento de datos
-- **Configuration**: Sistema switching JSON/PostgreSQL
+- **ETL Process**: Sistema de validación Excel RAW → PostgreSQL
+- **Configuration**: Sistema switching Excel/PostgreSQL
 
 ### Beneficios a Largo Plazo
 - **Performance**: Mejora exponencial en consultas geoespaciales
 - **Scalability**: Preparado para crecimiento 10x
-- **Maintainability**: Base de datos relacional vs archivos JSON
+- **Maintainability**: Base de datos relacional vs archivos Excel
 - **Analytics**: Capacidades avanzadas de consulta SQL
+- **Data Quality**: Validación estructurada con revisión humana obligatoria
 
 ---
 
@@ -439,35 +485,37 @@ citrino-clean/
 ## 🤖 Integración con Chatbot UI (v2.1.0)
 
 ### Sistema Conversacional
-El nuevo chatbot profesional integrado en v2.1.0 utiliza la arquitectura de datos actual (JSON) pero está preparado para migración PostgreSQL:
+El chatbot profesional integrado utiliza PostgreSQL como base de datos principal con datos migrados desde archivos Excel RAW:
 
 ```python
 # api/chatbot_completions.py
 class CitrinoChatbotAPI:
     def __init__(self):
-        self.propiedades = self._load_properties()  # JSON actual
-        self.recommendation_engine = RecommendationEngineMejorado()
+        self.propiedades = self._load_properties_from_postgres()
+        self.recommendation_engine = RecommendationEnginePostGIS()
 
     def generate_property_search_response(self, entities):
-        # Sistema híbrido actual - pronto migrará a PostgreSQL
+        # Sistema optimizado con PostGIS
         if self.recommendation_engine:
-            recomendaciones = self.recommendation_engine.generar_recomendaciones(
-                perfil, limite=5, umbral_minimo=0.01
+            recomendaciones = self.recommendation_engine.buscar_propiedades_georreferenciadas(
+                criterios, limite=5
             )
 ```
 
-### Preparación para Migración
-- **Data source abstraction**: Capa de abstracción lista para PostgreSQL
-- **API endpoints consistentes**: Mismos endpoints durante y post-migración
-- **Performance monitoring**: Métricas actuales baseline vs mejoras PostgreSQL esperadas
+### Arquitectura de Datos
+- **Excel RAW**: Fuente original de datos en data/raw/
+- **Validación**: Proceso estructurado con archivos intermedios
+- **PostgreSQL**: Base de datos principal con PostGIS
+- **API endpoints**: Respuesta en milisegundos con índices espaciales
 
-### Beneficios Esperados con PostgreSQL
-- **Chatbot response time**: De 2s → <200ms con consultas PostGIS
+### Beneficios con PostgreSQL
+- **Chatbot response time**: <200ms con consultas PostGIS optimizadas
 - **Concurrent users**: Soporte multiusuario sin bloqueos
 - **Advanced queries**: Búsqueda geoespacial compleja en tiempo real
 - **Data freshness**: Actualizaciones incrementales concurrentes
+- **Data quality**: Validación humana obligatoria antes de producción
 
 ---
 
-*Última actualización: 2025-10-15 (con integración Chatbot UI v2.1.0)*
-**Estado actual**: Chatbot UI operativo con JSON, migración PostgreSQL preparada
+*Última actualización: 2025-10-16*
+**Estado actual**: PostgreSQL como base de datos principal, flujo Excel RAW validado
