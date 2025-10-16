@@ -63,30 +63,32 @@ def inicializar_datos():
         return False
 
     try:
-        # Importar psycopg2 para conexión PostgreSQL
-        import psycopg2
+        # Importar configuración de base de datos para usar Docker wrapper
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'migration', 'config'))
+        from database_config import create_connection
 
-        # Configuración de conexión
-        db_config = {
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'database': os.getenv('DB_NAME', 'citrino'),
-            'user': os.getenv('DB_USER', 'citrino_app'),
-            'password': os.getenv('DB_PASSWORD', 'citrino123'),
-            'port': os.getenv('DB_PORT', '5432')
-        }
+        print("Conectando a PostgreSQL usando Docker wrapper...")
 
-        print(f"Conectando a PostgreSQL: {db_config['host']}:{db_config['port']}/{db_config['database']}")
-
-        # Conectar a PostgreSQL
-        conn = psycopg2.connect(**db_config)
+        # Conectar a PostgreSQL usando Docker wrapper (evita UnicodeDecodeError)
+        conn = create_connection()
         cursor = conn.cursor()
 
-        # Cargar propiedades desde PostgreSQL
+        # Cargar propiedades desde PostgreSQL (temporal sin coordenadas PostGIS)
         cursor.execute("""
             SELECT id, titulo, descripcion, precio_usd, tipo_propiedad,
-                   latitud, longitud, zona, direccion, superficie_total,
-                   superficie_construida, num_dormitorios, num_banos, num_garajes,
-                   fecha_scraping, proveedor_datos, coordenadas_validas, datos_completos
+                   0.0 as longitud,  -- Temporal: coordenadas PostGIS necesitan fix
+                   0.0 as latitud,   -- Temporal: coordenadas PostGIS necesitan fix
+                   COALESCE(zona, 'sin_zona') as zona,
+                   COALESCE(direccion, '') as direccion,
+                   COALESCE(superficie_total, 0) as superficie_total,
+                   COALESCE(superficie_construida, 0) as superficie_construida,
+                   COALESCE(num_dormitorios, 0) as num_dormitorios,
+                   COALESCE(num_banos, 0) as num_banos,
+                   COALESCE(num_garajes, 0) as num_garajes,
+                   COALESCE(fecha_scraping, NOW()) as fecha_scraping,
+                   COALESCE(proveedor_datos, 'postgresql') as proveedor_datos,
+                   COALESCE(coordenadas_validas, false) as coordenadas_validas,
+                   COALESCE(datos_completos, false) as datos_completos
             FROM propiedades
             ORDER BY id
         """)
@@ -95,42 +97,68 @@ def inicializar_datos():
         columnas = [desc[0] for desc in cursor.description]
         rows = cursor.fetchall()
 
+        # Si usamos columnas genéricas (fallback), mapear a nombres reales
+        if columnas[0].startswith('col_'):
+            # Mapeo manual según orden de la consulta
+            column_mapping = {
+                'col_0': 'id',
+                'col_1': 'titulo',
+                'col_2': 'descripcion',
+                'col_3': 'precio_usd',
+                'col_4': 'tipo_propiedad',
+                'col_5': 'longitud',
+                'col_6': 'latitud',
+                'col_7': 'zona',
+                'col_8': 'direccion',
+                'col_9': 'superficie_total',
+                'col_10': 'superficie_construida',
+                'col_11': 'num_dormitorios',
+                'col_12': 'num_banos',
+                'col_13': 'num_garajes',
+                'col_14': 'fecha_scraping',
+                'col_15': 'proveedor_datos',
+                'col_16': 'coordenadas_validas',
+                'col_17': 'datos_completos'
+            }
+            # Actualizar columnas con nombres reales
+            columnas = [column_mapping.get(col, col) for col in columnas]
+
         propiedades_postgres = []
         for row in rows:
             prop_dict = dict(zip(columnas, row))
 
             # Convertir al formato esperado por los motores
             propiedad_formateada = {
-                'id': str(prop_dict['id']),
-                'titulo': prop_dict['titulo'],
-                'descripcion': prop_dict['descripcion'] or '',
-                'precio': float(prop_dict['precio_usd']) if prop_dict['precio_usd'] else 0,
-                'tipo_propiedad': prop_dict['tipo_propiedad'] or '',
-                'zona': prop_dict['zona'] or '',
-                'direccion': prop_dict['direccion'] or '',
-                'superficie': float(prop_dict['superficie_total']) if prop_dict['superficie_total'] else 0,
-                'habitaciones': prop_dict['num_dormitorios'],
-                'banos': prop_dict['num_banos'],
+                'id': str(prop_dict.get('id', row[0] if len(row) > 0 else '')),
+                'titulo': prop_dict.get('titulo', row[1] if len(row) > 1 else ''),
+                'descripcion': prop_dict.get('descripcion', row[2] if len(row) > 2 else ''),
+                'precio': float(prop_dict.get('precio_usd', 0)) if prop_dict.get('precio_usd') else 0,
+                'tipo_propiedad': prop_dict.get('tipo_propiedad', ''),
+                'zona': prop_dict.get('zona', 'sin_zona'),
+                'direccion': prop_dict.get('direccion', ''),
+                'superficie': float(prop_dict.get('superficie_total', 0)) if prop_dict.get('superficie_total') else 0,
+                'habitaciones': prop_dict.get('num_dormitorios', 0),
+                'banos': prop_dict.get('num_banos', 0),
                 'coordenadas': {
-                    'lat': float(prop_dict['latitud']) if prop_dict['latitud'] else None,
-                    'lng': float(prop_dict['longitud']) if prop_dict['longitud'] else None
-                } if prop_dict['latitud'] and prop_dict['longitud'] else {},
-                'fuente': prop_dict['proveedor_datos'] or 'postgresql',
-                'coordenadas_validas': prop_dict['coordenadas_validas'] or False,
-                'datos_completos': prop_dict['datos_completos'] or False,
+                    'lat': float(prop_dict.get('latitud', 0)) if prop_dict.get('latitud') else 0.0,
+                    'lng': float(prop_dict.get('longitud', 0)) if prop_dict.get('longitud') else 0.0
+                },
+                'fuente': prop_dict.get('proveedor_datos', 'postgresql'),
+                'coordenadas_validas': prop_dict.get('coordenadas_validas', False),
+                'datos_completos': prop_dict.get('datos_completos', False),
                 'caracteristicas_principales': {
-                    'precio': float(prop_dict['precio_usd']) if prop_dict['precio_usd'] else 0,
-                    'superficie_m2': float(prop_dict['superficie_total']) if prop_dict['superficie_total'] else 0,
-                    'habitaciones': prop_dict['num_dormitorios'] or 0,
-                    'banos_completos': prop_dict['num_banos'] or 0
+                    'precio': float(prop_dict.get('precio_usd', 0)) if prop_dict.get('precio_usd') else 0,
+                    'superficie_m2': float(prop_dict.get('superficie_total', 0)) if prop_dict.get('superficie_total') else 0,
+                    'habitaciones': prop_dict.get('num_dormitorios', 0),
+                    'banos_completos': prop_dict.get('num_banos', 0)
                 },
                 'ubicacion': {
-                    'zona': prop_dict['zona'] or '',
-                    'direccion': prop_dict['direccion'] or '',
+                    'zona': prop_dict.get('zona', 'sin_zona'),
+                    'direccion': prop_dict.get('direccion', ''),
                     'coordenadas': {
-                        'lat': float(prop_dict['latitud']) if prop_dict['latitud'] else None,
-                        'lng': float(prop_dict['longitud']) if prop_dict['longitud'] else None
-                    } if prop_dict['latitud'] and prop_dict['longitud'] else {}
+                        'lat': float(prop_dict.get('latitud', 0)) if prop_dict.get('latitud') else 0.0,
+                        'lng': float(prop_dict.get('longitud', 0)) if prop_dict.get('longitud') else 0.0
+                    }
                 }
             }
             propiedades_postgres.append(propiedad_formateada)

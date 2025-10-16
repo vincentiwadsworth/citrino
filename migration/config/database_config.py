@@ -64,17 +64,8 @@ class DatabaseConfig:
         )
 
     def get_connection_params(self) -> Dict[str, Any]:
-        """Get connection parameters for psycopg2.connect()"""
-        return {
-            'host': self.host,
-            'port': self.port,
-            'database': self.database,
-            'user': self.user,
-            'password': self.password,
-            'sslmode': self.sslmode,
-            'connect_timeout': self.connect_timeout,
-            'application_name': self.application_name
-        }
+        """Get connection parameters - FORCED to Docker wrapper to avoid psycopg2 encoding issues"""
+        raise NotImplementedError("Direct psycopg2 connections are DISABLED due to UnicodeDecodeError. Use create_connection() instead.")
 
 @dataclass
 class MigrationConfig:
@@ -177,6 +168,8 @@ class DockerPostgresCursor:
         self.connection = connection
         self.config = config
         self._last_result = None
+        self._last_query = None
+        self.description = None
 
     def execute(self, query: str, params: Optional[Tuple] = None):
         """Execute SQL query using Docker psql"""
@@ -188,11 +181,11 @@ class DockerPostgresCursor:
             else:
                 formatted_query = query
 
-            # Build psql command
+            # Build psql command - use tab delimiter and show NULL values explicitly
             cmd = [
                 'docker', 'exec', '-i', self.connection.container_name,
                 'psql', '-U', self.config.user, '-d', self.config.database,
-                '-t', '-A', '-F,', '-c', formatted_query
+                '-t', '-A', '-F\t', '-P', 'null=[NULL]', '-c', formatted_query
             ]
 
             # Execute command
@@ -200,16 +193,34 @@ class DockerPostgresCursor:
                 cmd,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 timeout=60
             )
 
             if result.returncode != 0:
-                error_msg = result.stderr.strip()
+                error_msg = result.stderr.strip() if result.stderr else "Unknown error"
                 logging.error(f"Query failed: {error_msg}")
                 raise Exception(f"Docker psql query failed: {error_msg}")
 
-            # Parse result
-            self._last_result = self._parse_result(result.stdout.strip())
+            # Parse result - handle None stdout
+            if result.stdout is None:
+                self._last_result = []
+                self.description = []
+            else:
+                # Debug: mostrar output crudo
+                logging.debug(f"PSQL raw output (first 500 chars): {result.stdout[:500]}")
+                logging.debug(f"PSQL raw output lines: {len(result.stdout.split(chr(10)))}")
+
+                self._last_result = self._parse_result(result.stdout.strip())
+                # Create description with real column names for compatibility
+                self._build_column_description(formatted_query)
+
+                # Debug: mostrar resultado parseado
+                logging.debug(f"Parsed result rows: {len(self._last_result)}")
+                if self._last_result:
+                    logging.debug(f"First parsed row: {self._last_result[0]}")
+                    logging.debug(f"Row length: {len(self._last_result[0])}")
 
         except subprocess.TimeoutExpired:
             raise Exception("Query timeout (60s)")
@@ -246,25 +257,43 @@ class DockerPostgresCursor:
         return 0
 
     def _parse_result(self, output: str) -> List[Tuple]:
-        """Parse CSV-like output from psql"""
+        """Parse tab-delimited output from psql handling multi-line fields"""
         if not output.strip():
             return []
 
-        # Split by lines and parse CSV
+        # psql output format: fields separated by tabs, records by newlines
+        # But some fields may contain newlines, so we need to parse carefully
         lines = output.strip().split('\n')
         result = []
 
-        for line in lines:
-            if line.strip():
-                # Handle CSV parsing for complex values
-                try:
-                    reader = csv.reader([line])
-                    row = next(reader)
-                    result.append(tuple(row))
-                except:
-                    # Fallback for simple cases
-                    row = [col.strip() for col in line.split(',')]
-                    result.append(tuple(row))
+        # Count expected columns by analyzing the first line
+        if lines:
+            first_line_cols = len(lines[0].split('\t'))
+
+            # Parse line by line, handling multi-line records
+            current_record = []
+            for line in lines:
+                if not line.strip():
+                    continue
+
+                cols = line.split('\t')
+
+                # If this looks like the start of a new record
+                if len(cols) == first_line_cols:
+                    # Save previous record if exists
+                    if current_record:
+                        result.append(tuple(current_record))
+                    # Start new record
+                    current_record = [col.strip() for col in cols]
+                else:
+                    # This is a continuation of the current record (multi-line field)
+                    if current_record:
+                        # Append to the last field of current record
+                        current_record[-1] += '\n' + line.strip()
+
+            # Don't forget the last record
+            if current_record:
+                result.append(tuple(current_record))
 
         return result
 
@@ -273,6 +302,92 @@ class DockerPostgresCursor:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    def close(self):
+        """Close cursor for psycopg2 compatibility"""
+        pass
+
+    def _build_column_description(self, query: str):
+        """Build column description from SELECT query for psycopg2 compatibility"""
+        try:
+            import re
+
+            # Extract column names from SELECT query
+            # Handle queries with aliases (AS)
+            select_match = re.search(r'SELECT\s+(.*?)\s+FROM', query, re.IGNORECASE | re.DOTALL)
+            if select_match:
+                select_clause = select_match.group(1)
+
+                # Use regex to split by commas that are not inside parentheses
+                # This handles functions like ST_X(coordenadas::geometry) as longitud
+                col_parts = re.split(r',\s*(?=(?:[^()]*\([^()]*\))*[^()]*$)', select_clause)
+
+                columns = []
+                for col in col_parts:
+                    col = col.strip()
+
+                    # Handle aliases with "AS" - case insensitive
+                    as_match = re.search(r'\s+AS\s+(\w+)$', col, re.IGNORECASE)
+                    if as_match:
+                        alias = as_match.group(1).strip('"\'')
+                        columns.append(alias)
+                        continue
+
+                    # Handle function calls with implicit alias (last word)
+                    if '(' in col and ')' in col:
+                        # Remove everything inside and including parentheses, then check last word
+                        func_without_parens = re.sub(r'\([^)]*\)', '', col).strip()
+                        if func_without_parens:
+                            parts = func_without_parens.split()
+                            if len(parts) > 1:
+                                # Last word is likely the alias
+                                alias = parts[-1].strip('"\'')
+                                columns.append(alias)
+                            else:
+                                # Use function name
+                                func_name = parts[0].strip('"\'')
+                                columns.append(func_name)
+                        else:
+                            # Fallback to function name
+                            func_name = col.split('(')[0].strip('"\'')
+                            columns.append(func_name)
+                        continue
+
+                    # Handle simple column names with spaces (last word is alias)
+                    if ' ' in col:
+                        parts = col.split()
+                        alias = parts[-1].strip('"\'')
+                        columns.append(alias)
+                    else:
+                        # Use column name directly
+                        col_name = col.strip('"\'')
+                        columns.append(col_name)
+
+                # Special case: if we have results but parsing failed, use result count to generate column names
+                if self._last_result and len(columns) != len(self._last_result[0]):
+                    logging.warning(f"Column parsing mismatch: got {len(columns)} names but {len(self._last_result[0])} result columns")
+                    # Use generic column names as fallback
+                    num_cols = len(self._last_result[0])
+                    self.description = [(f'col_{i}', None, None, None, None, None, None) for i in range(num_cols)]
+                else:
+                    # Build description tuple (name, type_code, display_size, internal_size, precision, scale, null_ok)
+                    self.description = [(col, None, None, None, None, None, None) for col in columns]
+            else:
+                # Fallback to generic column names
+                if self._last_result:
+                    num_cols = len(self._last_result[0])
+                    self.description = [(f'col_{i}', None, None, None, None, None, None) for i in range(num_cols)]
+                else:
+                    self.description = []
+
+        except Exception as e:
+            # Fallback to generic description
+            logging.warning(f"Could not parse column names: {e}")
+            if self._last_result:
+                num_cols = len(self._last_result[0])
+                self.description = [(f'col_{i}', None, None, None, None, None, None) for i in range(num_cols)]
+            else:
+                self.description = []
 
 def docker_connection(config: Optional[DatabaseConfig] = None):
     """Factory function for Docker PostgreSQL connection"""
@@ -311,23 +426,9 @@ def create_connection_pool(
     config: Optional[DatabaseConfig] = None,
     min_connections: int = 1,
     max_connections: int = 5
-) -> psycopg2.pool.ThreadedConnectionPool:
-    """Create a connection pool for concurrent operations"""
-
-    if config is None:
-        config = load_database_config()
-
-    try:
-        pool = psycopg2.pool.ThreadedConnectionPool(
-            minconn=min_connections,
-            maxconn=max_connections,
-            **config.get_connection_params()
-        )
-        logging.info(f"Created connection pool: {min_connections}-{max_connections} connections")
-        return pool
-    except Exception as e:
-        logging.error(f"Failed to create connection pool: {e}")
-        raise
+) -> None:
+    """Create a connection pool for concurrent operations - DISABLED due to psycopg2 issues"""
+    raise NotImplementedError("Connection pools DISABLED due to psycopg2 UnicodeDecodeError. Use individual Docker connections instead.")
 
 def test_connection(config: Optional[DatabaseConfig] = None) -> bool:
     """Test database connection and basic functionality"""

@@ -33,7 +33,10 @@
       "Bash(cat:*)",
       "WebFetch(domain:stackoverflow.com)",
       "Bash(taskkill:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
