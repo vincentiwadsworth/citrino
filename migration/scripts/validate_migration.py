@@ -6,14 +6,16 @@ Ejecuta pruebas funcionales y de rendimiento para validar que todo funciona corr
 
 import os
 import sys
-import psycopg2
-import psycopg2.extras
 import time
 import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Tuple
 import math
+
+# Agregar path para importar configuración de base de datos
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from database_config import create_connection
 
 # Configuración de logging
 logging.basicConfig(
@@ -29,17 +31,16 @@ logger = logging.getLogger(__name__)
 class MigrationValidator:
     """Clase principal para validar la migración"""
 
-    def __init__(self, db_config: Dict):
+    def __init__(self, db_config: Dict = None):
         self.db_config = db_config
         self.conn = None
         self.test_results = {}
 
     def conectar_db(self):
-        """Establecer conexión con PostgreSQL"""
+        """Establecer conexión con PostgreSQL usando Docker wrapper"""
         try:
-            self.conn = psycopg2.connect(**self.db_config)
-            self.conn.autocommit = False
-            logger.info("Conexión exitosa a PostgreSQL")
+            self.conn = create_connection(self.db_config)
+            logger.info("Conexión exitosa a PostgreSQL via Docker")
         except Exception as e:
             logger.error(f"Error conectando a PostgreSQL: {e}")
             raise
@@ -592,14 +593,9 @@ class MigrationValidator:
 
 def main():
     """Función principal"""
-    # Configuración de base de datos
-    db_config = {
-        'host': os.getenv('DB_HOST', 'localhost'),
-        'database': os.getenv('DB_NAME', 'citrino'),
-        'user': os.getenv('DB_USER', 'postgres'),
-        'password': os.getenv('DB_PASSWORD', 'password'),
-        'port': os.getenv('DB_PORT', '5432')
-    }
+    # Usar configuración desde database_config
+    from database_config import load_database_config
+    db_config = None  # Dejar que database_config maneje la configuración
 
     # Crear directorio de logs si no existe
     os.makedirs('migration/logs', exist_ok=True)

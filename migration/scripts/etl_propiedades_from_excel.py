@@ -7,14 +7,17 @@ Procesa todos los archivos Excel de relevamiento y los migra a la base de datos
 import os
 import pandas as pd
 import numpy as np
-import psycopg2
-from psycopg2.extras import execute_values
+import sys
 from datetime import datetime
 import json
 import logging
 from typing import Dict, List, Tuple, Optional
 import re
 from pathlib import Path
+
+# Agregar path para importar configuración de base de datos
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from database_config import create_connection
 
 # Configuración de logging
 logging.basicConfig(
@@ -30,18 +33,17 @@ logger = logging.getLogger(__name__)
 class ETLPropiedades:
     """Clase principal para ETL de propiedades desde Excel a PostgreSQL"""
 
-    def __init__(self, db_config: Dict):
+    def __init__(self, db_config: Dict = None):
         self.db_config = db_config
         self.conn = None
         self.agentes_cache = {}  # Cache para deduplicación de agentes
         self.processed_urls = set()  # Evitar duplicados
 
     def conectar_db(self):
-        """Establecer conexión con PostgreSQL"""
+        """Establecer conexión con PostgreSQL usando Docker wrapper"""
         try:
-            self.conn = psycopg2.connect(**self.db_config)
-            self.conn.autocommit = False
-            logger.info("Conexión exitosa a PostgreSQL")
+            self.conn = create_connection(self.db_config)
+            logger.info("Conexión exitosa a PostgreSQL via Docker")
         except Exception as e:
             logger.error(f"Error conectando a PostgreSQL: {e}")
             raise
@@ -330,24 +332,24 @@ class ETLPropiedades:
                         prop['coordenadas_validadas']
                     ))
 
-                # Insertar batch
-                execute_values(
-                    cursor,
-                    """
-                    INSERT INTO propiedades (
-                        url, titulo, precio_usd, descripcion, habitaciones,
-                        banos, garajes, sup_terreno, sup_construida, detalles,
-                        latitud, longitud, direccion, zona, agente_id,
-                        fuente_origen, coordenadas_validadas
-                    ) VALUES %s
-                    ON CONFLICT (url) DO UPDATE SET
-                        titulo = EXCLUDED.titulo,
-                        precio_usd = EXCLUDED.precio_usd,
-                        descripcion = EXCLUDED.descripcion,
-                        updated_at = CURRENT_TIMESTAMP
-                    """,
-                    values
-                )
+                # Insertar batch individualmente (Docker wrapper no soporta execute_values)
+                for value in values:
+                    cursor.execute(
+                        """
+                        INSERT INTO propiedades (
+                            url, titulo, precio_usd, descripcion, habitaciones,
+                            banos, garajes, sup_terreno, sup_construida, detalles,
+                            latitud, longitud, direccion, zona, agente_id,
+                            fuente_origen, coordenadas_validadas
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (url) DO UPDATE SET
+                            titulo = EXCLUDED.titulo,
+                            precio_usd = EXCLUDED.precio_usd,
+                            descripcion = EXCLUDED.descripcion,
+                            updated_at = CURRENT_TIMESTAMP
+                        """,
+                        value
+                    )
 
                 logger.info(f"Insertado batch {i//batch_size + 1}/{(len(propiedades)-1)//batch_size + 1}")
 
@@ -412,14 +414,9 @@ class ETLPropiedades:
 
 def main():
     """Función principal del ETL"""
-    # Configuración de base de datos
-    db_config = {
-        'host': os.getenv('DB_HOST', 'localhost'),
-        'database': os.getenv('DB_NAME', 'citrino'),
-        'user': os.getenv('DB_USER', 'postgres'),
-        'password': os.getenv('DB_PASSWORD', 'password'),
-        'port': os.getenv('DB_PORT', '5432')
-    }
+    # Usar configuración desde database_config
+    from database_config import load_database_config
+    db_config = None  # Dejar que database_config cargue desde variables de entorno
 
     # Crear directorio de logs si no existe
     os.makedirs('migration/logs', exist_ok=True)

@@ -7,7 +7,6 @@ Orquesta todo el proceso desde la configuración inicial hasta la validación fi
 import os
 import sys
 import subprocess
-import psycopg2
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -16,6 +15,7 @@ import json
 # Agregar directorios al path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+from database_config import create_connection, load_database_config
 from etl_propiedades_from_excel import ETLPropiedades
 from etl_servicios_from_excel import ETLServicios
 
@@ -34,13 +34,8 @@ class MigrationManager:
     """Manager principal para la migración completa"""
 
     def __init__(self):
-        self.db_config = {
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'database': os.getenv('DB_NAME', 'citrino'),
-            'user': os.getenv('DB_USER', 'postgres'),
-            'password': os.getenv('DB_PASSWORD', 'password'),
-            'port': os.getenv('DB_PORT', '5432')
-        }
+        # Cargar configuración desde database_config
+        self.db_config = None  # Dejar que database_config maneje la configuración
         self.start_time = datetime.now()
 
         # Crear directorios necesarios
@@ -73,18 +68,11 @@ class MigrationManager:
 
         logger.info(f"Encontrados {len(archivos_excel)} archivos Excel")
 
-        # Verificar conexión a PostgreSQL
+        # Verificar conexión a PostgreSQL usando Docker wrapper
         try:
-            import psycopg2
-            conn = psycopg2.connect(
-                host=self.db_config['host'],
-                database=self.db_config['database'],
-                user=self.db_config['user'],
-                password=self.db_config['password'],
-                port=self.db_config['port']
-            )
+            conn = create_connection(self.db_config)
             conn.close()
-            logger.info("Conexión a PostgreSQL verificada")
+            logger.info("Conexión a PostgreSQL verificada via Docker")
         except Exception as e:
             logger.error(f"No se puede conectar a PostgreSQL: {e}")
             raise
@@ -100,14 +88,14 @@ class MigrationManager:
         try:
             # Ejecutar script SQL con Docker
             cmd = [
-                'docker', 'exec', '-i', 'citrino-postgres-new',
-                'psql', '-U', self.db_config['user'], '-d', self.db_config['database'],
+                'docker', 'exec', '-i', 'citrino-postgresql',
+                'psql', '-U', 'postgres', '-d', 'citrino',
                 '-f', f'/tmp/schema.sql'
             ]
 
             # Copiar schema file al contenedor
             copy_cmd = [
-                'docker', 'cp', schema_file, 'citrino-postgres-new:/tmp/schema.sql'
+                'docker', 'cp', schema_file, 'citrino-postgresql:/tmp/schema.sql'
             ]
             subprocess.run(copy_cmd, check=True)
 
@@ -168,7 +156,7 @@ class MigrationManager:
         logger.info("Validando migración...")
 
         try:
-            conn = psycopg2.connect(**self.db_config)
+            conn = create_connection(self.db_config)
             cursor = conn.cursor()
 
             # Verificar tablas principales
@@ -266,7 +254,7 @@ class MigrationManager:
         logger.info("Ejecutando pruebas de rendimiento...")
 
         try:
-            conn = psycopg2.connect(**self.db_config)
+            conn = create_connection(self.db_config)
             cursor = conn.cursor()
 
             import time
