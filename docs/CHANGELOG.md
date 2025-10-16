@@ -5,6 +5,30 @@ Todos los cambios notables del proyecto Citrino se documentarán en este archivo
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.2.3] - 2025-10-16
+
+### Arreglado
+- **IMPLEMENTACIONES CRÍTICAS ETL**: Reparación completa de sistema de migración PostgreSQL + PostGIS
+  - **ETL PROPIEDADES**: Eliminado psycopg2 directo, ahora usa Docker wrapper para compatibilidad Windows
+  - **ETL SERVICIOS**: Corregida importación y configuración en run_migration.py
+  - **DOCKER WRAPPER**: Todos los scripts actualizados para evitar errores encoding Windows
+  - **CONTENEDORES**: Actualizada configuración a citrino-postgresql (puerto 5433) consistente
+- **CONEXIONES POSTGRESQL**: Sistema completo funcional sin dependencias psycopg2 directas
+- **SISTEMA MIGRACIÓN**: Pipeline completo listo para ejecución sin errores críticos
+
+### Cambiado
+- **ARQUITECTURA ETL**: Migración de psycopg2 directo a Docker wrapper universal
+- **CONFIGURACIÓN DOCKER**: Centralización en contenedor citrino-postgresql para consistencia
+- **SISTEMA DE VALIDACIÓN**: Actualizado para usar conexiones compatibles Windows
+
+### Impacto
+- **ETL FUNCTIONAL**: Sistema completo de procesamiento de propiedades y servicios
+- **POSTGRESQL LISTO**: Pipeline de migración sin errores de conexión
+- **WINDOWS COMPATIBLE**: Eliminados problemas de encoding UTF-8
+- **POSTGIS READY**: Sistema preparado para consultas geoespaciales de alto rendimiento
+
+---
+
 ## [2.2.2] - 2025-10-16
 
 ### Añadido
