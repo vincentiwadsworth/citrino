@@ -21,7 +21,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 try:
     from llm_integration import LLMIntegration, LLMConfig
     from description_parser import DescriptionParser
-    from src.recommendation_engine_postgis import RecommendationEngine
+    from src.recommendation_engine_postgis import RecommendationEngineMejorado
     from prompts.system_prompt_chat import CITRINO_CHAT_SYSTEM_PROMPT, CITRINO_CHAT_CONFIG
     LLM_AVAILABLE = True
 except ImportError as e:
@@ -69,7 +69,7 @@ class CitrinoChatbotAPI:
             logger.info("Description Parser inicializado")
 
             # Inicializar motor de recomendaciones
-            self.recommendation_engine = RecommendationEngine()
+            self.recommendation_engine = RecommendationEngineMejorado()
             self.recommendation_engine.cargar_propiedades(self.propiedades)
             logger.info("Recommendation Engine inicializado")
 

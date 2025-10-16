@@ -18,8 +18,7 @@ logger = logging.getLogger(__name__)
 # Agregar los directorios src y scripts al path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from recommendation_engine import RecommendationEngine
-from src.recommendation_engine_postgis import RecommendationEngine  # PostGIS-powered recommendation engine
+from src.recommendation_engine_postgis import RecommendationEngineMejorado  # PostGIS-powered recommendation engine
 from property_catalog import SistemaConsultaCitrino
 
 app = Flask(__name__)
@@ -40,7 +39,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permitir todos los orígen
 
 # Inicializar sistemas
 sistema_consulta = SistemaConsultaCitrino()
-motor_recomendacion = RecommendationEngine()                    # RECOMMENDED - Simple y eficiente
+motor_recomendacion = RecommendationEngineMejorado()           # RECOMMENDED - PostGIS-powered
 motor_mejorado = RecommendationEngineMejorado()               # DEPRECATED - Scoring multicriterio complejo
 
 # Variable global para estado de carga
