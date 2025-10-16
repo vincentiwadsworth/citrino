@@ -212,7 +212,7 @@ WHERE
 
 ```bash
 # Ejemplo de procesamiento
-python scripts/validation/validate_raw_to_intermediate.py \
+python scripts/validation/validation_validate_properties_intermediate.py \
   --input "data/raw/relevamiento/2025.08.15 05.xlsx"
 ```
 

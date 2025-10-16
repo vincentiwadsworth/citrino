@@ -75,7 +75,7 @@ def check_dependencies():
     required_files = [
         parent_dir / 'api' / 'server.py',
         parent_dir / 'src' / 'llm_integration.py',
-        parent_dir / 'src' / 'recommendation_engine_mejorado.py',
+        parent_dir / 'src' / 'recommendation_engine_postgis.py',
         parent_dir / 'data' / 'metrics'
     ]
 

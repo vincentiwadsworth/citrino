@@ -9,7 +9,7 @@ Procesa UN archivo raw a la vez generando:
 3. Archivo listo para revisión humana por equipo Citrino
 
 Uso:
-    python scripts/validation/validate_raw_to_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
+    python scripts/validation/validation_validate_properties_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
 
 Author: Claude Code
 Date: 2025-10-15
@@ -24,7 +24,41 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Any, Optional
 import argparse
 import warnings
+import re
+import unicodedata
+from pathlib import Path
 warnings.filterwarnings('ignore')
+
+# Cargar variables de entorno desde .env
+def load_env_file():
+    """Carga variables de entorno desde archivo .env"""
+    env_file = Path(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+    if env_file.exists():
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key] = value
+
+load_env_file()
+
+# Agregar el directorio src al path para importar módulos
+src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+# Importar módulos de extracción
+try:
+    import description_parser
+    import llm_integration
+    DescriptionParser = description_parser.DescriptionParser
+    LLMIntegration = llm_integration.LLMIntegration
+    EXTRACCION_AVAILABLE = True
+    print("Módulos LLM cargados exitosamente")
+except ImportError as e:
+    print(f"ADVERTENCIA: Módulos de extracción no disponibles: {e}")
+    EXTRACCION_AVAILABLE = False
 
 # Configuración de coordenadas Santa Cruz (corregido)
 SANTA_CRUZ_BOUNDS = {
@@ -41,6 +75,9 @@ PRECIO_RANGES = {
     'outlier_factor': 3.0
 }
 
+# Tasa de conversión BOB a USD (actualizable)
+TASA_CAMBIO_BOB_USD = 6.96  # 1 USD = 6.96 BOB (tasa aproximada)
+
 class RawDataValidator:
     """Validador de archivos raw con generación de archivos intermedios"""
 
@@ -56,14 +93,67 @@ class RawDataValidator:
             'precios_invalidos': 0,
             'datos_completos': 0,
             'datos_incompletos': 0,
-            'duplicados': 0
+            'duplicados': 0,
+            'extracciones_regex': 0,
+            'extracciones_llm': 0,
+            'conversiones_moneda': 0
         }
         self.errors = []
+
+        # Inicializar parser avanzado de descripciones
+        if EXTRACCION_AVAILABLE:
+            try:
+                self.description_parser = DescriptionParser(use_regex_first=True)
+                self.log("Parser LLM inicializado")
+            except Exception as e:
+                self.log(f"Error inicializando LLM: {e}")
+                self.description_parser = None
+        else:
+            self.description_parser = None
+            self.log("DescriptionParser no disponible, usando extracción básica")
 
     def log(self, message: str):
         """Imprimir mensaje si verbose está activado"""
         if self.verbose:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] {message}")
+
+    def normalize_text(self, text: Any) -> str:
+        """
+        Normaliza texto de manera robusta:
+        - Corrige encoding
+        - Estandariza mayúsculas/minúsculas
+        - Elimina caracteres problemáticos
+        - Preserva acentos y caracteres españoles
+        """
+        if pd.isna(text) or text is None:
+            return ""
+
+        # Convertir a string si no lo es
+        if not isinstance(text, str):
+            text = str(text)
+
+        # Paso 1: Normalizar Unicode (NFC para preservar acentos)
+        text = unicodedata.normalize('NFC', text)
+
+        # Paso 2: Corregir problemas de encoding comunes
+        encoding_fixes = {
+            'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+            'Ã±': 'ñ', 'Ã¼': 'ü', 'Â¿': '¿', 'Â¡': '¡',
+            'Ã': 'í', 'Ã': 'ó', 'Ã': 'á', 'Ã': 'é', 'Ã': 'ú',
+            'Ã': 'Ñ', 'Ã': 'Ü',
+            'Ã¡': 'Á', 'Ã©': 'É', 'Ã­': 'Í', 'Ã³': 'Ó', 'Ãº': 'Ú'
+        }
+
+        for wrong, correct in encoding_fixes.items():
+            text = text.replace(wrong, correct)
+
+        # Paso 3: Eliminar caracteres de control excepto saltos de línea
+        text = ''.join(char for char in text if ord(char) >= 32 or char in '\n\r\t')
+
+        # Paso 4: Estandarizar espacios en blanco
+        text = re.sub(r'\s+', ' ', text.strip())
+
+        return text
 
     def validate_coordinates(self, lat: Optional[float], lng: Optional[float]) -> Tuple[bool, str]:
         """
@@ -112,22 +202,86 @@ class RawDataValidator:
 
     def extract_price(self, price_value: Any) -> Tuple[float, str]:
         """
-        Extraer precio numérico de texto
+        Extraer precio numérico de texto con detección de moneda y conversión automática
         """
         if pd.isna(price_value) or price_value is None:
             return 0.0, "Sin precio"
 
         try:
-            price_str = str(price_value)
-            # Limpiar símbolos y texto
-            price_str = price_str.replace('$', '').replace('USD', '').replace('Usd', '').replace(',', '').strip()
+            price_str = str(price_value).strip()
+            moneda_detectada = "USD"
 
-            # Convertir a número
-            price_num = float(price_str)
-            return price_num, "Precio extraído"
+            # Detectar moneda en el texto original
+            if any(indicator in price_str.upper() for indicator in ['BOB', 'BS.', 'BS', 'BOLIVIANOS']):
+                moneda_detectada = "BOB"
+            elif '$' in price_str and 'US' in price_str.upper():
+                moneda_detectada = "USD"
+
+            # Limpiar símbolos y texto para extracción numérica
+            price_str_limpio = price_str.replace('$', '').replace('USD', '').replace('Usd', '').replace('BOB', '').replace('Bs.', '').replace('BS', '').replace('bolivianos', '').replace(',', '').strip()
+
+            # Extraer número
+            price_num = float(price_str_limpio)
+
+            # Convertir a USD si está en BOB
+            if moneda_detectada == "BOB":
+                price_num_usd = price_num / TASA_CAMBIO_BOB_USD
+                self.stats['conversiones_moneda'] += 1
+                return price_num_usd, f"Precio BOB convertido: {price_num:,.0f} Bs → {price_num_usd:,.0f} USD"
+            else:
+                return price_num, f"Precio USD extraído: {price_num:,.0f}"
 
         except (ValueError, TypeError):
             return 0.0, f"Error extrayendo precio: {price_value}"
+
+    def extract_advanced_features(self, titulo: str, descripcion: str) -> Dict[str, Any]:
+        """
+        Extrae características del texto usando LLM y regex
+        """
+        if not self.description_parser:
+            return {}
+
+        try:
+            # Usar el parser híbrido
+            extracted = self.description_parser.extract_from_description(
+                descripcion=descripcion,
+                titulo=titulo,
+                use_cache=True
+            )
+
+            # Actualizar estadísticas
+            metodo = extracted.get('_extraction_method', 'desconocido')
+            if metodo == 'regex_only':
+                self.stats['extracciones_regex'] += 1
+            elif 'llm' in metodo:
+                self.stats['extracciones_llm'] += 1
+
+            self.log(f"  Extraídas características vía {metodo}")
+
+            # Mapear campos a nombres estandarizados
+            resultado = {
+                'estado_operativo': extracted.get('estado_operativo'),
+                'habitaciones_extraidas': extracted.get('habitaciones'),
+                'banos_extraidos': extracted.get('banos'),
+                'garajes_extraidos': extracted.get('garajes'),
+                'superficie_extraida': extracted.get('superficie'),
+                'agente_extraido': extracted.get('agente'),
+                'contacto_agente': extracted.get('contacto_agente'),
+                'zona_extraida': extracted.get('zona'),
+                'tipo_propiedad': extracted.get('tipo_propiedad'),
+                'amenities_extraidos': extracted.get('caracteristicas', []),
+                'informacion_adicional': extracted.get('informacion_adicional'),
+                'metodo_extraccion': metodo,
+                'proveedor_llm': extracted.get('_llm_provider'),
+                'modelo_llm': extracted.get('_llm_model'),
+                'fallback_usado': extracted.get('_fallback_usado', False)
+            }
+
+            return resultado
+
+        except Exception as e:
+            self.log(f"Error extrayendo características: {e}")
+            return {}
 
     def extract_surface(self, surface_value: Any) -> Tuple[float, str]:
         """
@@ -249,18 +403,26 @@ class RawDataValidator:
         for idx, row in df.iterrows():
             self.stats['total_filas'] += 1
 
+            # Reporte de progreso en tiempo real
+            progress = f"({idx+1}/{len(df)})"
+            if idx % 50 == 0 or idx == len(df) - 1:  # Reportar cada 50 o al final
+                print(f"[PROGRESO] {filename}: {progress} - {((idx+1)/len(df))*100:.1f}%")
+
             try:
                 # Extraer datos básicos
-                titulo_original = self.clean_text(row.get('Título') or row.get('Titulo') or row.get('titulo', ''))
+                titulo_original = self.normalize_text(row.get('Título') or row.get('Titulo') or row.get('titulo', ''))
                 precio_original = row.get('Precio', 0)
-                descripcion_original = self.clean_text(row.get('Descripción') or row.get('Descripcion', ''))
-                agente_original = self.clean_text(row.get('Agente', ''))
-                telefono_original = self.clean_text(row.get('Teléfono') or row.get('Telefono', ''))
+                descripcion_original = self.normalize_text(row.get('Descripción') or row.get('Descripcion', ''))
+                agente_original = self.normalize_text(row.get('Agente', ''))
+                telefono_original = self.normalize_text(row.get('Teléfono') or row.get('Telefono', ''))
 
                 # Procesar datos
                 precio_normalizado, precio_msg = self.extract_price(precio_original)
                 titulo_limpio = titulo_original
                 descripcion_limpia = descripcion_original
+
+                # EXTRAER CARACTERÍSTICAS AVANZADAS usando DescriptionParser
+                caract_avanzadas = self.extract_advanced_features(titulo_original, descripcion_original)
 
                 # Extraer coordenadas
                 lat_raw = row.get('Latitud')
@@ -318,7 +480,7 @@ class RawDataValidator:
                 sup_terreno, sup_terreno_msg = self.extract_surface(row.get('Sup. Terreno'))
                 sup_construida, sup_construida_msg = self.extract_surface(row.get('Sup. Construida'))
 
-                # Crear fila procesada
+                # Crear fila procesada con características avanzadas
                 processed_row = {
                     # Datos originales (preservados)
                     'Original_Titulo': titulo_original,
@@ -338,12 +500,31 @@ class RawDataValidator:
                     'Latitud_Procesada': lat_procesada,
                     'Longitud_Procesada': lng_procesada,
 
-                    # Características
+                    # Características básicas (originales)
                     'Habitaciones': habitaciones,
                     'Baños': baños,
                     'Garajes': garajes,
                     'Sup_Terreno': sup_terreno,
                     'Sup_Construida': sup_construida,
+
+                    # CARACTERÍSTICAS AVANZADAS EXTRAÍDAS
+                    'Estado_Operativo': caract_avanzadas.get('estado_operativo'),
+                    'Habitaciones_Extraidas': caract_avanzadas.get('habitaciones_extraidas'),
+                    'Banos_Extraidos': caract_avanzadas.get('banos_extraidos'),
+                    'Garajes_Extraidos': caract_avanzadas.get('garajes_extraidos'),
+                    'Superficie_Extraida': caract_avanzadas.get('superficie_extraida'),
+                    'Agente_Extraido': caract_avanzadas.get('agente_extraido'),
+                    'Contacto_Agente_Extraido': caract_avanzadas.get('contacto_agente'),
+                    'Zona_Extraida': caract_avanzadas.get('zona_extraida'),
+                    'Tipo_Propiedad_Extraido': caract_avanzadas.get('tipo_propiedad'),
+                    'Amenities_Extraidos': caract_avanzadas.get('amenities_extraidos', []),
+                    'Informacion_Adicional': caract_avanzadas.get('informacion_adicional'),
+
+                    # Metadatos de extracción
+                    'Metodo_Extraccion': caract_avanzadas.get('metodo_extraccion'),
+                    'Proveedor_LLM': caract_avanzadas.get('proveedor_llm'),
+                    'Modelo_LLM': caract_avanzadas.get('modelo_llm'),
+                    'Fallback_Usado': caract_avanzadas.get('fallback_usado', False),
 
                     # Estado y observaciones
                     'ESTADO': estado,
@@ -591,10 +772,13 @@ class RawDataValidator:
             # Tomar primeras 10 filas para muestra
             sample_df = df_processed.head(10)
 
-            # Seleccionar columnas importantes para revisión
+            # Seleccionar columnas importantes para revisión (incluyendo características avanzadas)
             important_cols = [
                 'Original_Titulo', 'Original_Precio', 'Precio_Normalizado',
-                'Latitud_Procesada', 'Longitud_Procesada', 'ESTADO', 'OBSERVACIONES'
+                'Latitud_Procesada', 'Longitud_Procesada', 'ESTADO', 'OBSERVACIONES',
+                'Estado_Operativo', 'Habitaciones_Extraidas', 'Banos_Extraidos',
+                'Garajes_Extraidos', 'Superficie_Extraida', 'Zona_Extraida',
+                'Tipo_Propiedad_Extraido', 'Agente_Extraido', 'Metodo_Extraccion'
             ]
 
             # Filtrar solo columnas existentes
@@ -722,38 +906,120 @@ class RawDataValidator:
             return False
 
 
+def process_all_files_in_directory(input_dir: str, output_path: str, file_type: str = 'propiedades', verbose: bool = False) -> bool:
+    """
+    Procesa TODOS los archivos RAW en un directorio automáticamente
+    """
+    import glob
+
+    # Buscar todos los archivos Excel en el directorio
+    pattern = os.path.join(input_dir, "**", "*.xlsx")
+    all_files = glob.glob(pattern, recursive=True)
+
+    if not all_files:
+        print(f"ERROR: No se encontraron archivos .xlsx en {input_dir}")
+        return False
+
+    print(f"ARCHIVOS ENCONTRADOS: {len(all_files)}")
+    for f in all_files:
+        print(f"  - {os.path.basename(f)}")
+
+    # Crear directorio de salida
+    os.makedirs(output_path, exist_ok=True)
+
+    # Procesar cada archivo
+    total_stats = {
+        'archivos_procesados': 0,
+        'archivos_exitosos': 0,
+        'archivos_fallidos': 0,
+        'total_propiedades': 0
+    }
+
+    for i, input_file in enumerate(all_files, 1):
+        filename = os.path.basename(input_file)
+        print(f"\n{'='*60}")
+        print(f"PROCESANDO ARCHIVO {i}/{len(all_files)}: {filename}")
+        print(f"{'='*60}")
+
+        # Crear validator para cada archivo
+        validator = RawDataValidator(verbose=verbose)
+
+        # Procesar archivo
+        success = validator.process_file(input_file, output_path, file_type)
+
+        # Actualizar estadísticas
+        total_stats['archivos_procesados'] += 1
+        total_stats['total_propiedades'] += validator.stats['total_filas']
+
+        if success:
+            total_stats['archivos_exitosos'] += 1
+            print(f"✅ {filename}: {validator.stats['total_filas']} propiedades procesadas")
+        else:
+            total_stats['archivos_fallidos'] += 1
+            print(f"❌ {filename}: ERROR EN PROCESAMIENTO")
+
+    # Resumen final
+    print(f"\n{'='*60}")
+    print("RESUMEN FINAL DEL PROCESAMIENTO")
+    print(f"{'='*60}")
+    print(f"Archivos procesados: {total_stats['archivos_procesados']}")
+    print(f"Archivos exitosos: {total_stats['archivos_exitosos']}")
+    print(f"Archivos fallidos: {total_stats['archivos_fallidos']}")
+    print(f"Total propiedades procesadas: {total_stats['total_propiedades']}")
+    print(f"Archivos generados en: {output_path}")
+    print(f"{'='*60}")
+
+    return total_stats['archivos_fallidos'] == 0
+
+
 def main():
     """
     Función principal
     """
-    parser = argparse.ArgumentParser(description='Validar archivo raw y generar intermedio para revisión')
-    parser.add_argument('--input', required=True, help='Ruta al archivo raw de entrada')
+    parser = argparse.ArgumentParser(description='Validar archivos raw y generar intermedios para revisión')
+    parser.add_argument('--input', help='Ruta al archivo raw de entrada (individual)')
+    parser.add_argument('--input-dir', help='Directorio con archivos RAW para procesar TODOS automáticamente')
     parser.add_argument('--output', default='data/processed', help='Directorio de salida')
     parser.add_argument('--type', choices=['propiedades', 'servicios'], default='propiedades', help='Tipo de archivo')
     parser.add_argument('--verbose', action='store_true', help='Mostrar detalles del procesamiento')
 
     args = parser.parse_args()
 
-    # Verificar archivo de entrada
-    if not os.path.exists(args.input):
-        print(f"ERROR: Archivo no encontrado: {args.input}")
+    # Validar parámetros
+    if not args.input and not args.input_dir:
+        print("ERROR: Debes especificar --input (archivo individual) o --input-dir (procesar todos)")
         return False
 
-    # Crear directorio de salida
-    os.makedirs(args.output, exist_ok=True)
+    if args.input and args.input_dir:
+        print("ERROR: No puedes especificar ambos --input y --input-dir")
+        return False
 
-    # Iniciar procesamiento
-    validator = RawDataValidator(verbose=args.verbose)
-    success = validator.process_file(args.input, args.output, args.type)
+    # Determinar modo de operación
+    if args.input:
+        # Modo individual (original)
+        if not os.path.exists(args.input):
+            print(f"ERROR: Archivo no encontrado: {args.input}")
+            return False
 
-    if success:
-        print(f"PROCESAMIENTO EXITOSO")
-        print(f"Archivos generados en: {args.output}")
-        print(f"Revisa los archivos intermedios para validación humana")
+        # Crear directorio de salida
+        os.makedirs(args.output, exist_ok=True)
+
+        # Iniciar procesamiento
+        validator = RawDataValidator(verbose=args.verbose)
+        success = validator.process_file(args.input, args.output, args.type)
+
+        if success:
+            print(f"PROCESAMIENTO EXITOSO")
+            print(f"Archivos generados en: {args.output}")
+            print(f"Revisa los archivos intermedios para validación humana")
+        else:
+            print("PROCESAMIENTO FALLIDO")
+
+        return success
+
     else:
-        print("PROCESAMIENTO FALLIDO")
-
-    return success
+        # Modo batch (procesar todos los archivos)
+        return process_all_files_in_directory(args.input_dir, args.output, args.type, args.verbose)
 
 
 if __name__ == "__main__":

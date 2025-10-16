@@ -84,7 +84,7 @@ El chatbot de Citrino ha sido implementado exitosamente como reemplazo principal
 
 #### Modificados:
 - `index.html` - Actualizado a v2.3.0 con chatbot como principal
-- `src/recommendation_engine_mejorado.py` - Correcciones de valores nulos
+- `src/recommendation_engine_postgis.py` - Correcciones de valores nulos
 - `api/chatbot_completions.py` - Integración con system prompts
 
 ### Configuración del Servidor

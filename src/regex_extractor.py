@@ -143,41 +143,135 @@ class RegexExtractor:
         
         # Patrones de amenities comunes
         self.amenities_keywords = [
-            'piscina', 'parque', 'cancha', 'gym', 'gimnasio', 'seguridad', 
+            'piscina', 'parque', 'cancha', 'gym', 'gimnasio', 'seguridad',
             'vigilancia', 'salon de eventos', 'área de juegos', 'jardín',
             'terraza', 'balcón', 'estacionamiento', 'garage', 'garaje',
             'cocina equipada', 'amoblado', 'amueblado', 'aire acondicionado',
             'calefacción', 'calefaccion', 'internet', 'wifi', 'cable'
         ]
+
+        # Patrones de estado operativo (nuevos)
+        self.estado_patterns = [
+            # Patrones de venta
+            r'en\s+venta',
+            r'venta(?:\s+directa)?',
+            r'se\s+vende',
+            r'por\s+venta',
+            r'oportunidad\s+de\s+venta',
+
+            # Patrones de alquiler
+            r'en\s+alquiler',
+            r'en\s+arriendo',
+            r'para\s+alquilar',
+            r'para\s+arrendar',
+            r'alquiler',
+            r'arriendo',
+
+            # Patrones de anticrético
+            r'en\s+anticr[ée]tico',
+            r'anticr[ée]tico',
+            r'para\s+anticr[ée]tico',
+
+            # Patrones de pre-venta
+            r'pre[-\s]?venta',
+            r'en\s+pre[-\s]?venta',
+            r'preventa(?:\s+inmediata)?',
+            r'proyecto\s+de\s+preventa',
+
+            # Patrones generales
+            r'operaci[óo]n\s+inmobiliaria',
+            r'transferencia\s+inmobiliaria'
+        ]
+
+        # Patrones de agente inmobiliario (nuevos)
+        self.agente_patterns = [
+            # Patrones explícitos
+            r'agente:\s*([^\n,]+)',
+            r'asesor:\s*([^\n,]+)',
+            r'contacto:\s*([^\n,]+)',
+            r'vendedor:\s*([^\n,]+)',
+            r'broker:\s*([^\n,]+)',
+            r'inmobiliaria:\s*([^\n,]+)',
+
+            # Patrones de teléfonos
+            r'tel[ée]fono:\s*([^\n,]+)',
+            r'tel\s*[:\-]?\s*([^\n,]+)',
+            r'celular:\s*([^\n,]+)',
+            r'whatsapp:\s*([^\n,]+)',
+            r'wp\s*[:\-]?\s*([^\n,]+)',
+
+            # Patrones de email
+            r'email:\s*([^\n,]+)',
+            r'e-mail:\s*([^\n,]+)',
+            r'correo:\s*([^\n,]+)',
+
+            # Patrones de nombres de inmobiliarias conocidas en Santa Cruz
+            r'(citi\s*inmuebles|citinmuebles)',
+            r'(urbana\s*propiedades|propiedades\s*urbanas)',
+            r'(inmobiliaria\s+[^,\n]+)',
+            r'(grupo\s+[^,\n]+\s*inmobiliario)',
+
+            # Patrones de contacto genérico
+            r'contactar\s+a\s+([^\n,]+)',
+            r'comunicarse\s+con\s+([^\n,]+)',
+            r'informes\s+con\s+([^\n,]+)'
+        ]
+
+        # Patrones de garajes/estacionamiento (mejorados)
+        self.garaje_patterns = [
+            # Patrones con número
+            r'(\d+)\s+garages?',
+            r'(\d+)\s+estacionamientos?',
+            r'(\d+)\s+plazas?\s+de\s+estacionamiento',
+            r'(\d+)\s+parqueos?',
+            r'(\d+)\s+places?\s+de\s+parking',
+
+            # Patrones sin número (asumir 1)
+            r'con\s+garage',
+            r'con\s+garaje',
+            r'con\s+estacionamiento',
+            r'con\s+parqueo',
+            r'cuenta\s+con\s+garage',
+            r'posee\s+estacionamiento',
+
+            # Patrones de cubiertos/descubiertos
+            r'(\d+)\s+garages?\s+cubiertos?',
+            r'(\d+)\s+estacionamientos?\s+cubiertos?',
+            r'(\d+)\s+parqueos?\s+cubiertos?'
+        ]
     
     def extract_all(self, descripcion: str, titulo: str = "") -> Dict[str, Any]:
         """
         Extrae todos los datos posibles usando regex.
-        
+
         Args:
             descripcion: Texto de la descripción
             titulo: Título de la propiedad (opcional)
-            
+
         Returns:
             Diccionario con los datos extraídos
         """
         texto_completo = f"{titulo} {descripcion}".lower()
-        
+
         resultado = {
             'precio': self.extract_precio(texto_completo),
             'moneda': self.extract_moneda(texto_completo),
             'superficie': self.extract_superficie(texto_completo),
             'habitaciones': self.extract_habitaciones(texto_completo),
             'banos': self.extract_banos(texto_completo),
+            'garajes': self.extract_garajes(texto_completo),
             'zona': self.extract_zona(texto_completo),
             'amenities': self.extract_amenities(texto_completo),
-            'referencias_ubicacion': self.extract_referencias(texto_completo)
+            'referencias_ubicacion': self.extract_referencias(texto_completo),
+            'estado_operativo': self.extract_estado_operativo(texto_completo),
+            'agente': self.extract_agente(texto_completo),
+            'contacto_agente': self.extract_contacto_agente(texto_completo)
         }
-        
+
         # Contar cuántos campos fueron extraídos exitosamente
         campos_extraidos = sum(1 for v in resultado.values() if v)
         resultado['_regex_extraction_success'] = campos_extraidos
-        
+
         return resultado
     
     def extract_precio(self, texto: str) -> Optional[float]:
@@ -299,12 +393,101 @@ class RegexExtractor:
     def extract_amenities(self, texto: str) -> List[str]:
         """Extrae lista de amenities mencionados."""
         amenities_encontrados = []
-        
+
         for amenity in self.amenities_keywords:
             if re.search(r'\b' + re.escape(amenity) + r'\b', texto, re.IGNORECASE):
                 amenities_encontrados.append(amenity.title())
-        
+
         return amenities_encontrados
+
+    def extract_garajes(self, texto: str) -> Optional[int]:
+        """Extrae el número de garajes/estacionamientos."""
+        for pattern in self.garaje_patterns:
+            match = re.search(pattern, texto, re.IGNORECASE)
+            if match:
+                groups = match.groups()
+                if groups and groups[0] is not None:
+                    try:
+                        return int(groups[0])
+                    except (ValueError, AttributeError):
+                        continue
+                else:
+                    # Si solo dice "con garage" sin número, asumir 1
+                    return 1
+        return None
+
+    def extract_estado_operativo(self, texto: str) -> Optional[str]:
+        """Extrae el estado operativo (venta, alquiler, etc.)."""
+        texto_original = texto  # Mantener original para retornar el valor encontrado
+
+        # Prioridad: pre-venta > venta > alquiler > anticrético
+        if re.search(r'pre[-\s]?venta|en\s+pre[-\s]?venta', texto, re.IGNORECASE):
+            return "pre-venta"
+        elif re.search(r'en\s+venta|venta|se\s+vende|por\s+venta', texto, re.IGNORECASE):
+            return "venta"
+        elif re.search(r'en\s+alquiler|alquiler|arriendo|para\s+alquilar', texto, re.IGNORECASE):
+            return "alquiler"
+        elif re.search(r'en\s+anticr[ée]tico|anticr[ée]tico', texto, re.IGNORECASE):
+            return "anticrético"
+
+        return None
+
+    def extract_agente(self, texto: str) -> Optional[str]:
+        """Extrae el nombre del agente o inmobiliaria."""
+        for pattern in self.agente_patterns:
+            match = re.search(pattern, texto, re.IGNORECASE)
+            if match:
+                groups = match.groups()
+                if groups and groups[0] is not None:
+                    agente = groups[0].strip()
+                    # Limpiar y capitalizar
+                    if len(agente) > 2:  # Evitar resultados muy cortos
+                        return agente.title()
+        return None
+
+    def extract_contacto_agente(self, texto: str) -> Optional[str]:
+        """Extrae información de contacto (teléfono, email)."""
+        # Patrones de teléfono (formatos bolivianos)
+        telefono_patterns = [
+            r'\b(\d{4}\s*[-\s]\s*\d{4})\b',  # 7777-7777
+            r'\b(\d{3}\s*[-\s]\s*\d{7})\b',  # 777-7777777
+            r'\b(\d{8})\b',                   # 77777777
+            r'\b(\d{7})\b',                   # 7777777
+            r'\b(\+\s*591\s*\d{8})\b',        # +591 77777777
+            r'\b(591\s*\d{8})\b',             # 591 77777777
+        ]
+
+        # Extraer teléfono
+        for pattern in telefono_patterns:
+            match = re.search(pattern, texto)
+            if match:
+                telefono = match.group(1).strip()
+                return telefono
+
+        # Patrones de email
+        email_patterns = [
+            r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
+        ]
+
+        for pattern in email_patterns:
+            match = re.search(pattern, texto)
+            if match:
+                email = match.group(0).strip().lower()
+                return email
+
+        # Patrones de WhatsApp
+        whatsapp_patterns = [
+            r'whatsapp[:\s]*([^\n,]+)',
+            r'wp[:\s]*([^\n,]+)',
+        ]
+
+        for pattern in whatsapp_patterns:
+            match = re.search(pattern, texto, re.IGNORECASE)
+            if match:
+                whatsapp = match.group(1).strip()
+                return f"WhatsApp: {whatsapp}"
+
+        return None
     
     def get_extraction_summary(self, resultado: Dict[str, Any]) -> str:
         """Genera un resumen de qué se pudo extraer con regex."""

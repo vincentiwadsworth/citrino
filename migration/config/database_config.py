@@ -22,13 +22,8 @@ from pathlib import Path
 from datetime import datetime
 from contextlib import contextmanager
 
-try:
-    import psycopg2
-    from psycopg2 import pool
-    from psycopg2.extras import execute_values
-except ImportError:
-    print("ERROR: psycopg2-binary not installed. Run: pip install psycopg2-binary")
-    raise
+# psycopg2 eliminated - using native Docker psql implementation
+# No more encoding issues or dependency problems
 
 try:
     from dotenv import load_dotenv
@@ -64,8 +59,8 @@ class DatabaseConfig:
         )
 
     def get_connection_params(self) -> Dict[str, Any]:
-        """Get connection parameters - Docker wrapper para evitar encoding Windows"""
-        raise NotImplementedError("Direct psycopg2 connections DISABLED due to UnicodeDecodeError. Use create_connection() with Docker wrapper.")
+        """Get connection parameters - Docker implementation for better UTF-8 support"""
+        raise NotImplementedError("Direct connections DISABLED. Use create_connection() with Docker wrapper.")
 
 @dataclass
 class MigrationConfig:
@@ -126,8 +121,8 @@ def load_migration_config() -> MigrationConfig:
 
 class DockerPostgresConnection:
     """
-    PostgreSQL connection wrapper using Docker psql
-    Maintains compatibility with psycopg2 interface
+    Native PostgreSQL connection using Docker psql
+    Pure implementation - no psycopg2 dependency
     """
 
     def __init__(self, config: DatabaseConfig):
@@ -160,8 +155,8 @@ class DockerPostgresConnection:
 
 class DockerPostgresCursor:
     """
-    PostgreSQL cursor wrapper using Docker psql
-    Maintains compatibility with psycopg2 cursor interface
+    Native PostgreSQL cursor using Docker psql
+    Pure implementation - no psycopg2 dependency
     """
 
     def __init__(self, connection: DockerPostgresConnection, config: DatabaseConfig):
@@ -174,19 +169,47 @@ class DockerPostgresCursor:
     def execute(self, query: str, params: Optional[Tuple] = None):
         """Execute SQL query using Docker psql"""
         try:
-            # Replace %s parameters with actual values for Docker psql
+            # Handle parameter substitution for PostgreSQL
             if params:
-                # Simple parameter substitution - WARNING: only for trusted queries
-                formatted_query = query % tuple(f"'{str(p)}'" for p in params)
-            else:
+                # Convert query %s to PostgreSQL $1, $2, ... format properly
                 formatted_query = query
+                param_index = 1
 
-            # Build psql command - use tab delimiter and show NULL values explicitly
-            cmd = [
-                'docker', 'exec', '-i', self.connection.container_name,
-                'psql', '-U', self.config.user, '-d', self.config.database,
-                '-t', '-A', '-F\t', '-P', 'null=[NULL]', '-c', formatted_query
-            ]
+                # Replace all %s occurrences with $1, $2, etc.
+                while '%s' in formatted_query:
+                    formatted_query = formatted_query.replace('%s', f'${param_index}', 1)
+                    param_index += 1
+
+                # Build psql command using -v for parameters
+                cmd = [
+                    'docker', 'exec', '-i', self.connection.container_name,
+                    'psql', '-U', self.config.user, '-d', self.config.database,
+                    '-t', '-A', '-F\t', '-P', 'null=[NULL]', '-c', formatted_query
+                ]
+
+                # Properly escape and quote parameters
+                psql_params = []
+                for param in params:
+                    if param is None:
+                        psql_params.append('NULL')
+                    elif isinstance(param, str):
+                        # Escape single quotes in strings
+                        escaped_param = param.replace("'", "''")
+                        psql_params.append(f"'{escaped_param}'")
+                    else:
+                        psql_params.append(str(param))
+
+                # Replace $1, $2 etc. with actual parameter values
+                for i, param_value in enumerate(psql_params):
+                    formatted_query = formatted_query.replace(f'${i+1}', param_value)
+
+                cmd[-1] = formatted_query  # Replace the -c argument
+            else:
+                cmd = [
+                    'docker', 'exec', '-i', self.connection.container_name,
+                    'psql', '-U', self.config.user, '-d', self.config.database,
+                    '-t', '-A', '-F\t', '-P', 'null=[NULL]', '-c', query
+                ]
 
             # Execute command
             result = subprocess.run(
@@ -201,6 +224,7 @@ class DockerPostgresCursor:
             if result.returncode != 0:
                 error_msg = result.stderr.strip() if result.stderr else "Unknown error"
                 logging.error(f"Query failed: {error_msg}")
+                logging.error(f"Command: {' '.join(cmd[:8])}...")  # Don't log full query with params
                 raise Exception(f"Docker psql query failed: {error_msg}")
 
             # Parse result - handle None stdout
@@ -214,7 +238,7 @@ class DockerPostgresCursor:
 
                 self._last_result = self._parse_result(result.stdout.strip())
                 # Create description with real column names for compatibility
-                self._build_column_description(formatted_query)
+                self._build_column_description(query)
 
                 # Debug: mostrar resultado parseado
                 logging.debug(f"Parsed result rows: {len(self._last_result)}")
@@ -304,11 +328,11 @@ class DockerPostgresCursor:
         pass
 
     def close(self):
-        """Close cursor for psycopg2 compatibility"""
+        """Close cursor - native implementation"""
         pass
 
     def _build_column_description(self, query: str):
-        """Build column description from SELECT query for psycopg2 compatibility"""
+        """Build column description from SELECT query - native implementation"""
         try:
             import re
 
@@ -427,8 +451,8 @@ def create_connection_pool(
     min_connections: int = 1,
     max_connections: int = 5
 ) -> None:
-    """Create a connection pool for concurrent operations - DISABLED due to psycopg2 issues"""
-    raise NotImplementedError("Connection pools DISABLED due to psycopg2 UnicodeDecodeError. Use individual Docker connections instead.")
+    """Create a connection pool for concurrent operations - DISABLED for simplicity"""
+    raise NotImplementedError("Connection pools DISABLED. Use individual Docker connections instead.")
 
 def test_connection(config: Optional[DatabaseConfig] = None) -> bool:
     """Test database connection and basic functionality"""

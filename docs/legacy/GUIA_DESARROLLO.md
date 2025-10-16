@@ -187,7 +187,7 @@ class RegexExtractor:
 ### Modificar Pesos del Motor de Recomendación
 
 ```python
-# src/recommendation_engine_mejorado.py
+# src/recommendation_engine_postgis.py
 
 # Ajustar pesos según necesidades de negocio
 WEIGHTS = {

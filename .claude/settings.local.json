@@ -37,10 +37,51 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(pkill:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(git log:*)",
+      "Bash(echo:*)",
+      "Bash($env:DB_PASSWORD=\"citrino_password\")",
+      "Bash(setx:*)",
+      "WebFetch(domain:camphouse.io)",
+      "WebFetch(domain:www.folderit.com)"
     ],
     "deny": [],
     "ask": []
   },
-  "hooks": {}
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "python.*migration.*\\.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REGLA: Ejecutar auditoría inmediatamente si reporta éxito'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write.*\\.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== ADVERTENCIA ANTI-BLOAD ===' && echo '¿Ya existe un script con esta funcionalidad?' && echo '¿Evité sufijos como _improved, _v2, _backup?' && echo 'REGLA DE ORO: Corregir archivos existentes, no crear duplicados'",
+            "timeout": 8
+          }
+        ]
+      },
+      {
+        "matcher": "Edit.*\\.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== ADVERTENCIA ANTI-BLOAD ===' && echo '¿Este es el archivo correcto y la versión actual?' && echo '¿Evitaré crear una versión mejorada en vez de corregir esta?' && echo 'REGLA DE ORO: Corregir el archivo existente, no crear duplicados'",
+            "timeout": 8
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -199,7 +199,7 @@ class RecommendationEngine:
    - Filtrado simple por criterios
    - Sin cálculos geoespaciales avanzados
 
-2. **Motor Mejorado** (`src/recommendation_engine_mejorado.py`)
+2. **Motor Mejorado** (`src/recommendation_engine_postgis.py`)
    - Geolocalización con Haversine
    - Verificación de servicios cercanos
    - Cache en memoria (limitada)

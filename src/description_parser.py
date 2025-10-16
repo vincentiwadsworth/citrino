@@ -87,9 +87,10 @@ class DescriptionParser:
         result = {}
         
         # Campos a combinar
-        campos = ['precio', 'moneda', 'habitaciones', 'banos', 'superficie',
-                  'superficie_terreno', 'superficie_construida', 'zona', 'tipo_propiedad']
-        
+        campos = ['precio', 'moneda', 'habitaciones', 'banos', 'garajes', 'superficie',
+                  'superficie_terreno', 'superficie_construida', 'zona', 'tipo_propiedad',
+                  'estado_operativo', 'agente', 'contacto_agente']
+
         for campo in campos:
             # Prioridad a regex si tiene valor
             if regex_data.get(campo):
@@ -98,14 +99,17 @@ class DescriptionParser:
                 result[campo] = llm_data[campo]
             else:
                 result[campo] = None
-        
+
         # Combinar características (unir ambas listas)
         result['caracteristicas'] = []
         if regex_data.get('amenities'):
             result['caracteristicas'].extend(regex_data['amenities'])
         if llm_data.get('caracteristicas'):
             result['caracteristicas'].extend(llm_data['caracteristicas'])
-        
+
+        # Información adicional (prioridad LLM)
+        result['informacion_adicional'] = llm_data.get('informacion_adicional')
+
         # Referencias de ubicación de regex
         if regex_data.get('referencias_ubicacion'):
             result['referencias_ubicacion'] = regex_data['referencias_ubicacion']
@@ -207,7 +211,7 @@ Responde ÚNICAMENTE con JSON:
         """
         texto_completo = f"{titulo}\n\n{descripcion}".strip()
         
-        return f"""Analiza esta descripción de propiedad inmobiliaria y extrae datos estructurados.
+        return f"""Analiza esta descripción de propiedad inmobiliaria en Santa Cruz y extrae información completa.
 
 TEXTO:
 {texto_completo}
@@ -218,24 +222,33 @@ Responde ÚNICAMENTE con un objeto JSON con esta estructura exacta:
     "moneda": "USD" o "Bs" o null,
     "habitaciones": <número o null>,
     "banos": <número o null>,
+    "garajes": <número o null>,
     "superficie": <número en m² o null>,
     "superficie_terreno": <número en m² o null>,
     "superficie_construida": <número en m² o null>,
     "zona": "<nombre de zona/barrio de Santa Cruz o null>",
-    "tipo_propiedad": "casa", "departamento", "terreno", "local", "oficina" o null,
-    "caracteristicas": [<lista de características relevantes>]
+    "tipo_propiedad": "casa", "departamento", "terreno", "local", "oficina", "lote", "quinta" o null,
+    "estado_operativo": "venta", "alquiler", "anticrético", "pre-venta" o null,
+    "agente": "<nombre agente/inmobiliaria o null>",
+    "contacto_agente": "<teléfono/email o null>",
+    "caracteristicas": [<lista de amenities relevantes>],
+    "informacion_adicional": "<detalles únicos adicionales o null>"
 }}
 
 REGLAS IMPORTANTES:
-1. Precio: Busca valores numéricos con $, USD, Bs, o palabras como "precio", "valor", "costo"
-2. Si precio está en Bs (bolivianos), indica moneda: "Bs", si está en USD o $, indica "USD"
-3. Habitaciones: busca "dormitorios", "habitaciones", "recámaras", "dorm", "hab"
-4. Baños: busca "baños", "baño", "bath"
-5. Superficie: busca "m²", "m2", "metros cuadrados", "mt2"
-6. Zona: identifica barrios/zonas de Santa Cruz (Equipetrol, Centro, Norte, Sur, Palmar, Urubó, etc)
-7. Tipo: identifica si es casa, departamento, terreno, local comercial, oficina, etc
-8. Si no encuentras un dato, usa null
-9. Responde SOLO el JSON, sin texto adicional
+1. **Precio**: Busca valores numéricos con $, USD, Bs, o palabras como "precio", "valor", "costo"
+2. **Moneda**: Si precio está en Bs (bolivianos), usa "Bs", si está en USD o $, usa "USD"
+3. **Estado operativo**: Identifica si es "venta", "alquiler", "anticrético", "pre-venta"
+4. **Habitaciones**: Busca "dormitorios", "habitaciones", "recámaras", "dorm", "hab"
+5. **Baños**: Busca "baños", "baño", "bath"
+6. **Garajes**: Busca "garage", "estacionamiento", "parqueo", "plaza"
+7. **Superficie**: Busca "m²", "m2", "metros cuadrados", "mt2"
+8. **Zona**: Identifica barrios/zonas de Santa Cruz (Equipetrol, Urubó, Centro, Norte, Sur, etc)
+9. **Agente**: Extrae nombres de inmobiliarias o agentes de contacto
+10. **Contacto**: Extrae teléfonos, WhatsApp, emails del agente
+11. **Características**: Identifica amenities como piscina, seguridad, gimnasio, etc
+12. **Si no encuentras un dato, usa null**
+13. **Responde ÚNICAMENTE el JSON, sin texto adicional**
 
 JSON:"""
 

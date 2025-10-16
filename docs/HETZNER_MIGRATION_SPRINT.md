@@ -26,7 +26,7 @@ Hetzner Cloud CPX11 (€5.09/mes)
     Índices GIST para consultas geoespaciales
  Python 3.11 + Flask 2.3.3
     recommendation_engine.py
-    recommendation_engine_mejorado.py (con PostGIS)
+    recommendation_engine_postgis.py (con PostGIS)
     property_catalog.py
     chatbot_completions.py
  Nginx (Reverse Proxy + SSL)
@@ -72,7 +72,7 @@ Total estimado:           1.0-1.6 GB
        server.py
     src/
        recommendation_engine.py
-       recommendation_engine_mejorado.py
+       recommendation_engine_postgis.py
        property_catalog.py
        llm_integration.py
     requirements.txt

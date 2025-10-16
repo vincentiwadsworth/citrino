@@ -23,8 +23,8 @@
    Property data endpoints                                  
                                                                
   src/ (Motores de Negocio)                                   
-   recommendation_engine.py (básico)                        
-   recommendation_engine_mejorado.py (geoespacial)          
+   recommendation_engine.py (básico)
+   recommendation_engine_postgis.py (geoespacial)          
    llm_integration.py (Z.AI + OpenRouter)                   
    description_parser.py (Extracción híbrida)               
    regex_extractor.py (Patrones regex)                      
@@ -142,7 +142,7 @@ Excel (Proveedor 02) → build_relevamiento_dataset.py
 ### 1. Strategy Pattern
 **Motor de Recomendación:**
 - `recommendation_engine.py` - Estrategia básica
-- `recommendation_engine_mejorado.py` - Estrategia avanzada
+- `recommendation_engine_postgis.py` - Estrategia avanzada
 
 ### 2. Fallback Pattern
 **Integración LLM:**

@@ -28,44 +28,48 @@ CREATE UNIQUE INDEX idx_agentes_unique ON agentes(nombre, COALESCE(telefono, '')
 -- Tabla de propiedades con coordenadas PostGIS
 CREATE TABLE propiedades (
     id BIGSERIAL PRIMARY KEY,
-    url VARCHAR(500) UNIQUE NOT NULL,
+    agente_id BIGINT REFERENCES agentes(id),
     titulo VARCHAR(500) NOT NULL,
-    precio_usd DECIMAL(12,2),
     descripcion TEXT,
-    habitaciones INTEGER,
-    banos INTEGER,
-    garajes INTEGER,
-    sup_terreno DECIMAL(10,2),
-    sup_construida DECIMAL(10,2),
-    detalles TEXT,
-
-    -- Campos de geolocalización
-    coordenadas GEOGRAPHY(POINT, 4326), -- PostGIS point
-    latitud DECIMAL(10,8),
-    longitud DECIMAL(11,8),
+    tipo_propiedad VARCHAR(100),
+    estado_propiedad VARCHAR(50),
+    precio_usd DECIMAL(12,2),
+    precio_usd_m2 DECIMAL(10,2),
     direccion TEXT,
     zona VARCHAR(255),
     uv VARCHAR(50),
     manzana VARCHAR(50),
-
-    -- Relaciones
-    agente_id BIGINT REFERENCES agentes(id),
-
-    -- Metadatos
-    fuente_origen VARCHAR(100),
-    fecha_extracion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    coordenadas_validadas BOOLEAN DEFAULT FALSE,
-    calidad_datos DECIMAL(3,2) DEFAULT 0.8,
+    lote VARCHAR(50),
+    superficie_total DECIMAL(10,2),
+    superficie_construida DECIMAL(10,2),
+    num_dormitorios INTEGER,
+    num_banos INTEGER,
+    num_garajes INTEGER,
+    coordenadas GEOGRAPHY(POINT, 4326), -- PostGIS point
+    latitud DECIMAL(10,8),
+    longitud DECIMAL(11,8),
+    coordenadas_validas BOOLEAN DEFAULT FALSE,
+    datos_completos BOOLEAN DEFAULT FALSE,
+    fecha_publicacion TIMESTAMP,
+    fecha_scraping TIMESTAMP,
+    proveedor_datos VARCHAR(100),
+    codigo_proveedor VARCHAR(100),
+    url_origen VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Constraints
+    CONSTRAINT propiedades_titulo_zona_unique UNIQUE (titulo, zona)
 );
 
 -- Indices espaciales y de rendimiento para propiedades
 CREATE INDEX idx_propiedades_coordenadas ON propiedades USING GIST(coordenadas);
 CREATE INDEX idx_propiedades_precio ON propiedades(precio_usd) WHERE precio_usd IS NOT NULL;
 CREATE INDEX idx_propiedades_zona ON propiedades(zona) WHERE zona IS NOT NULL;
-CREATE INDEX idx_propiedades_habitaciones ON propiedades(habitaciones) WHERE habitaciones IS NOT NULL;
+CREATE INDEX idx_propiedades_dormitorios ON propiedades(num_dormitorios) WHERE num_dormitorios IS NOT NULL;
 CREATE INDEX idx_propiedades_agente ON propiedades(agente_id);
+CREATE INDEX idx_propiedades_tipo_propiedad ON propiedades(tipo_propiedad);
+CREATE INDEX idx_propiedades_ultima_actualizacion ON propiedades(ultima_actualizacion);
 
 -- Tabla de servicios urbanos con PostGIS
 CREATE TABLE servicios (
@@ -240,8 +244,8 @@ SELECT
     AVG(precio_usd) as precio_promedio,
     MIN(precio_usd) as precio_minimo,
     MAX(precio_usd) as precio_maximo,
-    AVG(sup_terreno) as sup_terreno_promedio,
-    AVG(habitaciones) as habitaciones_promedio,
+    AVG(superficie_total) as sup_terreno_promedio,
+    AVG(num_dormitorios) as habitaciones_promedio,
     -- Densidad de servicios por zona
     (SELECT COUNT(*) FROM servicios s WHERE s.zona_uv = propiedades.zona) as servicios_cerca_zona
 FROM propiedades
@@ -262,11 +266,28 @@ INSERT INTO categorias_servicios (categoria_principal, descripcion, color_hex, p
 ('otros', 'Otros servicios', '#757575', 4)
 ON CONFLICT (categoria_principal) DO NOTHING;
 
+-- Tabla de log de migraciones
+CREATE TABLE migration_log (
+    id BIGSERIAL PRIMARY KEY,
+    tabla_migrada VARCHAR(100) NOT NULL,
+    fecha_ejecucion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    registros_procesados INTEGER DEFAULT 0,
+    registros_exitosos INTEGER DEFAULT 0,
+    registros_errores INTEGER DEFAULT 0,
+    execution_time_ms INTEGER DEFAULT 0,
+    detalles TEXT,
+    creado_por VARCHAR(100) DEFAULT 'etl_script'
+);
+
+CREATE INDEX idx_migration_log_tabla ON migration_log(tabla_migrada);
+CREATE INDEX idx_migration_log_fecha ON migration_log(fecha_ejecucion);
+
 -- Comentarios sobre las tablas
 COMMENT ON TABLE propiedades IS 'Catálogo de propiedades con coordenadas PostGIS para análisis espacial';
 COMMENT ON TABLE servicios IS 'Servicios urbanos con geolocalización para análisis de proximidad';
 COMMENT ON TABLE agentes IS 'Agentes inmobiliarios deduplicados';
 COMMENT ON TABLE proximidad_cache IS 'Cache de consultas de proximidad para optimizar rendimiento';
+COMMENT ON TABLE migration_log IS 'Registro de migraciones ETL para auditoría y monitoreo';
 
 -- Estadísticas para mejor rendimiento de consultas
 ANALYZE propiedades;

@@ -98,18 +98,18 @@
 ##  **Deliverables Completed**
 
 ### **1. Core Implementation**
-- [x] **`data/postgres/scripts/01_create_schema.sql`** - Complete DDL with PostGIS
-- [x] **`data/postgres/scripts/etl_excel_to_intermediate.py`** - Property processing ETL
-- [x] **`data/postgres/scripts/etl_guia_to_intermediate.py`** - Services processing ETL
-- [x] **`data/postgres/scripts/etl_consolidar_agentes.py`** - Agent deduplication
-- [x] **`data/postgres/scripts/etl_intermediate_to_postgres.py`** - PostgreSQL loader
-- [x] **`data/postgres/scripts/etl_validate_migration.py`** - Validation system
+- [x] **`migration/database/01_create_schema.sql`** - Complete DDL with PostGIS
+- [x] **`migration/scripts/etl_excel_to_intermediate.py`** - Property processing ETL
+- [x] **`migration/scripts/etl_guia_to_intermediate.py`** - Services processing ETL
+- [x] **`migration/scripts/etl_consolidar_agentes.py`** - Agent deduplication
+- [x] **`migration/scripts/etl_intermediate_to_postgres.py`** - PostgreSQL loader
+- [x] **`migration/scripts/etl_validate_migration.py`** - Validation system
 
 ### **2. Orchestration & Configuration**
-- [x] **`migrate_to_postgres.py`** - Complete migration orchestrator
+- [x] **`migration/scripts/migration_run_properties.py`** - Complete migration orchestrator
 - [x] **`requirements-postgres.txt`** - Dependencies for PostgreSQL stack
 - [x] **`.env.example`** - Updated with PostgreSQL configuration
-- [x] **Directory structure** - Complete `data/postgres/` hierarchy
+- [x] **Directory structure** - Complete `migration/` hierarchy
 
 ### **3. Documentation**
 - [x] **`README_POSTGRES_MIGRATION.md`** - Complete migration guide
@@ -228,14 +228,14 @@
 ### **Migration Command**
 ```bash
 # Single command for complete migration
-python migrate_to_postgres.py
+python migration/scripts/migration_run_properties.py
 
 # With validation
-python migrate_to_postgres.py && python data/postgres/scripts/etl_validate_migration.py
+python migration/scripts/migration_run_properties.py && python migration/scripts/etl_validate_migration.py
 ```
 
 ### **Monitoring Setup**
-- [x] **Logging**: Comprehensive log files in `data/postgres/logs/`
+- [x] **Logging**: Comprehensive log files in `logs/`
 - [x] **Metrics**: Real-time performance monitoring
 - [x] **Alerts**: Automatic error detection and notification
 - [x] **Health Checks**: Database and ETL pipeline health monitoring

@@ -20,11 +20,17 @@ from database_config import create_connection, load_database_config
 
 # Importar ETLs
 try:
-    from etl_propiedades_from_excel import ETLPropiedades
+    import importlib.util
+    # Importar 02_etl_propiedades.py dinámicamente
+    spec = importlib.util.spec_from_file_location("etl_propiedades", os.path.join(os.path.dirname(__file__), "02_etl_propiedades.py"))
+    etl_propiedades_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(etl_propiedades_module)
+    PropertyETL = etl_propiedades_module.PropertyETL
+
     from etl_servicios_from_excel import ETLServicios
 except ImportError:
     print("WARNING: ETL modules not found, continuing without them...")
-    ETLPropiedades = None
+    PropertyETL = None
     ETLServicios = None
 
 # Configuración de logging
@@ -32,7 +38,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('migration/logs/migration.log'),
+        logging.FileHandler('logs/migration.log'),
         logging.StreamHandler()
     ]
 )
@@ -43,11 +49,11 @@ class MigrationManager:
 
     def __init__(self):
         # Cargar configuración desde database_config
-        self.db_config = None  # Dejar que database_config maneje la configuración
+        self.db_config = load_database_config()
         self.start_time = datetime.now()
 
         # Crear directorios necesarios
-        os.makedirs('migration/logs', exist_ok=True)
+        os.makedirs('logs', exist_ok=True)
         os.makedirs('migration/backups', exist_ok=True)
 
     def verificar_prerequisitos(self):
@@ -123,21 +129,35 @@ class MigrationManager:
         """Ejecutar ETL de propiedades"""
         logger.info("Iniciando ETL de propiedades...")
 
-        if ETLPropiedades is None:
+        if PropertyETL is None:
             logger.warning("ETL de propiedades no disponible, omitiendo...")
             return []
 
         try:
-            etl = ETLPropiedades(self.db_config)
-            etl.conectar_db()
+            # Ejecutar ETL como subprocess para manejar encoding correctamente
+            etl_script = os.path.join(os.path.dirname(__file__), "02_etl_propiedades.py")
 
-            directorio_excel = 'data/raw/relevamiento'
-            propiedades = etl.procesar_todos_los_archivos(directorio_excel)
+            cmd = ['python', etl_script]
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8',
+                                  cwd=os.path.dirname(os.path.dirname(__file__)))
 
-            etl.cerrar_conexion()
+            if result.returncode == 0:
+                logger.info("ETL de propiedades completado exitosamente")
+                logger.info(f"Output:\n{result.stdout}")
 
-            logger.info(f"ETL de propiedades completado: {len(propiedades)} propiedades migradas ")
-            return propiedades
+                # Extraer número de propiedades del output
+                propiedades_migradas = 0
+                for line in result.stdout.split('\n'):
+                    if 'Properties inserted:' in line:
+                        propiedades_migradas += int(line.split(':')[-1].strip())
+                    elif 'Properties updated:' in line:
+                        propiedades_migradas += int(line.split(':')[-1].strip())
+
+                return propiedades_migradas
+            else:
+                logger.error(f"ETL script failed with return code {result.returncode}")
+                logger.error(f"Error: {result.stderr}")
+                raise Exception(f"ETL de propiedades falló: {result.stderr}")
 
         except Exception as e:
             logger.error(f"Error en ETL de propiedades: {e}")
@@ -256,7 +276,7 @@ class MigrationManager:
                 'indices_espaciales': indices_espaciales
             }
 
-            with open('migration/logs/migration_report.json', 'w') as f:
+            with open('logs/migration_report.json', 'w') as f:
                 json.dump(reporte, f, indent=2, ensure_ascii=False)
 
             return reporte
@@ -372,7 +392,7 @@ class MigrationManager:
             logger.info(f"Duración total: {duracion_total:.1f} segundos")
             logger.info(f"Propiedades: {len(propiedades)}")
             logger.info(f"Servicios: {len(servicios)}")
-            logger.info(f"Reporte guardado en: migration/logs/migration_report.json")
+            logger.info(f"Reporte guardado en: logs/migration_report.json")
 
             return reporte
 

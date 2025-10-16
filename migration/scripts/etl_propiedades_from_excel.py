@@ -24,7 +24,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('migration/logs/etl_propiedades.log'),
+        logging.FileHandler('logs/etl_propiedades.log'),
         logging.StreamHandler()
     ]
 )
@@ -419,7 +419,7 @@ def main():
     db_config = None  # Dejar que database_config cargue desde variables de entorno
 
     # Crear directorio de logs si no existe
-    os.makedirs('migration/logs', exist_ok=True)
+    os.makedirs('logs', exist_ok=True)
 
     # Inicializar ETL
     etl = ETLPropiedades(db_config)

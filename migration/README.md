@@ -56,7 +56,7 @@ nano .env
 ### Ejecución Completa
 ```bash
 # 1. Ejecutar migración completa
-python migration/scripts/run_migration.py
+python migration/scripts/migration_run_properties.py
 
 # 2. Validar resultados
 python migration/scripts/validate_migration.py
@@ -80,7 +80,7 @@ python migration/scripts/validate_migration.py
 ##  Scripts Disponibles
 
 ### Scripts Principales
-- `run_migration.py` - Orquestador completo
+- `migration_run_properties.py` - Orquestador completo
 - `etl_propiedades_from_excel.py` - ETL para propiedades
 - `etl_servicios_from_excel.py` - ETL para servicios urbanos
 - `validate_migration.py` - Validación completa
@@ -207,15 +207,15 @@ psql -d citrino -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 psql -d citrino -c "\d+ propiedades"
 
 # Recrear índices si es necesario
-python migration/scripts/run_migration.py
+python migration/scripts/migration_run_properties.py
 ```
 
 ##  Logs y Reportes
 
-- `migration/logs/migration.log` - Log del proceso ETL
-- `migration/logs/validation.log` - Log de validación
-- `migration/logs/migration_report.json` - Reporte final
-- `migration/logs/validation_results.json` - Resultados detallados
+- `logs/migration.log` - Log del proceso ETL
+- `logs/validation.log` - Log de validación
+- `logs/migration_report.json` - Reporte final
+- `logs/validation_results.json` - Resultados detallados
 
 ##  Integración con API Existente
 

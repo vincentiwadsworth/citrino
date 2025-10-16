@@ -135,7 +135,7 @@ cp .env_postgres .env
 # Editar .env con credenciales PostgreSQL
 
 # 2. Ejecutar migración completa
-python migration/scripts/run_migration.py
+python migration/scripts/migration_run_properties.py
 
 # 3. Validar resultados
 python migration/scripts/validate_migration.py
@@ -244,7 +244,7 @@ python api/server.py
 ##  **Post-Migración**
 
 ### **Monitoreo**
-- Logs de rendimiento en `migration/logs/`
+- Logs de rendimiento en `logs/`
 - Reportes de validación automáticos
 - Métricas de consultas espaciales
 

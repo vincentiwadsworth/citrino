@@ -22,7 +22,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('migration/logs/validation.log'),
+        logging.FileHandler('logs/validation.log'),
         logging.StreamHandler()
     ]
 )
@@ -579,7 +579,7 @@ class MigrationValidator:
                 logger.info(f"Consistencia: {'' if consistencia_ok else ''}")
 
             # Guardar resultados
-            with open('migration/logs/validation_results.json', 'w') as f:
+            with open('logs/validation_results.json', 'w') as f:
                 json.dump(resultados, f, indent=2, ensure_ascii=False, default=str)
 
             return resultados
@@ -598,7 +598,7 @@ def main():
     db_config = None  # Dejar que database_config maneje la configuración
 
     # Crear directorio de logs si no existe
-    os.makedirs('migration/logs', exist_ok=True)
+    os.makedirs('logs', exist_ok=True)
 
     validator = MigrationValidator(db_config)
 

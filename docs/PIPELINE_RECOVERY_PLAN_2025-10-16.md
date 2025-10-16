@@ -75,15 +75,15 @@
    - Reemplazar `psycopg2.connect()` por Docker wrapper en `create_connection()`
    - Actualizar `get_connection_params()` para usar siempre Docker wrapper
    - Forzar uso de Docker wrapper en todas las conexiones
-   - **Validación**: `python -c "from database_config import create_connection; conn = create_connection(); conn.close()"`
+   - **Validación**: `python -c "from migration.config.database_config import create_connection; conn = create_connection(); conn.close()"`
 
 2. **Actualizar API principal** en `api/server.py`
    - Modificar línea 81: `psycopg2.connect(**db_config)` → `create_connection()`
-   - Agregar import: `from database_config import create_connection`
+   - Agregar import: `from migration.config.database_config import create_connection`
    - **Validación**: `curl http://localhost:5001/api/health` debe mostrar `total_propiedades: 58`
 
 3. **Corregir ETL principal**
-   - Actualizar `migration/scripts/etl_propiedades_from_excel.py`
+   - Actualizar `migration/scripts/02_etl_propiedades.py`
    - Reemplazar `psycopg2.connect()` por `create_connection()`
    - **Validación**: Procesar archivo pequeño debe funcionar sin errores
 
@@ -157,19 +157,19 @@
 
 ### `api/server.py`
 - [ ] Línea 81 usa `create_connection()`
-- [ ] Import `database_config` agregado
+- [ ] Import `migration.config.database_config` agregado
 - [ ] Health endpoint muestra datos reales
 - [ ] API carga propiedades de PostgreSQL
 
 ### Scripts ETL
-- [ ] `etl_propiedades_from_excel.py` usa Docker wrapper
+- [ ] `02_etl_propiedades.py` usa Docker wrapper
 - [ ] `01_etl_agentes.py` usa Docker wrapper
 - [ ] `03_etl_servicios.py` usa Docker wrapper
 - [ ] Todos procesan sin `UnicodeDecodeError`
 
 ### Motores de recomendación
 - [ ] `recommendation_engine.py` usa PostgreSQL real
-- [ ] `recommendation_engine_mejorado.py` usa PostgreSQL real
+- [ ] `recommendation_engine_postgis.py` usa PostgreSQL real
 - [ ] Consultas funcionan con datos reales
 - [] Resultados consistentes con PostgreSQL
 

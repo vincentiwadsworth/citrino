@@ -19,7 +19,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('migration/logs/deduplicacion.log'),
+        logging.FileHandler('logs/deduplicacion.log'),
         logging.StreamHandler()
     ]
 )
@@ -351,10 +351,10 @@ class PropertyDeduplicator:
 
             # Guardar reporte
             import json
-            with open('migration/logs/duplicados_report.json', 'w', encoding='utf-8') as f:
+            with open('logs/duplicados_report.json', 'w', encoding='utf-8') as f:
                 json.dump(reporte, f, indent=2, ensure_ascii=False, default=str)
 
-            logger.info("Reporte guardado en migration/logs/duplicados_report.json")
+            logger.info("Reporte guardado en logs/duplicados_report.json")
 
             return reporte
 
@@ -373,7 +373,7 @@ if __name__ == "__main__":
     }
 
     # Crear directorio de logs
-    os.makedirs('migration/logs', exist_ok=True)
+    os.makedirs('logs', exist_ok=True)
 
     # Ejecutar análisis
     deduplicador = PropertyDeduplicator(db_config)

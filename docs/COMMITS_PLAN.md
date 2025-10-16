@@ -131,7 +131,7 @@ migration/scripts/etl_servicios_from_json.py (nuevo)
 
 **Archivos Creados/Modificados:**
 ```
-migration/scripts/run_migration.py (nuevo)
+migration/scripts/migration_run_properties.py (nuevo)
 migration/README.md (nuevo)
 ```
 
@@ -149,8 +149,8 @@ migration/README.md (nuevo)
 - [ ] Logging completo y funcional
 
 **Reportes Generados:**
-- `migration/logs/migration_report.json`
-- `migration/logs/migration.log`
+- `logs/migration_report.json`
+- `logs/migration.log`
 
 ---
 
@@ -357,7 +357,7 @@ cp .env_postgres .env
 # Editar .env con credenciales PostgreSQL
 
 # 2. Ejecutar migración completa
-python migration/scripts/run_migration.py
+python migration/scripts/migration_run_properties.py
 
 # 3. Validar resultados
 python migration/scripts/validate_migration.py

@@ -116,7 +116,7 @@ Refs: #sprint-1-story-1
 ```bash
 feat: implement Excel RAW validation workflow
 
-- Add validate_raw_to_intermediate.py for individual file processing
+- Add validation_validate_properties_intermediate.py for individual file processing
 - Add process_all_raw.py for batch processing
 - Add approve_processed_data.py for human approval
 - Generate intermediate Excel files for team review
@@ -179,10 +179,10 @@ python -c "import script_nombre; print('OK')"
 
 # Para scripts principales
 python api/server.py &
-python src/recommendation_engine_mejorado.py
+python src/recommendation_engine_postgis.py
 
 # Para scripts de validación Excel RAW
-python scripts/validation/validate_raw_to_intermediate.py --input "data/raw/test.xlsx"
+python scripts/validation/validation_validate_properties_intermediate.py --input "data/raw/test.xlsx"
 python scripts/validation/process_all_raw.py --input-dir "data/raw/" --dry-run
 ```
 

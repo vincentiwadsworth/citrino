@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from recommendation_engine import RecommendationEngine
-from recommendation_engine_mejorado import RecommendationEngineMejorado  # DEPRECATED
+from src.recommendation_engine_postgis import RecommendationEngine  # PostGIS-powered recommendation engine
 from property_catalog import SistemaConsultaCitrino
 
 app = Flask(__name__)

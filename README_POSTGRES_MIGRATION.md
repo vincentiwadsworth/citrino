@@ -37,7 +37,7 @@ Excel Crudo → Excel Intermedio → (Revisión Humana) → PostgreSQL + PostGIS
    - `etl_validate_migration.py` - Validación completa
 
 3. **Orquestador**
-   - `migrate_to_postgres.py` - Ejecución automatizada
+   - `migration_run_properties.py` - Ejecución automatizada
    - Validación de prerrequisitos
    - Recuperación de errores
    - Logging completo
@@ -89,13 +89,13 @@ pip install psycopg2-binary pandas openpyxl python-dotenv
 
 ```bash
 # Opción 1: Ejecución completa
-python migrate_to_postgres.py
+python migration/scripts/migration_run_properties.py
 
 # Opción 2: Verificar prerrequisitos
-python migrate_to_postgres.py --dry-run
+python migration/scripts/migration_run_properties.py --dry-run
 
 # Opción 3: Omitir pasos específicos
-python migrate_to_postgres.py --skip validate_migration
+python migration/scripts/migration_run_properties.py --skip validate_migration
 ```
 
 ##  **Directory Structure**
@@ -114,7 +114,7 @@ data/
        agentes_consolidados.xlsx
     validados/                # Aprobados por personal Citrino
     errores/                  # Logs de problemas
- postgres/                     # Base de datos y scripts
+ migration/                   # Base de datos y scripts
     scripts/                  # Scripts ETL y DDL
        01_create_schema.sql
        etl_excel_to_intermediate.py
@@ -318,16 +318,16 @@ SANTA_CRUZ_LON_MAX=-63.0
 ### **Script Options**
 ```bash
 # Ejecutar migración completa
-python migrate_to_postgres.py
+python migration/scripts/migration_run_properties.py
 
 # Omitir validación
-python migrate_to_postgres.py --skip validate_migration
+python migration/scripts/migration_run_properties.py --skip validate_migration
 
 # Solo verificar prerrequisitos
-python migrate_to_postgres.py --dry-run
+python migration/scripts/migration_run_properties.py --dry-run
 
 # Omitir múltiples pasos
-python migrate_to_postgres.py --skip create_schema validate_migration
+python migration/scripts/migration_run_properties.py --skip create_schema validate_migration
 ```
 
 ##  **Expected Performance**
@@ -419,12 +419,12 @@ psql -d citrino -f backup_propiedades_20251015_143022.sql
 **2. Re-ejecutar pasos específicos**
 ```bash
 # Re-procesar solo propiedades
-python migrate_to_postgres.py --skip create_schema guia_to_intermediate consolidate_agentes
+python migration/scripts/migration_run_properties.py --skip create_schema guia_to_intermediate consolidate_agentes
 ```
 
 **3. Validar después de recuperación**
 ```bash
-python data/postgres/scripts/etl_validate_migration.py
+python migration/scripts/etl_validate_migration.py
 ```
 
 ##  **Post-Migration Checklist**
@@ -469,19 +469,19 @@ python data/postgres/scripts/etl_validate_migration.py
 - **Migration Plan**: `docs/MIGRATION_PLAN.md`
 
 ### **Logs & Monitoring**
-- **ETL Logs**: `data/postgres/logs/etl_*.log`
-- **Migration Results**: `data/postgres/logs/migration_results_*.json`
-- **Validation Reports**: `data/postgres/logs/reporte_validacion_*.xlsx`
+- **ETL Logs**: `logs/etl_*.log`
+- **Migration Results**: `logs/migration_results_*.json`
+- **Validation Reports**: `logs/reporte_validacion_*.xlsx`
 
 ### **Emergency Contacts**
 - **Database Admin**: Configurar en `.env`
 - **ETL Process**: Logs detallados en cada script
-- **System Status**: Reportes automáticos en `data/postgres/logs/`
+- **System Status**: Reportes automáticos en `logs/`
 
 ---
 
 **Status**:  **Sprint 1 Complete - Ready for Production Migration**
 
-**Migration Command**: `python migrate_to_postgres.py`
+**Migration Command**: `python migration/scripts/migration_run_properties.py`
 
-**Validation Command**: `python data/postgres/scripts/etl_validate_migration.py`
+**Validation Command**: `python migration/scripts/etl_validate_migration.py`
