@@ -1,22 +1,38 @@
 #!/usr/bin/env python3
 """
-VALIDACIÓN DE ARCHIVOS RAW A INTERMEDIOS
-=========================================
+EXTRACCIÓN Y TRANSFORMACIÓN DE RAW A INTERMEDIOS
+===============================================
 
-Procesa UN archivo raw a la vez generando:
+Script portátil para procesar archivos raw generando:
 1. Archivo Excel intermedio con columnas originales + procesadas
 2. Reporte JSON con métricas de calidad
-3. Archivo listo para revisión humana por equipo Citrino
+3. Extracción inteligente de características con LLM
 
 Uso:
-    python scripts/validation/validation_validate_properties_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
+    python migration/scripts/extract_raw_to_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
+    python migration/scripts/extract_raw_to_intermediate.py --input-dir "data/raw/"
 
 Author: Claude Code
-Date: 2025-10-15
+Date: 2025-10-16
 """
 
 import os
 import sys
+
+# Bloque UTF-8 autoconsciente para portabilidad en Windows
+if os.name == 'nt':
+    # Reconfigurar la salida estándar para forzar UTF-8 si no está configurada
+    if sys.stdout.encoding != 'utf-8':
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')
+            print("INFO: Se ha forzado la codificación de la consola a UTF-8.")
+        except TypeError:
+            # Solución alternativa para versiones específicas
+            import codecs
+            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+            print("INFO: Se ha forzado la codificación de la consola a UTF-8 (modo alternativo).")
 import json
 import pandas as pd
 import numpy as np

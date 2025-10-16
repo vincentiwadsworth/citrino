@@ -18,7 +18,7 @@ This update implements professional naming conventions and removes legacy/duplic
 |----------|----------|---------|
 | `src/recommendation_engine_mejorado.py` | `src/recommendation_engine_postgis.py` | PostGIS-powered recommendation engine |
 | `migration/scripts/run_migration.py` | `migration/scripts/migration_run_properties.py` | Properties migration orchestrator |
-| `scripts/validation/validate_raw_to_intermediate.py` | `scripts/validation/validation_validate_properties_intermediate.py` | Raw to intermediate validation |
+| `scripts/validation/validate_raw_to_intermediate.py` | `migration/scripts/extract_raw_to_intermediate.py` | Raw to intermediate extraction & transformation |
 
 #### **Directory Structure Changes:**
 - **Logging**: `migration/logs/` → `logs/` (centralized)
@@ -103,7 +103,7 @@ For teams working with this codebase:
    ```bash
    # Test key functionality
    python api/server.py
-   python scripts/validation/validation_validate_properties_intermediate.py --help
+   python migration/scripts/extract_raw_to_intermediate.py --help
    python migration/scripts/migration_run_properties.py --help
    ```
 

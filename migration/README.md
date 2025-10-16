@@ -68,7 +68,7 @@ python migration/scripts/validate_migration.py
 psql -h localhost -U postgres -d citrino -f migration/database/02_create_schema_postgis.sql
 
 # 2. Migrar propiedades
-python migration/scripts/etl_propiedades_from_excel.py
+python migration/scripts/extract_raw_to_intermediate.py
 
 # 3. Migrar servicios
 python migration/scripts/etl_servicios_from_excel.py
@@ -81,7 +81,7 @@ python migration/scripts/validate_migration.py
 
 ### Scripts Principales
 - `migration_run_properties.py` - Orquestador completo
-- `etl_propiedades_from_excel.py` - ETL para propiedades
+- `extract_raw_to_intermediate.py` - ETL para propiedades
 - `etl_servicios_from_excel.py` - ETL para servicios urbanos
 - `validate_migration.py` - Validación completa
 

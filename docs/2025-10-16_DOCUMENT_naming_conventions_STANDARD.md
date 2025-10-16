@@ -37,8 +37,8 @@
 Formato: <acción>_<entidad>_<especificador>.py
 
 Ejemplos correctos:
-✅ scripts/validation/validate_raw_to_intermediate.py
-✅ scripts/migration/run_migration.py
+✅ migration/scripts/extract_raw_to_intermediate.py
+✅ migration/scripts/migration_run_properties.py
 ✅ scripts/analysis/analyze_data_quality.py
 ✅ scripts/maintenance/backup_database.py
 
@@ -127,7 +127,7 @@ Prefijos permitidos:
 - verify_      → Para verificaciones completas
 
 Ejemplos:
-✅ scripts/validation/validate_raw_data.py
+✅ migration/scripts/extract_raw_to_intermediate.py
 ✅ scripts/validation/check_coordinates.py
 ✅ scripts/validation/verify_migration.py
 ```
@@ -316,7 +316,7 @@ ls -la directorio/ | grep "nombre_similar"
 ❌ MAL: coord_validation_temp.py
 
 ✅ BIEN: Verificar si ya existe:
-   → scripts/validation/validate_raw_to_intermediate.py (ya incluye validación)
+   → migration/scripts/extract_raw_to_intermediate.py (ya incluye extracción y validación)
 
 ✅ BIEN: Si no existe:
    → scripts/validation/validate_coordinates.py

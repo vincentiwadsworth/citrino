@@ -26,7 +26,7 @@
 
 ### Problema #3: ETL PRINCIPAL ROTO (CRÍTICO)
 - **Scripts afectados**:
-  - `migration/scripts/etl_propiedades_from_excel.py`
+  - `migration/scripts/extract_raw_to_intermediate.py`
   - `migration/scripts/01_etl_agentes.py`
   - `migration/scripts/03_etl_servicios.py`
 - **Impacto**: No se pueden procesar los ~1,600 propiedades pendientes

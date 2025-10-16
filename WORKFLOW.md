@@ -181,9 +181,9 @@ python -c "import script_nombre; print('OK')"
 python api/server.py &
 python src/recommendation_engine_postgis.py
 
-# Para scripts de validación Excel RAW
-python scripts/validation/validation_validate_properties_intermediate.py --input "data/raw/test.xlsx"
-python scripts/validation/process_all_raw.py --input-dir "data/raw/" --dry-run
+# Para scripts de extracción ETL raw → intermediate
+python migration/scripts/extract_raw_to_intermediate.py --input "data/raw/test.xlsx"
+python migration/scripts/extract_raw_to_intermediate.py --input-dir "data/raw/"
 ```
 
 ### Cambios en Documentación

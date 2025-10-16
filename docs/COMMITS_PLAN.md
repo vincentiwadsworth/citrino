@@ -69,7 +69,7 @@ SELECT extname FROM pg_extension WHERE extname LIKE '%postgis%';
 
 **Archivos Creados/Modificados:**
 ```
-migration/scripts/etl_propiedades_from_excel.py (nuevo)
+migration/scripts/extract_raw_to_intermediate.py (nuevo)
 ```
 
 **Contenido Principal:**
@@ -372,7 +372,7 @@ python migration/scripts/mejorar_deduplicacion.py
 psql -h localhost -U postgres -d citrino -f migration/database/02_create_schema_postgis.sql
 
 # 2. Migrar propiedades
-python migration/scripts/etl_propiedades_from_excel.py
+python migration/scripts/extract_raw_to_intermediate.py
 
 # 3. Migrar servicios
 python migration/scripts/etl_servicios_from_json.py

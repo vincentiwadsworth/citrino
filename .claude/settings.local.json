@@ -43,7 +43,8 @@
       "Bash($env:DB_PASSWORD=\"citrino_password\")",
       "Bash(setx:*)",
       "WebFetch(domain:camphouse.io)",
-      "WebFetch(domain:www.folderit.com)"
+      "WebFetch(domain:www.folderit.com)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
