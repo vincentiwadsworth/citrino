@@ -44,7 +44,13 @@
       "Bash(setx:*)",
       "WebFetch(domain:camphouse.io)",
       "WebFetch(domain:www.folderit.com)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(xargs:*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Bash(stat:*)",
+      "Bash(head:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
