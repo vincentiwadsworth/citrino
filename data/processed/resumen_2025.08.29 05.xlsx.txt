@@ -1,0 +1,44 @@
+DIAGNÓSTICO DE ESTRUCTURA - 2025.08.29 05.xlsx
+============================================================
+
+ARCHIVO: 2025.08.29 05.xlsx
+TOTAL FILAS: 38
+TOTAL COLUMNAS: 20
+
+COLUMNAS ENCONTRADAS:
+  - URL
+  - Título
+  - Habitaciones
+  - Baños
+  - Garajes
+  - Sup. Terreno
+  - Sup. Construida
+  - Precio
+  - Moneda
+  - Descripción
+  - Detalles
+  - Características - Servicios
+  - Teléfono
+  - Correo
+  - Características - General
+  - Latitud
+  - Longitud
+  - Características - Interior
+  - Características - Ubicación
+  - Características - Exterior
+
+DETECCIÓN DE COORDENADAS:
+  - Latitud: Latitud (confianza: 100%)
+  - Longitud: Longitud (confianza: 100%)
+
+PROBLEMAS DETECTADOS:
+  - Coordenadas fuera de rango Santa Cruz detectadas
+
+RECOMENDACIONES:
+  - Revisar valores inválidos manualmente
+
+VALIDEZ SANTA CRUZ:
+  - Latitud válidas: 0
+  - Latitud inválidas: 10
+  - Longitud válidas: 0
+  - Longitud inválidas: 10

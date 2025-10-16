@@ -128,6 +128,42 @@ validar_producción_completa(todos_los_servicios)
 test_integracion_motor_recomendacion()
 ```
 
+### Lección #6: Validación Humana es Obligatoria (v2.2.2)
+
+**❌ ERROR:** Procesar directamente de raw a producción sin revisión intermedia
+**✅ CORRECCIÓN:** Siempre generar archivos intermedios para validación humana
+
+```python
+# Error: Procesamiento directo
+datos_raw = leer_excel("archivo.xlsx")
+datos_procesados = procesar_y_guardar_en_producción(datos_raw)
+
+# Correcto: Pipeline con validación humana
+datos_raw = leer_excel("archivo.xlsx")
+datos_intermedios = procesar_a_intermedios(datos_raw)
+# → REVISIÓN HUMANA AQUÍ ←
+if aprobado_por_equipo_citrino(datos_intermedios):
+    datos_produccion = mover_a_producción(datos_intermedios)
+```
+
+### Lección #7: No Celebrar Métricas Aisladas
+
+**❌ ERROR:** Celebrar 98.9% coordenadas válidas sin validar que los datos tengan sentido
+**✅ CORRECCIÓN:** Validar integridad completa de datos, no solo métricas aisladas
+
+```python
+# Error: Validar solo coordenadas
+coordenadas_validas = 98.9%
+print("Excelente: 98.9% coordenadas!")
+
+# Correcto: Validación completa de datos
+coordenadas_validas = 98.9%
+nombres_especificos = 99.8%
+precios_realistas = 100%
+estructura_correcta = 100%
+datos_tienen_sentido = validar_integridad_completa()
+```
+
 ---
 
 ## 🔍 Procesos de Validación

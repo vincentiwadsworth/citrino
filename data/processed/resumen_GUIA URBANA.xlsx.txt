@@ -1,0 +1,45 @@
+DIAGNÓSTICO DE ESTRUCTURA - GUIA URBANA.xlsx
+============================================================
+
+ARCHIVO: GUIA URBANA.xlsx
+TOTAL FILAS: 4942
+TOTAL COLUMNAS: 17
+
+COLUMNAS ENCONTRADAS:
+  - Unnamed: 0
+  - Unnamed: 1
+  - Unnamed: 2
+  - Unnamed: 3
+  - Unnamed: 4
+  - Unnamed: 5
+  - Unnamed: 6
+  - Unnamed: 7
+  - Unnamed: 8
+  - Unnamed: 9
+  - Unnamed: 10
+  - Unnamed: 11
+  - Unnamed: 12
+  - Unnamed: 13
+  - Unnamed: 14
+  - Unnamed: 15
+  - Unnamed: 16
+
+DETECCIÓN DE COORDENADAS:
+  - Latitud: None (confianza: 0%)
+  - Longitud: None (confianza: 0%)
+
+PROBLEMAS DETECTADOS:
+  - No se detectaron columnas de coordenadas
+  - Baja confianza en detección: Lat(0%), Lng(0%)
+  - Coordenadas no están en formato numérico
+
+RECOMENDACIONES:
+  - Revisar nombres de columnas manualmente
+  - Verificar nombres de columnas manualmente
+  - Investigar formato de coordenadas
+
+VALIDEZ SANTA CRUZ:
+  - Latitud válidas: 0
+  - Latitud inválidas: 0
+  - Longitud válidas: 0
+  - Longitud inválidas: 0

@@ -5,6 +5,36 @@ Todos los cambios notables del proyecto Citrino se documentarán en este archivo
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.2.2] - 2025-10-16
+
+### Añadido
+- **SISTEMA DE VALIDACIÓN RAW**: Pipeline completo de validación de archivos raw → intermedios
+  - **scripts/validation/validate_raw_to_intermediate.py**: Procesamiento individual con archivos intermedios
+  - **scripts/validation/generate_validation_report.py**: Reportes consolidados HTML/Excel
+  - **scripts/validation/diagnose_raw_structure.py**: Diagnóstico automático de estructura
+- **VALIDACIÓN HUMANA**: Flujo completo para revisión por equipo Citrino antes de producción
+- **ARCHIVOS INTERMEDIOS**: Excel con datos originales + procesados para validación manual
+- **REPORTES DE CALIDAD**: Métricas detalladas por archivo y consolidado general
+
+### Cambiado
+- **ETL PIPELINE**: Ahora incluye fase de validación humana obligatoria
+- **COORDENADAS GUIA URBANA**: Corregido detección (0% → 98.9% coordenadas válidas)
+- **NORMALIZACIÓN DE COORDENADAS**: Manejo automático de coordenadas multiplicadas (10^15, 10^16)
+- **FLUJO DE TRABAJO**: Raw → Intermedio (validación humana) → Producción
+
+### Arreglado
+- **COORDENADAS MULTIPLICADAS**: Detección y corrección automática de coordenadas con factores
+- **ESTRUCTURA GUIA URBANA**: Manejo correcto de columnas "Unnamed" y múltiples formatos
+- **DETECCIÓN DE SERVICIOS**: Lógica mejorada para identificar diferentes tipos de servicios urbanos
+
+### Métricas de Validación
+- **PROPIEDADES**: 60 propiedades procesadas (85% coordenadas, 93.3% precios válidos)
+- **SERVICIOS**: 4,942 servicios urbanos (98.9% coordenadas válidas)
+- **CALIDAD GENERAL**: 3 archivos EXCELENTE, 1 archivo ACEPTABLE
+- **RANGOS GEOGRÁFICOS**: Santa Cruz validado (-17.66 a -17.93, -63.06 a -63.25)
+
+---
+
 ## [2.2.1] - 2025-10-15
 
 ### Arreglado

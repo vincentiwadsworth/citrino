@@ -326,7 +326,9 @@ pytest tests/test_api_simple.py -v
 - Implement proper error handling and logging
 - Maintain thread safety for cached data
 
-### CRITICAL: PROHIBICIÓN ABSOLUTA DE EMOJIS
+### CRITICAL: REGLAS DE CALIDAD OBLIGATORIAS
+
+**1. PROHIBICIÓN ABSOLUTA DE EMOJIS**
 **ESTRICTAMENTE PROHIBIDO usar emojis en cualquier código, comentarios, logs o documentación.**
 - **MOTIVO**: Los emojis consumen una cantidad excesiva e innecesaria de tokens y violan las mejores prácticas
 - **REGLA**: Texto plano únicamente. Sin caracteres Unicode innecesarios bajo NINGUNA circunstancia
@@ -337,6 +339,34 @@ pytest tests/test_api_simple.py -v
   - WARNING: "Warning" (NUNCA usar emojis)
   - FILE: "File" (NUNCA usar emojis)
 - **IMPORTANTE**: Esta regla es INFLEXIBLE y se aplica a TODO el código, comentarios, logs y documentación
+
+**2. PROHIBICIÓN ABSOLUTA DE CANTAR VICTORIA SIN VALIDACIÓN**
+**NUNCA declarar éxito sin validación manual y exhaustiva.**
+- **MOTIVO**: Los scripts pueden generar datos incorrectos pero técnicamente válidos
+- **REGLA**: Todo procesamiento DEBE incluir validación humana
+- **REQUISITOS OBLIGATORIOS**:
+  - Extraer muestras de datos procesados para inspección manual
+  - Validar rangos geográficos y precios reales
+  - Verificar que las transformaciones tengan sentido
+  - Inspeccionar archivos intermedios antes de aprobar
+- **CONSECUENCIA**: Generar datos basura es peor que no generar datos
+- **EJEMPLOS DE VALIDACIÓN REQUERIDA**:
+  - Coordenadas: ¿Están realmente en Santa Cruz?
+  - Precios: ¿Son realistas para la zona?
+  - Transformaciones: ¿Los datos procesados tienen sentido?
+  - Calidad: ¿Los archivos intermedios son útiles para el equipo?
+
+**3. RANGOS GEOGRÁFICOS CORRECTOS - SANTA CRUZ**
+- **Coordenadas centrales**: -17.7833°, -63.1833°
+- **Rango aceptable**: Lat (-17.5 a -18.2), Lng (-63.0 a -63.5)
+- **Validación obligatoria**: 95%+ coordenadas dentro de rango
+- **Acción requerida**: Investigar cualquier coordenada fuera de rango
+
+**4. CALIDAD MÍNIMA EXIGIDA**
+- **Coordenadas válidas**: >90% (exigido, no opcional)
+- **Datos completos**: >80% (exigido, no opcional)
+- **Errores críticos**: <2% (exigido, no opcional)
+- **Cualquier métrica por debajo**: REPROCESAR OBLIGATORIO
 
 ### Data Handling
 - Always validate coordinates before distance calculations
@@ -437,3 +467,156 @@ python api/server.py
 - Validación de coordenadas geoespaciales
 - Sistema de confianza por proveedor de datos
 - Monitoreo de calidad en tiempo real
+
+## Workflow de Validación de Datos
+
+### Fase 1: Procesamiento Raw con Archivos Intermedios
+
+**IMPORTANTE**: Todo procesamiento de archivos raw DEBE generar archivos intermedios para revisión humana por el equipo Citrino. NUNCA se debe procesar directamente de raw a producción sin validación intermedia.
+
+#### 1.1 Estructura de Archivos Intermedios
+```
+/data/
+├── raw/                           # Archivos originales (no modificar)
+│   ├── guia/GUIA URBANA.xlsx
+│   └── relevamiento/*.xlsx
+├── processed/                     # Archivos intermedios para revisión
+│   ├── 2025.08.15 05_intermedio.xlsx
+│   ├── 2025.08.17 01_intermedio.xlsx
+│   └── guia_urbana_intermedio.xlsx
+└── final/                         # Datos aprobados para producción
+    ├── propiedades_aprobadas.json
+    └── servicios_aprobados.json
+```
+
+#### 1.2 Procesamiento Individual por Archivo
+```bash
+# Procesar UN archivo raw a la vez
+python scripts/validation/validate_raw_to_intermediate.py --input "data/raw/relevamiento/2025.08.15 05.xlsx"
+
+# Salida generada:
+# - data/processed/2025.08.15 05_intermedio.xlsx (Excel con columnas originales + procesadas)
+# - data/processed/2025.08.15 05_reporte.json (Métricas de calidad)
+```
+
+#### 1.3 Estructura de Archivos Intermedios Excel
+Cada archivo intermedio contiene:
+
+1. **Columnas Originales**: Sin modificar, preservadas para referencia
+2. **Columnas Procesadas**: Datos extraídos y normalizados
+3. **Columna ESTADO**: OK/ERROR/SIN_COORDENADAS/DATOS_INCOMPLETOS
+4. **Columna OBSERVACIONES**: Notas específicas para revisión del equipo
+5. **Resumen Inicial**: Estadísticas del procesamiento en la primera hoja
+
+**Ejemplo de estructura:**
+```
+Hoja 1: RESUMEN_PROCESAMIENTO
+- Total filas: 85
+- Filas procesadas: 80
+- Errores: 5
+- Propiedades con coordenadas: 78
+
+Hoja 2: DATOS_PROCESADOS
+[A] [B] [C] [D] [E] [F] [G] [H] [I] [J]
+Original_Titulo | Original_Precio | Titulo_Limpio | Precio_Normalizado | Coordenadas | ESTADO | OBSERVACIONES
+```
+
+### Fase 2: Revisión Humana por Equipo Citrino
+
+#### 2.1 Proceso de Revisión
+1. **Equipo Citrino revisa archivos** en `data/processed/`
+2. **Valida coordenadas** manualmente (¿están en Santa Cruz?)
+3. **Verifica precios** (¿son realistas?)
+4. **Confirma datos extraídos** (habitaciones, baños, etc.)
+5. **Documenta patrones de error** encontrados
+6. **Aprueba o solicita correcciones**
+
+#### 2.2 Checklist de Validación por Archivo
+- [ ] Coordenadas dentro de rango Santa Cruz (-17.5 a -18.5, -63.0 a -64.0)
+- [ ] Precios en rangos razonables ($10,000 - $2,000,000)
+- [ ] Títulos y descripciones coherentes
+- [ ] Datos de contacto completos cuando disponibles
+- [ ] Sin duplicados obvios dentro del mismo archivo
+- [ ] Formato de superficie consistente
+
+### Fase 3: Integración Final a Producción
+
+#### 3.1 Solo Archivos Aprobados
+```bash
+# Solo después de aprobación explícita del equipo Citrino:
+python scripts/validation/approve_processed_data.py --input "data/processed/2025.08.15 05_intermedio.xlsx"
+```
+
+#### 3.2 Trazabilidad Completa
+Cada propiedad final mantiene:
+- `fuente_archivo`: "2025.08.15 05.xlsx"
+- `fecha_procesamiento`: "2025-10-15T23:45:00Z"
+- `aprobado_por`: "nombre_equipo_citrino"
+- `fecha_aprobacion`: "2025-10-16T10:30:00Z"
+
+### Comandos de Validación
+
+#### Procesamiento Individual
+```bash
+# Procesar un archivo raw específico
+python scripts/validation/validate_raw_to_intermediate.py \
+  --input "data/raw/relevamiento/2025.08.15 05.xlsx" \
+  --output "data/processed/" \
+  --verbose
+
+# Procesar guía urbana
+python scripts/validation/validate_raw_to_intermediate.py \
+  --input "data/raw/guia/GUIA URBANA.xlsx" \
+  --output "data/processed/" \
+  --type servicios
+```
+
+#### Procesamiento Batch
+```bash
+# Procesar todos los archivos raw
+python scripts/validation/process_all_raw.py \
+  --input-dir "data/raw/" \
+  --output-dir "data/processed/"
+```
+
+#### Reportes de Validación
+```bash
+# Generar reporte consolidado
+python scripts/validation/generate_validation_report.py \
+  --input-dir "data/processed/" \
+  --output "reports/validacion_consolidada.html"
+```
+
+### Estructura de Scripts de Validación
+
+```
+scripts/validation/
+├── validate_raw_to_intermediate.py    # Procesamiento individual
+├── process_all_raw.py                 # Procesamiento batch
+├── generate_validation_report.py      # Reportes HTML/JSON
+├── approve_processed_data.py          # Aprobación a producción
+└── validation_utils.py                # Utilidades comunes
+```
+
+### Métricas de Calidad por Defecto
+
+**Mínimos aceptables:**
+- Coordenadas válidas: >80%
+- Datos completos: >70%
+- Errores críticos: <5%
+- Precios en rangos normales: >90%
+
+**Excelente:**
+- Coordenadas válidas: >95%
+- Datos completos: >90%
+- Errores críticos: <1%
+- Precios en rangos normales: >98%
+
+### Control de Calidad Automático
+
+El sistema de validación incluye:
+- **Validación geográfica**: Coordenadas dentro de Santa Cruz
+- **Validación de precios**: Detección de outliers
+- **Validación de texto**: Caracteres UTF-8, limpieza
+- **Validación estructural**: Columnas requeridas presentes
+- **Validación de duplicados**: Mismo título + precio + coordenadas
