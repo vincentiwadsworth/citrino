@@ -367,7 +367,7 @@ if __name__ == "__main__":
     db_config = {
         'host': os.getenv('DB_HOST', 'localhost'),
         'database': os.getenv('DB_NAME', 'citrino'),
-        'user': os.getenv('DB_USER', 'postgres'),
+        'user': os.getenv('DB_USER', 'citrino_app'),
         'password': os.getenv('DB_PASSWORD', 'password'),
         'port': os.getenv('DB_PORT', '5432')
     }

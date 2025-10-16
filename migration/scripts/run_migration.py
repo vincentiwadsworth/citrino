@@ -14,10 +14,18 @@ import json
 
 # Agregar directorios al path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config'))
 
 from database_config import create_connection, load_database_config
-from etl_propiedades_from_excel import ETLPropiedades
-from etl_servicios_from_excel import ETLServicios
+
+# Importar ETLs
+try:
+    from etl_propiedades_from_excel import ETLPropiedades
+    from etl_servicios_from_excel import ETLServicios
+except ImportError:
+    print("WARNING: ETL modules not found, continuing without them...")
+    ETLPropiedades = None
+    ETLServicios = None
 
 # Configuración de logging
 logging.basicConfig(
@@ -89,7 +97,7 @@ class MigrationManager:
             # Ejecutar script SQL con Docker
             cmd = [
                 'docker', 'exec', '-i', 'citrino-postgresql',
-                'psql', '-U', 'postgres', '-d', 'citrino',
+                'psql', '-U', 'citrino_app', '-d', 'citrino',
                 '-f', f'/tmp/schema.sql'
             ]
 
@@ -115,6 +123,10 @@ class MigrationManager:
         """Ejecutar ETL de propiedades"""
         logger.info("Iniciando ETL de propiedades...")
 
+        if ETLPropiedades is None:
+            logger.warning("ETL de propiedades no disponible, omitiendo...")
+            return []
+
         try:
             etl = ETLPropiedades(self.db_config)
             etl.conectar_db()
@@ -134,6 +146,10 @@ class MigrationManager:
     def ejecutar_etl_servicios(self):
         """Ejecutar ETL de servicios"""
         logger.info("Iniciando ETL de servicios urbanos...")
+
+        if ETLServicios is None:
+            logger.warning("ETL de servicios no disponible, omitiendo...")
+            return []
 
         try:
             etl = ETLServicios(self.db_config)
