@@ -7,8 +7,13 @@ from flask import Flask, request, jsonify
 import json
 import sys
 import os
+import logging
 from datetime import datetime
 from flask_cors import CORS
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Agregar los directorios src y scripts al path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))

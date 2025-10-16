@@ -17,7 +17,7 @@ import json
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from etl_propiedades_from_excel import ETLPropiedades
-from etl_servicios_from_json import ETLServicios
+from etl_servicios_from_excel import ETLServicios
 
 # Configuración de logging
 logging.basicConfig(
@@ -58,7 +58,7 @@ class MigrationManager:
         # Verificar archivos de datos
         archivos_requeridos = [
             'data/raw/relevamiento',
-            'data/guia_urbana_municipal_v2.json',
+            'data/raw/guia/GUIA URBANA.xlsx',
             'migration/database/02_create_schema_postgis.sql'
         ]
 
@@ -144,8 +144,8 @@ class MigrationManager:
             etl = ETLServicios(self.db_config)
             etl.conectar_db()
 
-            archivo_json = 'data/guia_urbana_municipal_v2.json'
-            servicios = etl.procesar_servicios_completos(archivo_json)
+            archivo_excel = 'data/raw/guia/GUIA URBANA.xlsx'
+            servicios = etl.procesar_servicios_completos(archivo_excel)
 
             etl.cerrar_conexion()
 

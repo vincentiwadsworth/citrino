@@ -1,10 +1,10 @@
 # Migración Citrino a PostgreSQL + PostGIS
 
-Sistema completo de ETL para migrar los datos de Citrino desde archivos Excel y JSON a PostgreSQL con PostGIS para análisis geoespacial de alto rendimiento.
+Sistema completo de ETL para migrar los datos de Citrino desde archivos Excel a PostgreSQL con PostGIS para análisis geoespacial de alto rendimiento.
 
 ## 🎯 Objetivo
 
-Transformar el sistema actual basado en archivos JSON a una base de datos PostgreSQL + PostGIS que permita:
+Transformar el sistema actual basado en archivos Excel a una base de datos PostgreSQL + PostGIS que permita:
 - Consultas espaciales en milisegundos (vs segundos actualmente)
 - Análisis geográfico complejo
 - Mejor escalabilidad y concurrencia
@@ -18,7 +18,7 @@ Transformar el sistema actual basado en archivos JSON a una base de datos Postgr
 - Agentes inmobiliarios con deduplicación automática
 
 ### Servicios Urbanos
-- **4,938 servicios** en `data/guia_urbana_municipal_v2.json`
+- **4,938 servicios** en `data/raw/guia/GUIA URBANA.xlsx`
 - Categorías: educación, salud, comercio, transporte, etc.
 - Coordenadas para análisis espacial
 
@@ -71,7 +71,7 @@ psql -h localhost -U postgres -d citrino -f migration/database/02_create_schema_
 python migration/scripts/etl_propiedades_from_excel.py
 
 # 3. Migrar servicios
-python migration/scripts/etl_servicios_from_json.py
+python migration/scripts/etl_servicios_from_excel.py
 
 # 4. Validar
 python migration/scripts/validate_migration.py
@@ -82,7 +82,7 @@ python migration/scripts/validate_migration.py
 ### Scripts Principales
 - `run_migration.py` - Orquestador completo
 - `etl_propiedades_from_excel.py` - ETL para propiedades
-- `etl_servicios_from_json.py` - ETL para servicios urbanos
+- `etl_servicios_from_excel.py` - ETL para servicios urbanos
 - `validate_migration.py` - Validación completa
 
 ### Base de Datos
@@ -111,7 +111,7 @@ python migration/scripts/validate_migration.py
 
 ## 📊 Métricas de Rendimiento
 
-### Antes (JSON + Python)
+### Antes (Excel + Python)
 - Búsqueda espacial: 3-10 segundos
 - Consultas complejas: 15-30 segundos
 - Memoria RAM: 500MB+ para datasets grandes

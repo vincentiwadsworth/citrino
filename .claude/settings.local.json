@@ -13,7 +13,16 @@
       "WebSearch",
       "WebFetch(domain:www.oracle.com)",
       "WebFetch(domain:www.hetzner.com)",
-      "WebFetch(domain:docs.hetzner.com)"
+      "WebFetch(domain:docs.hetzner.com)",
+      "Bash(set:*)",
+      "Bash(source:*)",
+      "Bash(psql:*)",
+      "Bash(docker:*)",
+      "Bash(winget search:*)",
+      "Bash(pip install:*)",
+      "mcp__web-search-prime__webSearchPrime",
+      "Bash(pip uninstall:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

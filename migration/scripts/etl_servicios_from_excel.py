@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-ETL para migrar servicios urbanos desde JSON a PostgreSQL + PostGIS
-Procesa el archivo JSON de servicios urbanos y los migra con coordenadas PostGIS
+ETL para migrar servicios urbanos desde Excel a PostgreSQL + PostGIS
+Procesa el archivo Excel de servicios urbanos y los migra con coordenadas PostGIS
 """
 
 import os
-import json
+import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
 from datetime import datetime
@@ -265,19 +265,55 @@ class ETLServicios:
             logger.warning(f"Error procesando servicio {servicio.get('id', 'unknown')}: {e}")
             return None
 
-    def cargar_servicios_desde_json(self, archivo_json: str) -> List[Dict]:
-        """Cargar y procesar servicios desde archivo JSON"""
-        logger.info(f"Cargando servicios desde: {archivo_json}")
+    def cargar_servicios_desde_excel(self, archivo_excel: str) -> List[Dict]:
+        """Cargar y procesar servicios desde archivo Excel"""
+        logger.info(f"Cargando servicios desde: {archivo_excel}")
 
         try:
-            with open(archivo_json, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            # Leer Excel
+            df = pd.read_excel(archivo_excel)
+            logger.info(f"Leídas {len(df)} filas de {archivo_excel}")
 
-            servicios_raw = data.get('servicios', [])
-            logger.info(f"Encontrados {len(servicios_raw)} servicios en JSON")
+            # Mapear columnas según estructura del Excel
+            columnas_map = {
+                # Columnas esperadas del Excel de servicios
+                'Nombre': 'nombre',
+                'Categoría': 'categoria_principal',
+                'Subcategoría': 'subcategoria',
+                'Dirección': 'direccion',
+                'Teléfono': 'telefono',
+                'Email': 'email',
+                'Web': 'web',
+                'UV': 'uv',
+                'Manzana': 'manzana',
+                'Zona UV': 'zona_uv',
+                'Coordenada X': 'longitud',
+                'Coordenada Y': 'latitud'
+            }
+
+            # Renombrar columnas si existen
+            df = df.rename(columns=columnas_map)
 
             servicios_procesados = []
-            for servicio in servicios_raw:
+            for _, row in df.iterrows():
+                # Crear estructura similar a la del JSON
+                servicio = {
+                    'id': f"servicio_excel_{len(servicios_procesados)}",
+                    'nombre': row.get('nombre', ''),
+                    'categoria_principal': row.get('categoria_principal', ''),
+                    'subcategoria': row.get('subcategoria', ''),
+                    'direccion': row.get('direccion', ''),
+                    'telefono': row.get('telefono', ''),
+                    'email': row.get('email', ''),
+                    'web': row.get('web', ''),
+                    'uv': row.get('uv', ''),
+                    'manzana': row.get('manzana', ''),
+                    'zona_uv': row.get('zona_uv', ''),
+                    'latitud': row.get('latitud'),
+                    'longitud': row.get('longitud')
+                }
+
+                # Procesar servicio
                 servicio_procesado = self.procesar_servicio(servicio)
                 if servicio_procesado:
                     servicios_procesados.append(servicio_procesado)
@@ -297,7 +333,7 @@ class ETLServicios:
             return servicios_procesados
 
         except Exception as e:
-            logger.error(f"Error cargando archivo JSON: {e}")
+            logger.error(f"Error cargando archivo Excel: {e}")
             raise
 
     def insertar_servicios_batch(self, servicios: List[Dict], batch_size: int = 200):
@@ -425,12 +461,12 @@ class ETLServicios:
         except Exception as e:
             logger.error(f"Error en análisis de calidad: {e}")
 
-    def procesar_servicios_completos(self, archivo_json: str):
+    def procesar_servicios_completos(self, archivo_excel: str):
         """Proceso completo de ETL para servicios"""
         logger.info("Iniciando ETL completo para servicios urbanos")
 
         # Cargar y procesar servicios
-        servicios = self.cargar_servicios_desde_json(archivo_json)
+        servicios = self.cargar_servicios_desde_excel(archivo_excel)
 
         if servicios:
             # Insertar en base de datos
@@ -472,8 +508,8 @@ def main():
         etl.conectar_db()
 
         # Procesar servicios
-        archivo_json = 'data/guia_urbana_municipal_v2.json'
-        servicios = etl.procesar_servicios_completos(archivo_json)
+        archivo_excel = 'data/raw/guia/GUIA URBANA.xlsx'
+        servicios = etl.procesar_servicios_completos(archivo_excel)
 
     except Exception as e:
         logger.error(f"Error en ETL de servicios: {e}")

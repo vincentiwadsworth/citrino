@@ -29,11 +29,50 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 try:
-    import psycopg2
-    from psycopg2 import sql, extras
-    from psycopg2.extras import execute_values
+    sys.path.append(str(Path(__file__).parent.parent / 'config'))
+    from database_config import create_connection
+    # Use custom execute_values function for Docker compatibility
+    def execute_values(cursor, query, data, fetch=False):
+        """Custom execute_values function for Docker wrapper"""
+        if not data:
+            return []
+
+        # Split query to get the base INSERT part
+        base_query = query.split('VALUES')[0] + 'VALUES '
+
+        # Execute individual INSERT statements (slower but compatible)
+        results = []
+        for row in data:
+            # Escape single quotes in data
+            escaped_row = []
+            for item in row:
+                if item is None:
+                    escaped_row.append('NULL')
+                elif isinstance(item, str):
+                    escaped_row.append("'" + item.replace("'", "''") + "'")
+                else:
+                    escaped_row.append(str(item))
+
+            single_query = base_query + '(' + ', '.join(escaped_row) + ')'
+            single_query += '''
+                ON CONFLICT (nombre)
+                DO UPDATE SET
+                    telefono = EXCLUDED.telefono,
+                    email = EXCLUDED.email,
+                    empresa = EXCLUDED.empresa
+                RETURNING id, CASE WHEN xmin::text::int = 1 THEN 'inserted' ELSE 'updated' END as action
+            '''
+
+            cursor.execute(single_query)
+            if fetch:
+                result = cursor.fetchone()
+                if result:
+                    results.append(result)
+
+        return results
+
 except ImportError:
-    print("ERROR: psycopg2-binary not installed. Run: pip install psycopg2-binary")
+    print("ERROR: database_config module not found")
     sys.exit(1)
 
 try:
@@ -102,29 +141,19 @@ class AgentETL:
         self.logger = logging.getLogger(__name__)
 
     def connect_database(self) -> bool:
-        """Establish connection to PostgreSQL database"""
+        """Establish connection to PostgreSQL database using Docker"""
         try:
-            connection_params = {
-                'host': os.getenv('DB_HOST', 'localhost'),
-                'port': os.getenv('DB_PORT', '5432'),
-                'database': os.getenv('DB_NAME', 'citrino'),
-                'user': os.getenv('DB_USER', 'postgres'),
-                'password': os.getenv('DB_PASSWORD', 'password')
-            }
-
             if self.dry_run:
-                self.logger.info("DRY RUN: Would connect to database with params:")
-                self.logger.info(f"  Host: {connection_params['host']}")
-                self.logger.info(f"  Database: {connection_params['database']}")
+                self.logger.info("DRY RUN: Would connect to database via Docker")
+                self.logger.info(f"  Database: {os.getenv('DB_NAME', 'citrino')}")
                 return True
 
-            self.db_connection = psycopg2.connect(**connection_params)
-            self.db_connection.autocommit = False
-            self.logger.info("Successfully connected to PostgreSQL database")
+            self.db_connection = create_connection()
+            self.logger.info("Successfully connected to PostgreSQL database via Docker")
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to connect to database: {e}")
+            self.logger.error(f"Failed to connect to database via Docker: {e}")
             return False
 
     def extract_agents_from_json(self) -> Dict[str, Agent]:
@@ -139,7 +168,7 @@ class AgentETL:
 
         agents_dict = {}
 
-        for property_data in data:
+        for property_data in data.get('propiedades', []):
             self.stats['total_properties_processed'] += 1
 
             # Extract agent information if available
